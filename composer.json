@@ -1,6 +1,6 @@
 {
-  "name": "sebastianlenz/essentials",
-  "description": "Essential Craft CMS utilities",
+  "name": "sebastianlenz/common",
+  "description": "Common Craft CMS utilities",
   "type": "craft-plugin",
   "license": "Craft",
   "require": {
@@ -13,8 +13,8 @@
     }
   },
   "extra": {
-    "handle": "sle-essentials",
-    "name": "Craft essentials",
+    "handle": "sebastianlenz.common",
+    "name": "Craft utilities",
     "developer": "Sebastian Lenz",
     "developerUrl": "https://github.com/sebastian-lenz/"
   }
