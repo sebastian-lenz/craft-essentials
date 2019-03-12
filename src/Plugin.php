@@ -1,6 +1,6 @@
 <?php
 
-namespace sle\essentials;
+namespace sebastianlenz\essentials;
 
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\TemplateEvent;
