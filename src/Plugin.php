@@ -11,7 +11,9 @@ use yii\caching\FileCache;
 /**
  * Class Plugin
  * @property FileCache $cache
+ * @property FrontendCache $frontendCache
  * @property MailEncoder $mailEncoder
+ * @method Settings getSettings()
  */
 class Plugin extends \craft\base\Plugin
 {
@@ -26,14 +28,24 @@ class Plugin extends \craft\base\Plugin
         'class'     => FileCache::class,
         'cachePath' => '@runtime/elements'
       ],
-      'mailEncoder' => new MailEncoder()
+      'frontendCache' => new FrontendCache(),
+      'mailEncoder' => new MailEncoder(),
     ]);
+
+    \Craft::$app->view->registerTwigExtension(new twig\Extension());
 
     Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS, [$this, 'onRegisterCacheOptions']);
     Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, [$this, 'onElementChanged']);
     Event::on(Elements::class, Elements::EVENT_AFTER_DELETE_ELEMENT, [$this, 'onElementChanged']);
     Event::on(Elements::class, Elements::EVENT_AFTER_MERGE_ELEMENTS, [$this, 'onElementChanged']);
     Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, [$this, 'onElementChanged']);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function createSettingsModel() {
+    return new Settings();
   }
 
   /**

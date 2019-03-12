@@ -18,7 +18,7 @@ class Extension extends \Twig_Extension
   /**
    * The cache key of the commit hash.
    */
-  const COMMIT_HASH_CACHE_KEY = 'sle.essentials.CommitHash';
+  const COMMIT_HASH_CACHE_KEY = 'common.commitHash';
 
 
   //<editor-fold desc="Twig extension implementation">
