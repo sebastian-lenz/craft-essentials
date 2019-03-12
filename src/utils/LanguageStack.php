@@ -19,10 +19,10 @@ class LanguageStack implements \Countable
 
 
   /**
-   * @param float $quality
    * @param string $language
+   * @param float $quality
    */
-  public function addLanguage($quality, $language) {
+  public function addLanguage($language, $quality = 1.0) {
     $this->addGroup($quality)->addLanguage($language);
   }
 

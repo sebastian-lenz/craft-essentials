@@ -4,14 +4,11 @@ namespace sebastianlenz\common\twig;
 
 use sebastianlenz\common\MailEncoder;
 use sebastianlenz\common\Plugin;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
 /**
  * Class Extension
  */
-class Extension extends AbstractExtension
+class Extension extends \Twig_Extension
 {
   /**
    * @var string
@@ -31,7 +28,7 @@ class Extension extends AbstractExtension
    */
   public function getFilters() {
     return [
-      new TwigFilter('encodeMail', [self::class, 'encodeMail']),
+      new \Twig_SimpleFilter('encodeMail', [self::class, 'encodeMail']),
     ];
   }
 
@@ -40,9 +37,9 @@ class Extension extends AbstractExtension
    */
   public function getFunctions() {
     return [
-      new TwigFunction('commitHash', [$this, 'getCommitHash']),
-      new TwigFunction('currentYear', [$this, 'getCurrentYear']),
-      new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
+      new \Twig_SimpleFunction('commitHash', [$this, 'getCommitHash']),
+      new \Twig_SimpleFunction('currentYear', [$this, 'getCurrentYear']),
+      new \Twig_SimpleFunction('encodeMail', [$this, 'getEncodedMail']),
     ];
   }
 

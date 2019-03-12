@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "sebastianlenz\\essentials\\": "src/"
+      "sebastianlenz\\common\\": "src/"
     }
   },
   "extra": {
