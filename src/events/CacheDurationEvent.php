@@ -85,7 +85,7 @@ class CacheDurationEvent extends Event
         $duration = 0;
       }
 
-      $cache->set(self::CACHE_KEY, $duration);
+      $cache->set(self::CACHE_KEY, $duration, $duration);
     }
 
     return $duration;
