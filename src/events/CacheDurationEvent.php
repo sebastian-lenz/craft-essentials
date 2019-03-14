@@ -3,6 +3,7 @@
 namespace sebastianlenz\common\events;
 
 use craft\elements\Entry;
+use sebastianlenz\common\FrontendCache;
 use sebastianlenz\common\Plugin;
 use yii\base\Event;
 
@@ -24,10 +25,14 @@ class CacheDurationEvent extends Event
 
   /**
    * FrontendCacheRequestEvent constructor.
+   * @param int|false $duration
    */
-  public function __construct() {
+  public function __construct($duration = false) {
     parent::__construct();
-    $this->duration = $this->getDefaultDuration();
+
+    $this->duration = $duration === false
+      ? $this->getDefaultDuration()
+      : $duration;
   }
 
   /**
@@ -78,9 +83,16 @@ class CacheDurationEvent extends Event
       try {
         $now = new \DateTime('first day of last month');
         $until = $duration = $this->getChangeDate();
-        $duration = is_null($until)
+        $event = new CacheDurationEvent(is_null($until)
           ? 0
-          : $until->getTimestamp() - $now->getTimestamp();
+          : $until->getTimestamp() - $now->getTimestamp()
+        );
+
+        Plugin::getInstance()->frontendCache->trigger(
+          FrontendCache::EVENT_DEFAULT_CACHE_DURATION, $event
+        );
+
+        $duration = $event->duration;
       } catch (\Throwable $error) {
         $duration = 0;
       }
