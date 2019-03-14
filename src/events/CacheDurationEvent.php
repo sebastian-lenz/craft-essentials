@@ -39,7 +39,7 @@ class CacheDurationEvent extends Event
    * @return \DateTime|null
    * @throws \Exception
    */
-  private function getChangeDate() {
+  private function getNextEntryChangeDate() {
     $now = new \DateTime();
     $nowAtom = $now->format(\DateTime::ATOM);
 
@@ -74,6 +74,20 @@ class CacheDurationEvent extends Event
 
   /**
    * @return int
+   * @throws \Exception
+   */
+  private function getDurationTillNextEntryChange() {
+    $entry = $this->getNextEntryChangeDate();
+
+    if (is_null($entry)) {
+      return 0;
+    } else {
+      return $entry->getTimestamp() - time();
+    }
+  }
+
+  /**
+   * @return int
    */
   private function getDefaultDuration() {
     $cache = Plugin::getCache();
@@ -81,11 +95,8 @@ class CacheDurationEvent extends Event
 
     if ($duration === false) {
       try {
-        $now = new \DateTime('first day of last month');
-        $until = $duration = $this->getChangeDate();
-        $event = new CacheDurationEvent(is_null($until)
-          ? 0
-          : $until->getTimestamp() - $now->getTimestamp()
+        $event = new CacheDurationEvent(
+          $this->getDurationTillNextEntryChange()
         );
 
         Plugin::getInstance()->frontendCache->trigger(
@@ -101,5 +112,17 @@ class CacheDurationEvent extends Event
     }
 
     return $duration;
+  }
+
+  /**
+   * @param int $value
+   */
+  public function setMinDuration($value) {
+    if ($value <= 0) return;
+    if ($this->duration == 0) {
+      $this->duration = $value;
+    } else {
+      $this->duration = min($this->duration, $value);
+    }
   }
 }
