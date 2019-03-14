@@ -115,6 +115,13 @@ class CacheDurationEvent extends Event
   }
 
   /**
+   * @param \DateTime $value
+   */
+  public function setMinDate(\DateTime $value) {
+    $this->setMinDuration($value - time());
+  }
+
+  /**
    * @param int $value
    */
   public function setMinDuration($value) {
