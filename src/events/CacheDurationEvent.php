@@ -1,10 +1,10 @@
 <?php
 
-namespace sebastianlenz\common\events;
+namespace lenz\craft\events;
 
 use craft\elements\Entry;
-use sebastianlenz\common\FrontendCache;
-use sebastianlenz\common\Plugin;
+use lenz\craft\FrontendCache;
+use lenz\craft\Plugin;
 use yii\base\Event;
 
 /**

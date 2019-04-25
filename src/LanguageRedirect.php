@@ -1,8 +1,8 @@
 <?php
 
-namespace sebastianlenz\common;
+namespace lenz\craft;
 
-use sebastianlenz\common\utils\LanguageStack;
+use lenz\craft\utils\LanguageStack;
 
 /**
  * Helper that parses the HTTP_ACCEPT_LANGUAGE header.

@@ -1,6 +1,6 @@
 <?php
 
-namespace sebastianlenz\common\utils;
+namespace lenz\craft\utils;
 
 /**
  * Class LanguagesStack

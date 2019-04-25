@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "sebastianlenz\\common\\": "src/"
+      "lenz\\craft\\": "src/"
     }
   },
   "extra": {

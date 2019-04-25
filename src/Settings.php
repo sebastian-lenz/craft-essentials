@@ -1,6 +1,6 @@
 <?php
 
-namespace sebastianlenz\common;
+namespace lenz\craft;
 
 /**
  * Class Settings

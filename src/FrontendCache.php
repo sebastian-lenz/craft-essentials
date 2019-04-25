@@ -1,10 +1,10 @@
 <?php
 
-namespace sebastianlenz\common;
+namespace lenz\craft;
 
 use craft\web\Application;
-use sebastianlenz\common\events\CacheDurationEvent;
-use sebastianlenz\common\events\CacheKeyEvent;
+use lenz\craft\events\CacheDurationEvent;
+use lenz\craft\events\CacheKeyEvent;
 use yii\base\ActionEvent;
 use yii\base\Component;
 use yii\base\Event;
@@ -55,6 +55,13 @@ class FrontendCache extends Component
    * @param ActionEvent $event
    */
   public function onBeforeAction(ActionEvent $event) {
+    if (
+      $event->action->id != 'render' ||
+      $event->action->controller->id != 'templates'
+    ) {
+      return;
+    }
+
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
     if ($cacheKeyEvent->handled) {

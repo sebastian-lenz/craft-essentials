@@ -1,9 +1,9 @@
 <?php
 
-namespace sebastianlenz\common\twig;
+namespace lenz\craft\twig;
 
-use sebastianlenz\common\MailEncoder;
-use sebastianlenz\common\Plugin;
+use lenz\craft\MailEncoder;
+use lenz\craft\Plugin;
 
 /**
  * Class Extension

@@ -1,6 +1,6 @@
 <?php
 
-namespace sebastianlenz\common;
+namespace lenz\craft;
 
 use craft\events\RegisterCacheOptionsEvent;
 use craft\services\Elements;
