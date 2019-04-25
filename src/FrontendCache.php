@@ -64,7 +64,7 @@ class FrontendCache extends Component
 
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
-    if ($cacheKeyEvent->handled) {
+    if ($cacheKeyEvent->handled || is_null($cacheKeyEvent->cacheKey)) {
       return;
     }
 

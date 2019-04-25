@@ -13,9 +13,9 @@ use yii\base\Event;
 class CacheKeyEvent extends Event
 {
   /**
-   * @var string
+   * @var string|null
    */
-  public $cacheKey;
+  public $cacheKey = null;
 
 
   /**
