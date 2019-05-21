@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\utils;
+namespace lenz\craft\essentials\utils;
 
 /**
  * Class LanguageGroup

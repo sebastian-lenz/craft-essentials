@@ -1,5 +1,6 @@
 /.idea
 /etc
 /vendor
+/studio.json
 .DS_Store
 composer.lock

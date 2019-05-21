@@ -1,18 +1,20 @@
 <?php
 
-namespace lenz\craft;
+namespace lenz\craft\essentials;
 
-use craft\events\RegisterCacheOptionsEvent;
-use craft\services\Elements;
-use craft\utilities\ClearCaches;
-use yii\base\Event;
-use yii\caching\FileCache;
+use Craft;
+use lenz\craft\essentials\services\FrontendCache;
+use lenz\craft\essentials\services\LanguageRedirect;
+use lenz\craft\essentials\services\MailEncoder;
+use lenz\craft\essentials\services\RemoveDashboard;
 
 /**
  * Class Plugin
- * @property FileCache $cache
+ *
  * @property FrontendCache $frontendCache
+ * @property LanguageRedirect $languageRedirect
  * @property MailEncoder $mailEncoder
+ * @property RemoveDashboard $removeDashboard
  * @method Settings getSettings()
  */
 class Plugin extends \craft\base\Plugin
@@ -24,21 +26,13 @@ class Plugin extends \craft\base\Plugin
     parent::init();
 
     $this->setComponents([
-      'cache' => [
-        'class'     => FileCache::class,
-        'cachePath' => '@runtime/elements'
-      ],
-      'frontendCache' => new FrontendCache(),
-      'mailEncoder' => new MailEncoder(),
+      'frontendCache'    => FrontendCache::getInstance(),
+      'languageRedirect' => LanguageRedirect::getInstance(),
+      'mailEncoder'      => MailEncoder::getInstance(),
+      'removeDashboard'  => RemoveDashboard::getInstance(),
     ]);
 
-    \Craft::$app->view->registerTwigExtension(new twig\Extension());
-
-    Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS, [$this, 'onRegisterCacheOptions']);
-    Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, [$this, 'onElementChanged']);
-    Event::on(Elements::class, Elements::EVENT_AFTER_DELETE_ELEMENT, [$this, 'onElementChanged']);
-    Event::on(Elements::class, Elements::EVENT_AFTER_MERGE_ELEMENTS, [$this, 'onElementChanged']);
-    Event::on(Elements::class, Elements::EVENT_AFTER_SAVE_ELEMENT, [$this, 'onElementChanged']);
+    Craft::$app->view->registerTwigExtension(new twig\Extension());
   }
 
   /**
@@ -46,30 +40,5 @@ class Plugin extends \craft\base\Plugin
    */
   public function createSettingsModel() {
     return new Settings();
-  }
-
-  /**
-   * @param Event $event
-   */
-  public function onElementChanged(Event $event) {
-    $this->cache->flush();
-  }
-
-  /**
-   * @param RegisterCacheOptionsEvent $event
-   */
-  public function onRegisterCacheOptions(RegisterCacheOptionsEvent $event) {
-    $event->options[] = [
-      'key'    => 'elements',
-      'label'  => 'Elements',
-      'action' => [$this->cache, 'flush']
-    ];
-  }
-
-  /**
-   * @return FileCache
-   */
-  static function getCache() {
-    return self::getInstance()->cache;
   }
 }

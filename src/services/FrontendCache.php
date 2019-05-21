@@ -1,10 +1,12 @@
 <?php
 
-namespace lenz\craft;
+namespace lenz\craft\essentials\services;
 
+use Craft;
 use craft\web\Application;
-use lenz\craft\events\CacheDurationEvent;
-use lenz\craft\events\CacheKeyEvent;
+use lenz\craft\essentials\events\CacheDurationEvent;
+use lenz\craft\essentials\events\CacheKeyEvent;
+use lenz\craft\utils\elementCache\ElementCache;
 use yii\base\ActionEvent;
 use yii\base\Component;
 use yii\base\Event;
@@ -20,9 +22,9 @@ class FrontendCache extends Component
   private $cacheKey = null;
 
   /**
-   * Cache key prefix
+   * @var FrontendCache
    */
-  const CACHE_KEY = 'common.frontend';
+  static private $_instance;
 
   /**
    * Triggered when the plugin is looking for the default cache duration.
@@ -44,7 +46,7 @@ class FrontendCache extends Component
   /**
    * FrontendCache constructor.
    */
-  public function __construct() {
+  private function __construct() {
     parent::__construct();
 
     Event::on(Application::class, Application::EVENT_BEFORE_ACTION, [$this, 'onBeforeAction']);
@@ -68,12 +70,12 @@ class FrontendCache extends Component
       return;
     }
 
-    $cache = Plugin::getCache();
-    $cacheKey = self::CACHE_KEY . '(' . $cacheKeyEvent->cacheKey . ')';
+    $cache = ElementCache::getCache();
+    $cacheKey = self::class . ';cacheKey=' . $cacheKeyEvent->cacheKey;
     $cacheData = $cache->get($cacheKey);
 
     if ($cacheData !== false) {
-      $response = \Craft::$app->response;
+      $response = Craft::$app->response;
       $response->headers->fromArray($cacheData['headers']);
       $response->data = $cacheData['data'];
       $response->format = $cacheData['format'];
@@ -86,14 +88,14 @@ class FrontendCache extends Component
   }
 
   /**
-   * @param Event $event
+   * @return void
    */
-  public function onAfterRequest(Event $event) {
+  public function onAfterRequest() {
     if (is_null($this->cacheKey)) {
       return;
     }
 
-    $response = \Craft::$app->response;
+    $response = Craft::$app->response;
     if (
       $response->statusCode != 200 ||
       strpos($response->data, 'actions/assets/generate-transform') !== false
@@ -107,11 +109,26 @@ class FrontendCache extends Component
       return;
     }
 
-    $cache = Plugin::getCache();
+    $cache = ElementCache::getCache();
     $cache->set($this->cacheKey, array(
       'data'    => $response->data,
       'format'  => $response->format,
       'headers' => $response->headers->toArray(),
     ), $durationEvent->duration);
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @return FrontendCache
+   */
+  public static function getInstance() {
+    if (!isset(self::$_instance)) {
+      self::$_instance = new FrontendCache();
+    }
+
+    return self::$_instance;
   }
 }

@@ -1,20 +1,28 @@
 <?php
 
-namespace lenz\craft;
+namespace lenz\craft\essentials\services;
 
+use Craft;
 use craft\events\TemplateEvent;
 use craft\web\View;
+use yii\base\Component;
 use yii\base\Event;
 
 /**
  * Class MailEncoder
  */
-class MailEncoder extends \yii\base\Component
+class MailEncoder extends Component
 {
+  /**
+   * @var MailEncoder
+   */
+  static private $_instance;
+
+
   /**
    * Component constructor.
    */
-  public function __construct() {
+  private function __construct() {
     parent::__construct();
 
     Event::on(
@@ -27,32 +35,32 @@ class MailEncoder extends \yii\base\Component
   /**
    * @param TemplateEvent $event
    */
-  function onAfterRenderPageTemplate(TemplateEvent $event) {
-    if (!\Craft::$app->getRequest()->getIsCpRequest()) {
+  public function onAfterRenderPageTemplate(TemplateEvent $event) {
+    if (!Craft::$app->getRequest()->getIsCpRequest()) {
       $event->output = self::encodeAll($event->output);
     }
   }
 
+
+  // Static methods
+  // --------------
+
   /**
-   * @param string $value
-   * @return string
+   * @return MailEncoder
    */
-  public static function encodeAll($value) {
-    return preg_replace_callback('/<a[^>]*href="mailto:([^"]*)"[^>]*>.*?<\/a>/s', function($matches) {
-      $mail = trim($matches[1]);
-      if (empty($mail)) {
-        return '';
-      } else {
-        return self::encode($matches[0]);
-      }
-    }, $value);
+  public static function getInstance() {
+    if (!isset(self::$_instance)) {
+      self::$_instance = new MailEncoder();
+    }
+
+    return self::$_instance;
   }
 
   /**
    * @param string $value
    * @return string
    */
-  static function encode($value) {
+  public static function encode($value) {
     $id = uniqid();
     $encoded = str_replace(
       array("\n", "\r"),
@@ -68,5 +76,20 @@ class MailEncoder extends \yii\base\Component
         '});',
       '</script>'
     ));
+  }
+
+  /**
+   * @param string $value
+   * @return string
+   */
+  public static function encodeAll($value) {
+    return preg_replace_callback('/<a[^>]*href="mailto:([^"]*)"[^>]*>.*?<\/a>/s', function($matches) {
+      $mail = trim($matches[1]);
+      if (empty($mail)) {
+        return '';
+      } else {
+        return self::encode($matches[0]);
+      }
+    }, $value);
   }
 }

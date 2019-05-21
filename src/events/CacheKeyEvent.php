@@ -1,10 +1,10 @@
 <?php
 
-namespace lenz\craft\events;
+namespace lenz\craft\essentials\events;
 
 use craft\base\Element;
 use craft\web\Request;
-use lenz\craft\Plugin;
+use lenz\craft\essentials\Plugin;
 use yii\base\Event;
 
 /**

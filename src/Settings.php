@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft;
+namespace lenz\craft\essentials;
 
 /**
  * Class Settings

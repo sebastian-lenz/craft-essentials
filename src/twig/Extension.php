@@ -1,9 +1,9 @@
 <?php
 
-namespace lenz\craft\twig;
+namespace lenz\craft\essentials\twig;
 
-use lenz\craft\MailEncoder;
-use lenz\craft\Plugin;
+use lenz\craft\essentials\services\MailEncoder;
+use lenz\craft\utils\elementCache\ElementCache;
 
 /**
  * Class Extension
@@ -18,10 +18,8 @@ class Extension extends \Twig_Extension
   /**
    * The cache key of the commit hash.
    */
-  const COMMIT_HASH_CACHE_KEY = 'common.commitHash';
+  const CACHE_COMMIT = self::class . '::getCommitHash';
 
-
-  //<editor-fold desc="Twig extension implementation">
 
   /**
    * @inheritdoc
@@ -43,27 +41,18 @@ class Extension extends \Twig_Extension
     ];
   }
 
-  //</editor-fold>
-  //<editor-fold desc="Helpers">
-
   /**
    * @return string
    */
   public function getCommitHash() {
     if (!isset($this->_commitHash)) {
-      $cache = Plugin::getCache();
-      $hash = $cache->get(self::COMMIT_HASH_CACHE_KEY);
-
-      if ($hash === false) {
+      $this->_commitHash = ElementCache::with(self::CACHE_COMMIT, function() {
         try {
-          $hash = substr(shell_exec('git rev-parse HEAD'), 0, 7);
-          $cache->set(self::COMMIT_HASH_CACHE_KEY, $hash);
+          return substr(shell_exec('git rev-parse HEAD'), 0, 7);
         } catch (\Exception $e) {
-          $hash = '0000000';
+          return '0000000';
         }
-      }
-
-      $this->_commitHash = $hash;
+      });
     }
 
     return $this->_commitHash;
@@ -87,6 +76,4 @@ class Extension extends \Twig_Extension
 
     return MailEncoder::encode($value);
   }
-
-  //</editor-fold>
 }
