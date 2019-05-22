@@ -2,7 +2,7 @@
   "name": "sebastianlenz/craft-essentials",
   "description": "Essential services for Craft CMS",
   "type": "craft-plugin",
-  "license": "Craft",
+  "license": "MIT",
   "require": {
     "php": "^7.0",
     "craftcms/cms": "^3.1.0",
