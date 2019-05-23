@@ -7,10 +7,12 @@ use lenz\craft\essentials\services\FrontendCache;
 use lenz\craft\essentials\services\LanguageRedirect;
 use lenz\craft\essentials\services\MailEncoder;
 use lenz\craft\essentials\services\RemoveDashboard;
+use lenz\craft\utils\elementCache\ElementCache;
 
 /**
  * Class Plugin
  *
+ * @property ElementCache $elementCache
  * @property FrontendCache $frontendCache
  * @property LanguageRedirect $languageRedirect
  * @property MailEncoder $mailEncoder
@@ -26,6 +28,7 @@ class Plugin extends \craft\base\Plugin
     parent::init();
 
     $this->setComponents([
+      'elementCache'     => ElementCache::getInstance(),
       'frontendCache'    => FrontendCache::getInstance(),
       'languageRedirect' => LanguageRedirect::getInstance(),
       'mailEncoder'      => MailEncoder::getInstance(),
