@@ -98,6 +98,7 @@ class FrontendCache extends Component
     $response = Craft::$app->response;
     if (
       $response->statusCode != 200 ||
+      strpos($response->data, Craft::$app->getConfig()->general->csrfTokenName) !== false ||
       strpos($response->data, 'actions/assets/generate-transform') !== false
     ) {
       return;
