@@ -3,8 +3,8 @@
 namespace lenz\craft\essentials\events;
 
 use craft\elements\Entry;
-use lenz\craft\essentials\FrontendCache;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\FrontendCache;
 use yii\base\Event;
 
 /**
@@ -90,7 +90,7 @@ class CacheDurationEvent extends Event
    * @return int
    */
   private function getDefaultDuration() {
-    $cache = Plugin::getCache();
+    $cache = Plugin::getInstance()->elementCache->cache;
     $duration = $cache->get(self::CACHE_KEY);
 
     if ($duration === false) {
