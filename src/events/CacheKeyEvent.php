@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\events;
 
+use Craft;
 use craft\base\Element;
 use craft\web\Request;
 use lenz\craft\essentials\Plugin;
@@ -31,22 +32,23 @@ class CacheKeyEvent extends Event
    * @return bool
    */
   private function generateCacheKey() {
-    $request = \Craft::$app->request;
+    $request = Craft::$app->request;
     if (
       !($request instanceof Request) ||
       !$request->getIsGet() ||
       $request->getIsCpRequest() ||
-      \Craft::$app->getConfig()->getGeneral()->devMode
+      Craft::$app->getConfig()->getGeneral()->devMode ||
+      !Craft::$app->getUser()->getIsGuest()
     ) {
       return true;
     }
 
-    $route = \Craft::$app->requestedRoute;
+    $route = Craft::$app->requestedRoute;
     if (!in_array($route, Plugin::getInstance()->getSettings()->cachedRoutes)) {
       return true;
     }
 
-    $params = \Craft::$app->getUrlManager()->getRouteParams();
+    $params = Craft::$app->getUrlManager()->getRouteParams();
     if (!is_array($params)) {
       return true;
     }
