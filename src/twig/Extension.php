@@ -2,13 +2,17 @@
 
 namespace lenz\craft\essentials\twig;
 
+use Exception;
 use lenz\craft\essentials\services\MailEncoder;
 use lenz\craft\utils\elementCache\ElementCache;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 /**
  * Class Extension
  */
-class Extension extends \Twig_Extension
+class Extension extends AbstractExtension
 {
   /**
    * @var string
@@ -26,7 +30,7 @@ class Extension extends \Twig_Extension
    */
   public function getFilters() {
     return [
-      new \Twig_SimpleFilter('encodeMail', [self::class, 'encodeMail']),
+      new TwigFilter('encodeMail', [self::class, 'encodeMail']),
     ];
   }
 
@@ -35,9 +39,9 @@ class Extension extends \Twig_Extension
    */
   public function getFunctions() {
     return [
-      new \Twig_SimpleFunction('commitHash', [$this, 'getCommitHash']),
-      new \Twig_SimpleFunction('currentYear', [$this, 'getCurrentYear']),
-      new \Twig_SimpleFunction('encodeMail', [$this, 'getEncodedMail']),
+      new TwigFunction('commitHash', [$this, 'getCommitHash']),
+      new TwigFunction('currentYear', [$this, 'getCurrentYear']),
+      new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
     ];
   }
 
@@ -49,7 +53,7 @@ class Extension extends \Twig_Extension
       $this->_commitHash = ElementCache::with(self::CACHE_COMMIT, function() {
         try {
           return substr(shell_exec('git rev-parse HEAD'), 0, 7);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           return '0000000';
         }
       });

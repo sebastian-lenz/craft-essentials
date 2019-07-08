@@ -34,7 +34,7 @@ class LanguageRedirect extends Component
   /**
    * Languages constructor.
    */
-  private function __construct() {
+  public function __construct() {
     parent::__construct();
 
     $request = Craft::$app->getRequest();

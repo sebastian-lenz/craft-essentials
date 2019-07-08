@@ -46,7 +46,7 @@ class FrontendCache extends Component
   /**
    * FrontendCache constructor.
    */
-  private function __construct() {
+  public function __construct() {
     parent::__construct();
 
     Event::on(Application::class, Application::EVENT_BEFORE_ACTION, [$this, 'onBeforeAction']);

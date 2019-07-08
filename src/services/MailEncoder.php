@@ -22,7 +22,7 @@ class MailEncoder extends Component
   /**
    * Component constructor.
    */
-  private function __construct() {
+  public function __construct() {
     parent::__construct();
 
     Event::on(

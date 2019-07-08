@@ -2,10 +2,13 @@
 
 namespace lenz\craft\essentials\utils;
 
+use Countable;
+use Exception;
+
 /**
  * Class LanguagesStack
  */
-class LanguageStack implements \Countable
+class LanguageStack implements Countable
 {
   /**
    * @var LanguageGroup[]
@@ -75,7 +78,7 @@ class LanguageStack implements \Countable
   /**
    * @param LanguageStack $acceptedStack
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getBestLanguage($acceptedStack) {
     $combined = $this->combine($acceptedStack);
@@ -84,7 +87,7 @@ class LanguageStack implements \Countable
     }
 
     if (count($combined) === 0) {
-      throw new \Exception('No languages available.');
+      throw new Exception('No languages available.');
     }
 
     return $combined->getBestGroup()->getBestLanguage();
