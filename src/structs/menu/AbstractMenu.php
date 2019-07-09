@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\menu;
+namespace lenz\craft\essentials\structs\menu;
 
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
