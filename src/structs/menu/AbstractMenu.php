@@ -144,7 +144,7 @@ abstract class AbstractMenu
    */
   static function normalizeId($elementOrId) {
     if ($elementOrId instanceof ElementInterface) {
-      return $elementOrId->getId();
+      return intval($elementOrId->getId());
     } elseif ($elementOrId instanceof AbstractMenuItem) {
       return $elementOrId->id;
     } else {
