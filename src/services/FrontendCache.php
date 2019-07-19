@@ -77,6 +77,7 @@ class FrontendCache extends Component
     if ($cacheData !== false) {
       $response = Craft::$app->response;
       $response->headers->fromArray($cacheData['headers']);
+      $response->headers->add('X-Craft-Cache', 'hit');
       $response->data = $cacheData['data'];
       $response->format = $cacheData['format'];
 
