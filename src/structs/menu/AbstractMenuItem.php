@@ -7,6 +7,7 @@ use craft\elements\Entry;
 use craft\helpers\Html;
 use craft\helpers\Template;
 use Twig\Markup;
+use Yii;
 
 /**
  * Class AbstractMenuItem
@@ -34,9 +35,19 @@ abstract class AbstractMenuItem
   public $title;
 
   /**
+   * @var string
+   */
+  public $sectionHandle;
+
+  /**
    * @var int
    */
   public $sectionId;
+
+  /**
+   * @var string
+   */
+  public $typeHandle;
 
   /**
    * @var int
@@ -57,7 +68,7 @@ abstract class AbstractMenuItem
     if ($config instanceof ElementInterface) {
       $this->setElement($config);
     } elseif (is_array($config)) {
-      \Yii::configure($this, $config);
+      Yii::configure($this, $config);
     }
   }
 
@@ -116,10 +127,12 @@ abstract class AbstractMenuItem
     $this->id = intval($element->getId());
 
     if ($element instanceof Entry) {
-      $this->title     = $element->title;
-      $this->sectionId = intval($element->sectionId);
-      $this->typeId    = intval($element->typeId);
-      $this->url       = $element->getUrl();
+      $this->title         = $element->title;
+      $this->sectionHandle = $element->getSection()->handle;
+      $this->sectionId     = intval($element->sectionId);
+      $this->typeHandle    = $element->getType()->handle;
+      $this->typeId        = intval($element->typeId);
+      $this->url           = $element->getUrl();
     }
   }
 
