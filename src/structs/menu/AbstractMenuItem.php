@@ -126,13 +126,16 @@ abstract class AbstractMenuItem
   protected function setElement(ElementInterface $element) {
     $this->id = intval($element->getId());
 
+    if ($element instanceof ElementInterface) {
+      $this->title = (string)$element;
+      $this->url   = $element->getUrl();
+    }
+
     if ($element instanceof Entry) {
-      $this->title         = $element->title;
       $this->sectionHandle = $element->getSection()->handle;
       $this->sectionId     = intval($element->sectionId);
       $this->typeHandle    = $element->getType()->handle;
       $this->typeId        = intval($element->typeId);
-      $this->url           = $element->getUrl();
     }
   }
 
