@@ -90,6 +90,20 @@ abstract class AbstractMenu
   }
 
   /**
+   * @param int|string $type
+   * @return AbstractMenuItem[]
+   */
+  public function getAllByType($type) {
+    $isTypeId = is_numeric($type);
+
+    return array_filter($this->_items, function(AbstractMenuItem $item) use ($isTypeId, $type) {
+      return $isTypeId
+        ? $item->typeId == $type
+        : $item->typeHandle == $type;
+    });
+  }
+
+  /**
    * @param ElementInterface|AbstractMenuItem|int $elementOrId
    * @return AbstractMenuItem|null
    */
@@ -98,6 +112,26 @@ abstract class AbstractMenu
     return array_key_exists($id, $this->_items)
       ? $this->_items[$id]
       : null;
+  }
+
+  /**
+   * @param int|string $type
+   * @return AbstractMenuItem|null
+   */
+  public function getByType($type) {
+    $isTypeId = is_numeric($type);
+
+    foreach ($this->_items as $item) {
+      if ($isTypeId) {
+        if ($item->typeId == $type) {
+          return $item;
+        }
+      } elseif ($item->typeHandle == $type) {
+        return $item;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -122,6 +156,15 @@ abstract class AbstractMenu
   }
 
 
+  // Protected methods
+  // -----------------
+
+  /**
+   * Initializes the menu after loading.
+   */
+  protected function init() {}
+
+
   // Static methods
   // --------------
 
@@ -133,6 +176,8 @@ abstract class AbstractMenu
       static::$_instance = ElementCache::withLanguage(self::class, function() {
         return new static(null);
       });
+
+      static::$_instance->init();
     }
 
     return static::$_instance;
