@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\services;
 use Craft;
 use craft\models\Site;
 use Exception;
+use lenz\craft\essentials\events\SitesEvent;
 use lenz\craft\essentials\utils\LanguageStack;
 use Throwable;
 use yii\base\Component;
@@ -29,6 +30,11 @@ class LanguageRedirect extends Component
    * @var LanguageRedirect
    */
   static private $_instance;
+
+  /**
+   * Event triggered when looking for available sites.
+   */
+  const EVENT_AVAILABLE_SITES = 'availableSites';
 
 
   /**
@@ -92,7 +98,13 @@ class LanguageRedirect extends Component
     if (!isset($this->_languageStack)) {
       $this->_languageStack = new LanguageStack();
       $this->_sites = [];
+
       $sites = Craft::$app->getSites()->getAllSites();
+      if ($this->hasEventHandlers(self::EVENT_AVAILABLE_SITES)) {
+        $event = new SitesEvent(['sites' => $sites]);
+        $this->trigger(self::EVENT_AVAILABLE_SITES, $event);
+        $sites = $event->sites;
+      }
 
       foreach ($sites as $site) {
         $language = $site->language;
