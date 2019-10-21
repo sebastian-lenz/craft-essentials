@@ -17,10 +17,17 @@ use lenz\craft\utils\elementCache\ElementCache;
  * @property LanguageRedirect $languageRedirect
  * @property MailEncoder $mailEncoder
  * @property RemoveDashboard $removeDashboard
+ * @property services\i18n\I18N $i18n
  * @method Settings getSettings()
  */
 class Plugin extends \craft\base\Plugin
 {
+  /**
+   * @var bool
+   */
+  public $hasCpSettings = true;
+
+
   /**
    * @return void
    */
@@ -33,6 +40,7 @@ class Plugin extends \craft\base\Plugin
       'languageRedirect' => LanguageRedirect::getInstance(),
       'mailEncoder'      => MailEncoder::getInstance(),
       'removeDashboard'  => RemoveDashboard::getInstance(),
+      'i18n'             => services\i18n\I18N::class,
     ]);
 
     Craft::$app->view->registerTwigExtension(new twig\Extension());
@@ -43,5 +51,16 @@ class Plugin extends \craft\base\Plugin
    */
   public function createSettingsModel() {
     return new Settings();
+  }
+
+
+  // Protected methods
+  // -----------------
+
+  /**
+   * @inheritdoc
+   */
+  protected function settingsHtml() {
+    return Craft::$app->view->renderTemplate('lenz-craft-essentials/_settings');
   }
 }
