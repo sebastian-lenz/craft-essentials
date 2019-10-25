@@ -1,0 +1,18 @@
+{% import '_includes/forms' as forms %}
+
+<h3>Languages</h3>
+
+{{ forms.lightswitchField({
+  errors: settings.getErrors('enableLanguageRedirect'),
+  label: 'Enable Language Redirect',
+  name: 'enableLanguageRedirect',
+  on: settings.enableLanguageRedirect,
+}) }}
+
+{{ forms.checkboxGroupField({
+  errors: settings.getErrors('disabledLanguages'),
+  label: 'Disabled languages',
+  name: 'disabledLanguages',
+  options: settings.allLanguages,
+  values: settings.disabledLanguages,
+}) }}

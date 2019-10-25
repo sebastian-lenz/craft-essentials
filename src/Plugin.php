@@ -61,6 +61,11 @@ class Plugin extends \craft\base\Plugin
    * @inheritdoc
    */
   protected function settingsHtml() {
-    return Craft::$app->view->renderTemplate('lenz-craft-essentials/_settings');
+    return Craft::$app->view->renderTemplate(
+      'lenz-craft-essentials/_settings',
+      [
+        'settings' => $this->getSettings(),
+      ]
+    );
   }
 }

@@ -2,8 +2,10 @@
 
 namespace lenz\craft\essentials\twig;
 
+use craft\base\ElementInterface;
 use Exception;
 use lenz\craft\essentials\services\MailEncoder;
+use lenz\craft\essentials\utils\ElementTranslations;
 use lenz\craft\utils\elementCache\ElementCache;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -30,7 +32,8 @@ class Extension extends AbstractExtension
    */
   public function getFilters() {
     return [
-      new TwigFilter('encodeMail', [self::class, 'encodeMail']),
+      new TwigFilter('encodeMail', [$this, 'getEncodedMail']),
+      new TwigFilter('translations', [$this, 'getTranslations']),
     ];
   }
 
@@ -79,5 +82,15 @@ class Extension extends AbstractExtension
     }
 
     return MailEncoder::encode($value);
+  }
+
+  /**
+   * @param array $options
+   * @return array
+   */
+  public function getTranslations(ElementInterface $element = null, array $options = []) {
+    return ElementTranslations::create($options)
+      ->setElement($element)
+      ->getTranslations();
   }
 }

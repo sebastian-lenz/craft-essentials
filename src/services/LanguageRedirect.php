@@ -6,6 +6,7 @@ use Craft;
 use craft\models\Site;
 use Exception;
 use lenz\craft\essentials\events\SitesEvent;
+use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\utils\LanguageStack;
 use Throwable;
 use yii\base\Component;
@@ -17,14 +18,14 @@ use yii\base\Component;
 class LanguageRedirect extends Component
 {
   /**
+   * @var Site[]
+   */
+  private $_enabledSites;
+
+  /**
    * @var LanguageStack
    */
   private $_languageStack;
-
-  /**
-   * @var Site[]
-   */
-  private $_sites;
 
   /**
    * @var LanguageRedirect
@@ -44,9 +45,11 @@ class LanguageRedirect extends Component
     parent::__construct();
 
     $request = Craft::$app->getRequest();
+
     if (
       $request->isSiteRequest &&
-      count($request->queryParams) == 0
+      count($request->queryParams) == 0 &&
+      Plugin::getInstance()->getSettings()->enableLanguageRedirect
     ) {
       $url = $this->getBestSiteUrl();
       if (!is_null($url)) {
@@ -86,9 +89,51 @@ class LanguageRedirect extends Component
       return null;
     }
 
-    return isset($this->_sites[$language])
-      ? $this->_sites[$language]->getBaseUrl()
-      : null;
+    $site = $this->getEnabledSite($language);
+    return is_null($site)
+      ? null
+      : $site->getBaseUrl();
+  }
+
+  /**
+   * @param string $language
+   * @return Site|null
+   */
+  public function getEnabledSite($language) {
+    foreach ($this->getEnabledSites() as $site) {
+      if ($site->language == $language) {
+        return $site;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @return Site[]
+   */
+  public function getEnabledSites() {
+    if (!isset($this->_enabledSites)) {
+      $settings = Plugin::getInstance()->getSettings();
+      $disabledLanguages = $settings->disabledLanguages;
+
+      $sites = array_filter(
+        Craft::$app->getSites()->getAllSites(),
+        function(Site $site) use ($disabledLanguages) {
+          return !in_array($site->language, $disabledLanguages);
+        }
+      );
+
+      if ($this->hasEventHandlers(self::EVENT_AVAILABLE_SITES)) {
+        $event = new SitesEvent(['sites' => $sites]);
+        $this->trigger(self::EVENT_AVAILABLE_SITES, $event);
+        $sites = $event->sites;
+      }
+
+      $this->_enabledSites = $sites;
+    }
+
+    return $this->_enabledSites;
   }
 
   /**
@@ -96,21 +141,12 @@ class LanguageRedirect extends Component
    */
   public function getLanguageStack() {
     if (!isset($this->_languageStack)) {
-      $this->_languageStack = new LanguageStack();
-      $this->_sites = [];
-
-      $sites = Craft::$app->getSites()->getAllSites();
-      if ($this->hasEventHandlers(self::EVENT_AVAILABLE_SITES)) {
-        $event = new SitesEvent(['sites' => $sites]);
-        $this->trigger(self::EVENT_AVAILABLE_SITES, $event);
-        $sites = $event->sites;
+      $stack = new LanguageStack();
+      foreach ($this->getEnabledSites() as $site) {
+        $stack->addLanguage($site->language);
       }
 
-      foreach ($sites as $site) {
-        $language = $site->language;
-        $this->_languageStack->addLanguage($language);
-        $this->_sites[$language] = $site;
-      }
+      $this->_languageStack = $stack;
     }
 
     return $this->_languageStack;
