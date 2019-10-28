@@ -4,7 +4,7 @@ namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\models\Section;
-use lenz\craft\essentials\services\gettext\Translations;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
  * Class CpElementsSource

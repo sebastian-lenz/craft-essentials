@@ -5,7 +5,6 @@ namespace lenz\craft\essentials\services\redirectNotFound\redirects;
 use Craft;
 use craft\web\Request;
 use craft\web\Response;
-use yii\base\ExitException;
 
 /**
  * Class AbstractRedirect

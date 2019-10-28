@@ -7,7 +7,7 @@ use craft\base\Field;
 use craft\fields\BaseOptionsField;
 use craft\fields\Matrix;
 use craft\records\FieldLayoutTab;
-use lenz\craft\essentials\services\gettext\Translations;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
  * Class CpFieldsSource

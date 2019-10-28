@@ -4,8 +4,10 @@ namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\helpers\ArrayHelper;
-use Gettext\Extractors\PhpCode;
-use lenz\craft\essentials\services\gettext\Translations;
+use Exception;
+use lenz\craft\essentials\services\gettext\Gettext;
+use lenz\craft\essentials\services\gettext\utils\PhpFunctionsScanner;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Throwable;
@@ -17,6 +19,7 @@ class ModulesSource extends AbstractSource
 {
   /**
    * @param Translations $translations
+   * @throws Exception
    */
   public function extract(Translations $translations) {
     foreach ($this->getModules() as $module => $moduleClass) {
@@ -36,9 +39,15 @@ class ModulesSource extends AbstractSource
   /**
    * @param Translations $translations
    * @param string $path
+   * @throws Exception
    */
   private function extractFile(Translations $translations, string $path) {
-    PhpCode::fromFile($path, $translations, [
+    Gettext::printSource('file', $path);
+
+    $scanner = new PhpFunctionsScanner(file_get_contents($path));
+    $scanner->save($translations, [
+      'constants' => [],
+      'file'      => $path,
       'functions' => [
         't' => 'pgettext',
       ],
@@ -48,6 +57,7 @@ class ModulesSource extends AbstractSource
   /**
    * @param Translations $translations
    * @param string $basePath
+   * @throws Exception
    */
   private function extractModule(Translations $translations, string $basePath) {
     $dirIterator = new RecursiveDirectoryIterator($basePath);

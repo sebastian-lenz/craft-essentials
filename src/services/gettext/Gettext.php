@@ -8,6 +8,7 @@ use Gettext\Merge;
 use Gettext\Translation;
 use lenz\craft\essentials\services\gettext\sources\AbstractSource;
 use lenz\contentfield\fields\ContentField;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 
@@ -108,9 +109,12 @@ class Gettext extends Component
   // ---------------
 
   private function compileSiteTranslations(Site $site) {
-    $path = $this->getSiteTranslationPath($site);
-    $source = implode(DIRECTORY_SEPARATOR, [$path, 'site.po']);
-    $target = implode(DIRECTORY_SEPARATOR, [$path, 'site.php']);
+    $source = $this->getSiteTranslationSource($site);
+    $target = implode(DIRECTORY_SEPARATOR, [
+      $this->getSiteTranslationPath($site),
+      'site.php'
+    ]);
+
     if (!file_exists($source) || !is_readable($source)) {
       return;
     }
@@ -152,6 +156,17 @@ class Gettext extends Component
   }
 
   /**
+   * @param Site $site
+   * @return string
+   */
+  private function getSiteTranslationSource(Site $site) {
+    return Craft::getAlias(implode(
+      DIRECTORY_SEPARATOR,
+      ['@root', 'translations', $site->language . '.po']
+    ));
+  }
+
+  /**
    * @param Translations $translations
    * @param Site $site
    * @param string $path
@@ -167,6 +182,11 @@ class Gettext extends Component
       } elseif (preg_match('/\.po$/', $existingName)) {
         $this->mergePo($translations, $site, $existingPath);
       }
+    }
+
+    $source = $this->getSiteTranslationSource($site);
+    if (file_exists($source)) {
+      $this->mergePo($translations, $site, $source);
     }
 
     return $translations;
@@ -215,9 +235,19 @@ class Gettext extends Component
    * @param Site $site
    */
   private function storeSiteTranslations(Translations $translations, Site $site) {
-    $path = $this->getSiteTranslationPath($site);
-    $this->merge($translations, $site, $path)
+    $this->merge($translations, $site, $this->getSiteTranslationPath($site))
       ->setLanguage($site->language)
-      ->toPoFile(implode(DIRECTORY_SEPARATOR, [$path, 'site.po']));
+      ->toPoFile($this->getSiteTranslationSource($site));
+  }
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param string $type
+   * @param string $name
+   */
+  static function printSource($type, $name) {
+    echo ' - ' . ucfirst($type) . ' `' . $name . "`\n";
   }
 }

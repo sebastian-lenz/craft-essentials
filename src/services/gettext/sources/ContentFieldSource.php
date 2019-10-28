@@ -6,7 +6,7 @@ use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
 use lenz\contentfield\Plugin;
-use lenz\craft\essentials\services\gettext\Translations;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
  * Class ContentFieldSource

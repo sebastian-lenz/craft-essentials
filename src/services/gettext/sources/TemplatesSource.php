@@ -6,7 +6,8 @@ use Craft;
 use craft\web\View;
 use Gettext\Extractors\PhpCode;
 use lenz\contentfield\twig\YamlAwareTemplateLoader;
-use lenz\craft\essentials\services\gettext\Translations;
+use lenz\craft\essentials\services\gettext\Gettext;
+use lenz\craft\essentials\services\gettext\utils\Translations;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Twig\Environment;
@@ -49,6 +50,8 @@ class TemplatesSource extends AbstractSource
    * @throws \Exception
    */
   private function extractTemplate(Translations $translations, string $path, string $name) {
+    Gettext::printSource('template', $path);
+
     try {
       $source = $this->_twig->getLoader()->getSourceContext($name);
       $code = $this->_twig->compileSource($source);
