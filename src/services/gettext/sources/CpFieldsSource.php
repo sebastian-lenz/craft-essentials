@@ -1,13 +1,13 @@
 <?php
 
-namespace lenz\craft\essentials\services\i18n\sources;
+namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\base\Field;
 use craft\fields\BaseOptionsField;
 use craft\fields\Matrix;
 use craft\records\FieldLayoutTab;
-use lenz\craft\essentials\services\i18n\Translations;
+use lenz\craft\essentials\services\gettext\Translations;
 
 /**
  * Class CpFieldsSource

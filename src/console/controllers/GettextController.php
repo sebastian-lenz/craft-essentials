@@ -8,19 +8,19 @@ use lenz\craft\essentials\Plugin;
 /**
  * Class TranslationsController
  */
-class TranslationsController extends Controller
+class GettextController extends Controller
 {
   /**
    * Compile all gettext files.
    */
   public function actionCompile() {
-    Plugin::getInstance()->i18n->compile();
+    Plugin::getInstance()->gettext->compile();
   }
 
   /**
    * Extract all translatable strings.
    */
   public function actionExtract() {
-    Plugin::getInstance()->i18n->extract();
+    Plugin::getInstance()->gettext->extract();
   }
 }

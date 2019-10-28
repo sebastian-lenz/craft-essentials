@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\services\i18n;
+namespace lenz\craft\essentials\services\gettext;
 
 use Gettext\Translations as BaseTranslations;
 

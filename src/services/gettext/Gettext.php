@@ -1,20 +1,20 @@
 <?php
 
-namespace lenz\craft\essentials\services\i18n;
+namespace lenz\craft\essentials\services\gettext;
 
 use Craft;
 use craft\models\Site;
 use Gettext\Merge;
 use Gettext\Translation;
-use lenz\craft\essentials\services\i18n\sources\AbstractSource;
+use lenz\craft\essentials\services\gettext\sources\AbstractSource;
 use lenz\contentfield\fields\ContentField;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 
 /**
- * Class I18N
+ * Class Gettext
  */
-class I18N extends Component
+class Gettext extends Component
 {
   /**
    * @var AbstractSource[]

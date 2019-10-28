@@ -1,12 +1,12 @@
 <?php
 
-namespace lenz\craft\essentials\services\i18n\sources;
+namespace lenz\craft\essentials\services\gettext\sources;
 
 use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
 use lenz\contentfield\Plugin;
-use lenz\craft\essentials\services\i18n\Translations;
+use lenz\craft\essentials\services\gettext\Translations;
 
 /**
  * Class ContentFieldSource

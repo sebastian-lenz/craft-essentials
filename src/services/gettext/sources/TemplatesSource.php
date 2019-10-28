@@ -1,12 +1,12 @@
 <?php
 
-namespace lenz\craft\essentials\services\i18n\sources;
+namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\web\View;
 use Gettext\Extractors\PhpCode;
 use lenz\contentfield\twig\YamlAwareTemplateLoader;
-use lenz\craft\essentials\services\i18n\Translations;
+use lenz\craft\essentials\services\gettext\Translations;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Twig\Environment;
