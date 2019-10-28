@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\utils;
+namespace lenz\craft\essentials\services\redirectLanguage;
 
 use Countable;
 use Exception;

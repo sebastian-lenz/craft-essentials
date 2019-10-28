@@ -10,7 +10,8 @@
     "gettext/gettext": "^4.7"
   },
   "require-dev": {
-    "sebastianlenz/contentfield": "dev-release"
+    "sebastianlenz/contentfield": "dev-release",
+    "solspace/craft3-calendar": "^2.0"
   },
   "autoload": {
     "psr-4": {
