@@ -6,6 +6,7 @@ use Craft;
 use craft\base\Model;
 use craft\models\Site;
 use lenz\craft\essentials\events\SitesEvent;
+use yii\behaviors\AttributeTypecastBehavior;
 
 /**
  * Class Settings
@@ -27,6 +28,21 @@ class Settings extends Model
    */
   public $enableLanguageRedirect = true;
 
+
+  /**
+   * @inheritDoc
+   */
+  public function afterValidate() {
+    $this->enableLanguageRedirect = !!$this->enableLanguageRedirect;
+
+    $this->cachedRoutes = is_array($this->cachedRoutes)
+      ? $this->cachedRoutes
+      : [];
+
+    $this->disabledLanguages = is_array($this->disabledLanguages)
+      ? $this->disabledLanguages
+      : [];
+  }
 
   /**
    * @return array
