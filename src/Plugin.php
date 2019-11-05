@@ -8,6 +8,7 @@ use lenz\craft\utils\elementCache\ElementCache;
 /**
  * Class Plugin
  *
+ * @property services\disabledLanguages\DisabledLanguages $disabledLanguages
  * @property ElementCache $elementCache
  * @property services\FrontendCache $frontendCache
  * @property services\gettext\Gettext $gettext
@@ -33,14 +34,15 @@ class Plugin extends \craft\base\Plugin
     parent::init();
 
     $this->setComponents([
-      'elementCache'     => ElementCache::getInstance(),
-      'frontendCache'    => services\FrontendCache::getInstance(),
-      'gettext'          => services\gettext\Gettext::class,
-      'mailEncoder'      => services\MailEncoder::getInstance(),
-      'redirectLanguage' => services\redirectLanguage\RedirectLanguage::getInstance(),
-      'redirectNotFound' => services\redirectNotFound\RedirectNotFound::getInstance(),
-      'removeDashboard'  => services\RemoveDashboard::getInstance(),
-      'translations'     => services\translations\Translations::class,
+      'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
+      'elementCache'      => ElementCache::getInstance(),
+      'frontendCache'     => services\FrontendCache::getInstance(),
+      'gettext'           => services\gettext\Gettext::class,
+      'mailEncoder'       => services\MailEncoder::getInstance(),
+      'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),
+      'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
+      'removeDashboard'   => services\RemoveDashboard::getInstance(),
+      'translations'      => services\translations\Translations::class,
     ]);
 
     Craft::$app->view->registerTwigExtension(new twig\Extension());
