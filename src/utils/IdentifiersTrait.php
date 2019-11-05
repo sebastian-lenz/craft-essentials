@@ -19,6 +19,22 @@ trait IdentifiersTrait
 
   /**
    * @param string $name
+   * @return string|null
+   */
+  public function getIdentifier($name) {
+    self::loadIdentifiers();
+
+    return array_key_exists($name, self::$_identifiers)
+      ? self::$_identifiers[$name]
+      : null;
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param string $name
    * @return int|null
    */
   static public function __callStatic($name, $arguments) {
