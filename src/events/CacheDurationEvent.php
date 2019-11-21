@@ -3,8 +3,11 @@
 namespace lenz\craft\essentials\events;
 
 use craft\elements\Entry;
+use DateTime;
+use Exception;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\FrontendCache;
+use Throwable;
 use yii\base\Event;
 
 /**
@@ -36,12 +39,12 @@ class CacheDurationEvent extends Event
   }
 
   /**
-   * @return \DateTime|null
-   * @throws \Exception
+   * @return DateTime|null
+   * @throws Exception
    */
   private function getNextEntryChangeDate() {
-    $now = new \DateTime();
-    $nowAtom = $now->format(\DateTime::ATOM);
+    $now = new DateTime();
+    $nowAtom = $now->format(DateTime::ATOM);
 
     $nextPost = Entry::find()
       ->status(null)
@@ -74,7 +77,7 @@ class CacheDurationEvent extends Event
 
   /**
    * @return int
-   * @throws \Exception
+   * @throws Exception
    */
   private function getDurationTillNextEntryChange() {
     $entry = $this->getNextEntryChangeDate();
@@ -104,7 +107,7 @@ class CacheDurationEvent extends Event
         );
 
         $duration = $event->duration;
-      } catch (\Throwable $error) {
+      } catch (Throwable $error) {
         $duration = 0;
       }
 
@@ -115,10 +118,10 @@ class CacheDurationEvent extends Event
   }
 
   /**
-   * @param \DateTime $value
+   * @param DateTime $value
    */
-  public function setMinDate(\DateTime $value) {
-    $this->setMinDuration($value - time());
+  public function setMinDate(DateTime $value) {
+    $this->setMinDuration($value->getTimestamp() - time());
   }
 
   /**
