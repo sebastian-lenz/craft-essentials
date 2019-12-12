@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\twig;
 
+use Craft;
 use craft\base\ElementInterface;
 use Exception;
 use lenz\craft\essentials\Plugin;
@@ -21,6 +22,11 @@ class Extension extends AbstractExtension
    * @var string
    */
   private $_commitHash;
+
+  /**
+   * @var array
+   */
+  private $_translations;
 
   /**
    * The cache key of the commit hash.
@@ -91,11 +97,16 @@ class Extension extends AbstractExtension
    */
   public function getTranslations(ElementInterface $element = null, array $options = []) {
     if (is_null($element)) {
-      $element = \Craft::$app->getUrlManager()->getMatchedElement();
+      $element = Craft::$app->getUrlManager()->getMatchedElement();
     }
 
-    return Plugin::getInstance()
-      ->translations
-      ->getTranslations($element, $options);
+    $id = $element->getId();
+    if (!isset($this->_translations[$id])) {
+      $this->_translations[$id] = Plugin::getInstance()
+        ->translations
+        ->getTranslations($element, $options);
+    }
+
+    return $this->_translations[$id];
   }
 }
