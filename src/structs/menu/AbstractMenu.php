@@ -2,20 +2,27 @@
 
 namespace lenz\craft\essentials\structs\menu;
 
-use craft\base\ElementInterface;
-use craft\elements\db\ElementQuery;
-use craft\elements\Entry;
+use Craft;
+use lenz\craft\essentials\structs\structure\AbstractStructure;
 use lenz\craft\utils\elementCache\ElementCache;
+use thomas\twig\structs\MenuItem;
 
 /**
  * Class Menu
+ *
+ * @property AbstractMenuItem[] $_items
  */
-abstract class AbstractMenu
+abstract class AbstractMenu extends AbstractStructure
 {
   /**
    * @var AbstractMenuItem[]
    */
-  protected $_items = [];
+  protected $_breadcrumbs;
+
+  /**
+   * @var AbstractMenuItem|null
+   */
+  protected $_current;
 
   /**
    * @var AbstractMenu
@@ -29,89 +36,18 @@ abstract class AbstractMenu
 
 
   /**
-   * AbstractMenu constructor.
-   * @param ElementQuery $query
-   */
-  public function __construct(ElementQuery $query) {
-    $elements  = $query->all();
-    $itemClass = static::ITEM_CLASS;
-    $items     = [];
-    $stack     = [];
-
-    foreach ($elements as $element) {
-      $item = new $itemClass($element);
-
-      if ($element instanceof Entry) {
-        $level = max(1, intval($element->level));
-        while (count($stack) >= $level) {
-          array_pop($stack);
-        }
-
-        $item->parentId = end($stack);
-        $stack[] = $item->id;
-      }
-
-      $items[$item->id] = $item;
-    }
-
-    $this->_items = $items;
-  }
-
-  /**
-   * @param ElementInterface|AbstractMenuItem|int $elementOrId
-   * @param bool $includeSelf
-   * @return AbstractMenuItem[]
-   */
-  public function getAncestors($elementOrId, $includeSelf = false) {
-    $item   = $this->getById($elementOrId);
-    $result = [];
-
-    if (is_null($item)) {
-      return $result;
-    }
-
-    if (!$includeSelf) {
-      $item = $this->getById($item->parentId);
-    }
-
-    while ($item) {
-      array_unshift($result, $item);
-      $item = $this->getById($item->parentId);
-    }
-
-    return $result;
-  }
-
-  /**
-   * @return AbstractMenuItem[]
-   */
-  public function getAll() {
-    return $this->_items;
-  }
-
-  /**
    * @param int|string $type
    * @return AbstractMenuItem[]
    */
   public function getAllByType($type) {
     $isTypeId = is_numeric($type);
 
-    return array_filter($this->_items, function(AbstractMenuItem $item) use ($isTypeId, $type) {
-      return $isTypeId
-        ? $item->typeId == $type
-        : $item->typeHandle == $type;
-    });
-  }
-
-  /**
-   * @param ElementInterface|AbstractMenuItem|int $elementOrId
-   * @return AbstractMenuItem|null
-   */
-  public function getById($elementOrId) {
-    $id = static::normalizeId($elementOrId);
-    return array_key_exists($id, $this->_items)
-      ? $this->_items[$id]
-      : null;
+    return array_filter(
+      $this->_items,
+      function(AbstractMenuItem $item) use ($isTypeId, $type) {
+        return $isTypeId ? $item->typeId == $type : $item->typeHandle == $type;
+      }
+    );
   }
 
   /**
@@ -135,24 +71,17 @@ abstract class AbstractMenu
   }
 
   /**
-   * @param ElementInterface|AbstractMenuItem|int $elementOrId
    * @return AbstractMenuItem[]
    */
-  public function getChildren($elementOrId) {
-    $id = static::normalizeId($elementOrId);
-
-    return array_filter($this->_items, function(AbstractMenuItem $item) use ($id) {
-      return $item->parentId === $id;
-    });
+  public function getBreadcrumbs() {
+    return $this->_breadcrumbs;
   }
 
   /**
-   * @return AbstractMenuItem[]
+   * @return AbstractMenuItem|null
    */
-  public function getRootItems() {
-    return array_filter($this->_items, function(AbstractMenuItem $item) {
-      return $item->parentId === false;
-    });
+  public function getCurrent() {
+    return $this->_current;
   }
 
 
@@ -160,9 +89,41 @@ abstract class AbstractMenu
   // -----------------
 
   /**
+   * @return AbstractMenuItem|null
+   */
+  protected function findCurrent() {
+    $element = Craft::$app->getUrlManager()
+      ->getMatchedElement();
+
+    if (!$element) {
+      return null;
+    }
+
+    foreach ($this->_items as $item) {
+      if ($item->id == $element->getId()) {
+        return $item;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Initializes the menu after loading.
    */
-  protected function init() {}
+  protected function init() {
+    $current = $this->findCurrent();
+    $breadcrumbs = is_null($current)
+      ? []
+      : $current->getAncestors(true);
+
+    foreach ($breadcrumbs as $item) {
+      $item->isActive = true;
+    }
+
+    $this->_breadcrumbs = $breadcrumbs;
+    $this->_current = $current;
+  }
 
 
   // Static methods
@@ -181,19 +142,5 @@ abstract class AbstractMenu
     }
 
     return static::$_instance;
-  }
-
-  /**
-   * @param ElementInterface|AbstractMenuItem|int $elementOrId
-   * @return int
-   */
-  static function normalizeId($elementOrId) {
-    if ($elementOrId instanceof ElementInterface) {
-      return intval($elementOrId->getId());
-    } elseif ($elementOrId instanceof AbstractMenuItem) {
-      return $elementOrId->id;
-    } else {
-      return intval($elementOrId);
-    }
   }
 }
