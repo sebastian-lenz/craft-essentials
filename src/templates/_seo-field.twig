@@ -1,0 +1,6 @@
+{% import "foreign-field/forms" as forms %}
+
+{% namespace field.handle %}
+  {{ forms.textareaField(value, 'description') }}
+  {{ forms.textareaField(value, 'keywords') }}
+{% endnamespace %}

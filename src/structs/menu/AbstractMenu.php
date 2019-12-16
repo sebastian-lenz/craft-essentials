@@ -5,7 +5,6 @@ namespace lenz\craft\essentials\structs\menu;
 use Craft;
 use lenz\craft\essentials\structs\structure\AbstractStructure;
 use lenz\craft\utils\elementCache\ElementCache;
-use thomas\twig\structs\MenuItem;
 
 /**
  * Class Menu

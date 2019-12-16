@@ -4,9 +4,6 @@ namespace lenz\craft\essentials;
 
 use Craft;
 use craft\base\Model;
-use craft\models\Site;
-use lenz\craft\essentials\events\SitesEvent;
-use yii\behaviors\AttributeTypecastBehavior;
 
 /**
  * Class Settings
