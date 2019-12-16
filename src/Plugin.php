@@ -28,13 +28,18 @@ use yii\base\Event;
 class Plugin extends \craft\base\Plugin
 {
   /**
-   * @var bool
+   * @inheritDoc
    */
   public $hasCpSettings = true;
 
+  /**
+   * @inheritDoc
+   */
+  public $schemaVersion = '1.1.0';
+
 
   /**
-   * @return void
+   * @inheritDoc
    */
   public function init() {
     parent::init();

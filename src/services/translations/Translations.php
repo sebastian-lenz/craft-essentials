@@ -93,11 +93,12 @@ class Translations extends Component
       }
 
       return [
-        'isCurrent' => $currentSite === $site,
-        'name'      => $site->name,
-        'site'      => $site,
-        'target'    => $target,
-        'url'       => is_null($target) ? $site->baseUrl : $target->getUrl(),
+        'isCurrent'  => $currentSite === $site,
+        'isFallback' => is_null($target),
+        'name'       => $site->name,
+        'site'       => $site,
+        'target'     => $target,
+        'url'        => is_null($target) ? $site->baseUrl : $target->getUrl(),
       ];
     }, $sites);
   }
