@@ -62,7 +62,7 @@ abstract class AbstractStructure implements IteratorAggregate
     if ($insertIndex == -1) {
       $this->_items[] = $item;
     } else {
-      array_splice($this->_items, $insertIndex, 0, $item);
+      array_splice($this->_items, $insertIndex, 0, [$item]);
     }
 
     return $item;
