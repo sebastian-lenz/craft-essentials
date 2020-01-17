@@ -41,6 +41,34 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
+   * @param AbstractStructureItem $parent
+   * @param AbstractStructureItem $item
+   * @return AbstractStructureItem
+   */
+  public function attachTo($parent, $item) {
+    $insertAt = $parent->nestedLft;
+    $insertIndex = -1;
+
+    foreach ($this->_items as $index => $existing) {
+      if ($existing->nestedLft == $insertAt) $insertIndex = $index;
+      if ($existing->nestedLft > $insertAt) $existing->nestedLft += 2;
+      if ($existing->nestedRgt > $insertAt) $existing->nestedRgt += 2;
+    }
+
+    $item->nestedLevel = $parent->nestedLevel + 1;
+    $item->nestedLft = $insertAt + 1;
+    $item->nestedRgt = $insertAt + 2;
+
+    if ($insertIndex == -1) {
+      $this->_items[] = $item;
+    } else {
+      array_splice($this->_items, $insertIndex, 0, $item);
+    }
+
+    return $item;
+  }
+
+  /**
    * @return AbstractStructureItem[]
    */
   public function getAll() {
@@ -165,7 +193,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @return AbstractStructureItem[]
    */
   protected function filter(callable $callback) {
-    return array_filter($this->_items, $callback);
+    return array_values(array_filter($this->_items, $callback));
   }
 
 

@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\structs\menu;
 
 use Craft;
 use lenz\craft\essentials\structs\structure\AbstractStructure;
+use lenz\craft\essentials\structs\structure\AbstractStructureItem;
 use lenz\craft\utils\elementCache\ElementCache;
 
 /**
@@ -36,17 +37,18 @@ abstract class AbstractMenu extends AbstractStructure
 
   /**
    * @param int|string $type
-   * @return AbstractMenuItem[]
+   * @return AbstractMenuItem[]|AbstractStructureItem[]
    */
   public function getAllByType($type) {
     $isTypeId = is_numeric($type);
 
-    return array_filter(
-      $this->_items,
-      function(AbstractMenuItem $item) use ($isTypeId, $type) {
-        return $isTypeId ? $item->typeId == $type : $item->typeHandle == $type;
+    return $this->filter(function(AbstractMenuItem $item) use ($isTypeId, $type) {
+      if ($isTypeId) {
+        return $item->typeId == $type;
+      } else {
+        return $item->typeHandle == $type;
       }
-    );
+    });
   }
 
   /**
