@@ -19,8 +19,10 @@ class GettextController extends Controller
 
   /**
    * Extract all translatable strings.
+   *
+   * @param string $ignore
    */
-  public function actionExtract() {
-    Plugin::getInstance()->gettext->extract();
+  public function actionExtract($ignore = '') {
+    Plugin::getInstance()->gettext->extract(explode(',', $ignore));
   }
 }

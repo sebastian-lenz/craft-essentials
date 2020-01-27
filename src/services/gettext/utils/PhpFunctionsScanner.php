@@ -6,6 +6,8 @@ use Exception;
 use Gettext\Translations;
 use Gettext\Utils\PhpFunctionsScanner as PhpFunctionsScannerBase;
 use lenz\craft\essentials\services\gettext\Gettext;
+use ReflectionClass;
+use Throwable;
 use yii\base\Model;
 
 /**
@@ -87,20 +89,27 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
   /**
    * @param Translations[] $translations
    * @param string $className
+   * @throws Throwable
    */
   protected function saveClass(array $translations, string $className) {
-    if (!class_exists($className) || !is_subclass_of($className, Model::class)) {
+    if (
+      !class_exists($className) ||
+      !is_subclass_of($className, Model::class) ||
+      is_subclass_of($className, UntranslatedModel::class)
+    ) {
       return;
     }
 
     Gettext::printSource('model', $className);
+    $reflector = new ReflectionClass($className);
 
     /** @var Model $model */
     $model = new $className();
     foreach ($model->attributes() as $attribute) {
       $label = $model->getAttributeLabel($attribute);
       foreach ($translations as $translation) {
-        $translation->insert('', $label);
+        $row = $translation->insert('', $label);
+        $row->addReference($reflector->getFileName());
       }
     }
   }
@@ -112,7 +121,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
     $this->eachClassName(function($className) use ($translations) {
       try {
         $this->saveClass($translations, $className);
-      } catch (\Throwable $error) {
+      } catch (Throwable $error) {
         // Ignore errors here
       }
     });

@@ -51,9 +51,10 @@ class Gettext extends Component
   }
 
   /**
+   * @param array $ignoredSites
    * @return Translations
    */
-  public function extract() {
+  public function extract(array $ignoredSites) {
     $translations = new Translations();
     foreach ($this->getSources() as $source) {
       $source->extract($translations);
@@ -67,7 +68,7 @@ class Gettext extends Component
       }
     }
 
-    $this->storeTranslations($translations);
+    $this->storeTranslations($translations, $ignoredSites);
     return $translations;
   }
 
@@ -222,10 +223,15 @@ class Gettext extends Component
 
   /**
    * @param Translations $translations
+   * @param array $ignoredSites
    */
-  private function storeTranslations(Translations $translations) {
+  private function storeTranslations(Translations $translations, array $ignoredSites) {
     $sites = Craft::$app->getSites()->getAllSites();
     foreach ($sites as $site) {
+      if (in_array($site->language, $ignoredSites)) {
+        continue;
+      }
+
       $this->storeSiteTranslations($translations, $site);
     }
   }
