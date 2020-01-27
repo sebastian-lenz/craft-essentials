@@ -110,9 +110,8 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
    */
   protected function saveClasses(array $translations) {
     $this->eachClassName(function($className) use ($translations) {
-      $this->saveClass($translations, $className);
       try {
-
+        $this->saveClass($translations, $className);
       } catch (\Throwable $error) {
         // Ignore errors here
       }
