@@ -27,17 +27,10 @@ abstract class AbstractStructure implements IteratorAggregate
    * AbstractMenu constructor.
    * @param ElementQuery $query
    */
-  public function __construct(ElementQuery $query) {
-    $elements  = $query->all();
-    $itemClass = static::ITEM_CLASS;
-    $items     = [];
-
-    foreach ($elements as $element) {
-      $item = new $itemClass($this, $element);
-      $items[intval($item->id)] = $item;
+  public function __construct(ElementQuery $query = null) {
+    if (!is_null($query)) {
+      $this->_items = $this->createItemsFromQuery($query);
     }
-
-    $this->_items = $items;
   }
 
   /**
@@ -187,6 +180,23 @@ abstract class AbstractStructure implements IteratorAggregate
 
   // Protected methods
   // -----------------
+
+  /**
+   * @param ElementQuery $query
+   * @return AbstractStructureItem[]
+   */
+  protected function createItemsFromQuery(ElementQuery $query) : array {
+    $elements  = $query->all();
+    $itemClass = static::ITEM_CLASS;
+    $items     = [];
+
+    foreach ($elements as $element) {
+      $item = new $itemClass($this, $element);
+      $items[intval($item->id)] = $item;
+    }
+
+    return $items;
+  }
 
   /**
    * @param callable $callback
