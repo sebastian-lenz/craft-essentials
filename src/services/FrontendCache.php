@@ -50,21 +50,29 @@ class FrontendCache extends Component
   public function __construct() {
     parent::__construct();
 
-    if ($this->isEnabled()) {
-      Event::on(
-        Application::class, Application::EVENT_BEFORE_ACTION,
-        function(ActionEvent $event) {
-          $this->onBeforeAction($event);
+    Event::on(
+      Application::class,
+      Application::EVENT_INIT,
+      function() {
+        if (!$this->isEnabled()) {
+          return;
         }
-      );
 
-      Event::on(
-        Application::class, Application::EVENT_AFTER_REQUEST,
-        function() {
-          $this->onAfterRequest();
-        }
-      );
-    }
+        Event::on(
+          Application::class, Application::EVENT_BEFORE_ACTION,
+          function(ActionEvent $event) {
+            $this->onBeforeAction($event);
+          }
+        );
+
+        Event::on(
+          Application::class, Application::EVENT_AFTER_REQUEST,
+          function() {
+            $this->onAfterRequest();
+          }
+        );
+      }
+    );
   }
 
 
