@@ -53,6 +53,7 @@ class Plugin extends \craft\base\Plugin
       'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),
       'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
       'removeDashboard'   => services\RemoveDashboard::getInstance(),
+      'removeStopWords'   => services\RemoveStopWords::getInstance(),
       'translations'      => services\translations\Translations::class,
     ]);
 
