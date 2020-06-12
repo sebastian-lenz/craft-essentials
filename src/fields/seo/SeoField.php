@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\fields\seo;
 
 use Craft;
+use craft\base\ElementInterface;
 use lenz\craft\utils\foreignField\ForeignField;
 
 /**
@@ -10,6 +11,19 @@ use lenz\craft\utils\foreignField\ForeignField;
  */
 class SeoField extends ForeignField
 {
+  /**
+   * @inheritDoc
+   */
+  public function getSearchKeywords($value, ElementInterface $element): string {
+    return $value instanceof SeoModel
+      ? $value->getSearchKeywords()
+      : '';
+  }
+
+
+  // Static methods
+  // --------------
+
   /**
    * @inheritdoc
    */

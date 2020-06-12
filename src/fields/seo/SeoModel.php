@@ -109,4 +109,14 @@ class SeoModel extends ForeignFieldModel
       $this->getMetaTags()
     ));
   }
+
+  /**
+   * @return string
+   */
+  public function getSearchKeywords() {
+    return implode(' ', [
+      $this->description,
+      $this->keywords
+    ]);
+  }
 }
