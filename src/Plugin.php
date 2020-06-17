@@ -23,6 +23,7 @@ use yii\base\Event;
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
  * @property services\RemoveDashboard $removeDashboard
  * @property services\translations\Translations $translations
+ * @property services\siteMap\SiteMapService $siteMap
  * @method Settings getSettings()
  */
 class Plugin extends \craft\base\Plugin
@@ -55,6 +56,7 @@ class Plugin extends \craft\base\Plugin
       'removeDashboard'   => services\RemoveDashboard::getInstance(),
       'removeStopWords'   => services\RemoveStopWords::getInstance(),
       'translations'      => services\translations\Translations::class,
+      'siteMap'           => services\siteMap\SiteMapService::getInstance(),
     ]);
 
     RegisterCpTemplates::register();

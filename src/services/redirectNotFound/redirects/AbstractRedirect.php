@@ -38,7 +38,10 @@ abstract class AbstractRedirect
    * @return AbstractRedirect[]
    */
   static public function getRedirects() {
-    $result  = [];
+    $result  = [
+      new SiteMapRedirect(),
+    ];
+
     $csvFile = Craft::getAlias('@root/config/redirects.csv');
     if (file_exists($csvFile)) {
       $result[] = new CsvRedirect($csvFile);
