@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\services\FrontendCache;
+namespace lenz\craft\essentials\services\frontendCache;
 
 use Craft;
 use craft\web\Application;
