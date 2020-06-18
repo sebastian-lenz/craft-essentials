@@ -16,7 +16,7 @@ use yii\base\Event;
  *
  * @property services\disabledLanguages\DisabledLanguages $disabledLanguages
  * @property ElementCache $elementCache
- * @property services\FrontendCache $frontendCache
+ * @property services\frontendCache\FrontendCacheService $frontendCache
  * @property services\gettext\Gettext $gettext
  * @property services\MailEncoder $mailEncoder
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
@@ -48,7 +48,7 @@ class Plugin extends \craft\base\Plugin
     $this->setComponents([
       'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
       'elementCache'      => ElementCache::getInstance(),
-      'frontendCache'     => services\FrontendCache::getInstance(),
+      'frontendCache'     => services\frontendCache\FrontendCacheService::getInstance(),
       'gettext'           => services\gettext\Gettext::class,
       'mailEncoder'       => services\MailEncoder::getInstance(),
       'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),

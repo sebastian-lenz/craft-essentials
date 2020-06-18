@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\services;
+namespace lenz\craft\essentials\services\FrontendCache;
 
 use Craft;
 use craft\web\Application;
@@ -13,9 +13,9 @@ use yii\base\Event;
 use yii\base\Response;
 
 /**
- * Class FrontendCache
+ * Class FrontendCacheService
  */
-class FrontendCache extends Component
+class FrontendCacheService extends Component
 {
   /**
    * @var string
@@ -23,14 +23,14 @@ class FrontendCache extends Component
   private $_cacheKey = null;
 
   /**
-   * @var FrontendCache
+   * @var FrontendCacheService
    */
   static private $_instance;
 
   /**
-   * Triggered when the plugin is looking for the default cache duration.
+   * Placeholder used to represent CSRF tokens when caching pages.
    */
-  const EVENT_DEFAULT_CACHE_DURATION = 'defaultCacheDuration';
+  const CSRF_PLACEHOLDER = '<!-- ($DRY_CSRF_TOKEN); -->';
 
   /**
    * Triggered when the plugin is looking for the cache duration
@@ -53,26 +53,81 @@ class FrontendCache extends Component
     Event::on(
       Application::class,
       Application::EVENT_INIT,
-      function() {
-        if (!$this->isEnabled()) {
-          return;
-        }
-
-        Event::on(
-          Application::class, Application::EVENT_BEFORE_ACTION,
-          function(ActionEvent $event) {
-            $this->onBeforeAction($event);
-          }
-        );
-
-        Event::on(
-          Application::class, Application::EVENT_AFTER_REQUEST,
-          function() {
-            $this->onAfterRequest();
-          }
-        );
-      }
+      [$this, 'onApplicationInit']
     );
+  }
+
+  /**
+   * @return void
+   */
+  public function onAfterRequest() {
+    if (is_null($this->_cacheKey)) {
+      return;
+    }
+
+    $response = Craft::$app->response;
+    if (
+      $response->statusCode != 200 ||
+      strpos($response->data, 'actions/assets/generate-transform') !== false
+    ) {
+      return;
+    }
+
+    $durationEvent = new CacheDurationEvent();
+    $this->trigger(self::EVENT_CACHE_DURATION, $durationEvent);
+    if ($durationEvent->handled) {
+      return;
+    }
+
+    $key = $this->_cacheKey;
+    $duration = $durationEvent->duration;
+    $this->setCacheData($key, $response, $duration);
+  }
+
+  /**
+   * @return void
+   */
+  public function onApplicationInit() {
+    if (!$this->isEnabled()) {
+      return;
+    }
+
+    Event::on(
+      Application::class,
+      Application::EVENT_BEFORE_ACTION,
+      [$this, 'onBeforeAction']
+    );
+  }
+
+  /**
+   * @param ActionEvent $event
+   */
+  public function onBeforeAction(ActionEvent $event) {
+    if (
+      $event->action->id != 'render' ||
+      $event->action->controller->id != 'templates'
+    ) {
+      return;
+    }
+
+    $cacheKeyEvent = new CacheKeyEvent();
+    $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
+    if ($cacheKeyEvent->handled || is_null($cacheKeyEvent->cacheKey)) {
+      return;
+    }
+
+    $response = $this->getCachedResponse($cacheKeyEvent->cacheKey);
+    if (is_null($response)) {
+      $this->_cacheKey = $cacheKeyEvent->cacheKey;
+      Event::on(
+        Application::class,
+        Application::EVENT_AFTER_REQUEST,
+        [$this, 'onAfterRequest']
+      );
+    } else {
+      $event->handled = true;
+      $event->isValid = false;
+    }
   }
 
 
@@ -89,10 +144,16 @@ class FrontendCache extends Component
       return null;
     }
 
+    $data = $cacheData['data'];
+    if (strpos($data, self::CSRF_PLACEHOLDER) !== false) {
+      $token = Craft::$app->getRequest()->getCsrfToken();
+      $data = str_replace(self::CSRF_PLACEHOLDER, $token, $data);
+    }
+
     $response = Craft::$app->response;
     $response->headers->fromArray($cacheData['headers']);
     $response->headers->add('X-Craft-Cache', 'hit');
-    $response->data = $cacheData['data'];
+    $response->data = $data;
     $response->format = $cacheData['format'];
 
     return $response;
@@ -143,71 +204,23 @@ class FrontendCache extends Component
   }
 
   /**
-   * @param ActionEvent $event
-   */
-  protected function onBeforeAction(ActionEvent $event) {
-    if (
-      $event->action->id != 'render' ||
-      $event->action->controller->id != 'templates'
-    ) {
-      return;
-    }
-
-    $cacheKeyEvent = new CacheKeyEvent();
-    $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
-    if ($cacheKeyEvent->handled || is_null($cacheKeyEvent->cacheKey)) {
-      return;
-    }
-
-    $response = $this->getCachedResponse($cacheKeyEvent->cacheKey);
-    if (is_null($response)) {
-      $this->_cacheKey = $cacheKeyEvent->cacheKey;
-    } else {
-      $event->handled = true;
-      $event->isValid = false;
-    }
-  }
-
-  /**
-   * @return void
-   */
-  protected function onAfterRequest() {
-    if (is_null($this->_cacheKey)) {
-      return;
-    }
-
-    $response      = Craft::$app->response;
-    $csrfTokenName = Craft::$app->getConfig()->general->csrfTokenName;
-    if (
-      $response->statusCode != 200 ||
-      strpos($response->data, $csrfTokenName) !== false ||
-      strpos($response->data, 'actions/assets/generate-transform') !== false
-    ) {
-      return;
-    }
-
-    $durationEvent = new CacheDurationEvent();
-    $this->trigger(self::EVENT_CACHE_DURATION, $durationEvent);
-    if ($durationEvent->handled) {
-      return;
-    }
-
-    $key      = $this->_cacheKey;
-    $duration = $durationEvent->duration;
-    $this->setCacheData($key, $response, $duration);
-  }
-
-  /**
    * @param string $key
    * @param Response $response
    * @param int $duration
    */
   protected function setCacheData(string $key, Response $response, int $duration) {
-    $cache = ElementCache::getCache();
-    $key   = $this->getCacheKey($key);
+    $cache     = ElementCache::getCache();
+    $tokenName = Craft::$app->getConfig()->general->csrfTokenName;
+    $key       = $this->getCacheKey($key);
+    $data      = $response->data;
+
+    if (strpos($data, $tokenName) !== false) {
+      $token = Craft::$app->getRequest()->getCsrfToken();
+      $data = str_replace($token, self::CSRF_PLACEHOLDER, $data);
+    }
 
     $cache->set($key, array(
-      'data'    => $response->data,
+      'data'    => $data,
       'format'  => $response->format,
       'headers' => $response->headers->toArray(),
     ), $duration);
@@ -218,11 +231,11 @@ class FrontendCache extends Component
   // --------------
 
   /**
-   * @return FrontendCache
+   * @return FrontendCacheService
    */
   public static function getInstance() {
     if (!isset(self::$_instance)) {
-      self::$_instance = new FrontendCache();
+      self::$_instance = new FrontendCacheService();
     }
 
     return self::$_instance;
