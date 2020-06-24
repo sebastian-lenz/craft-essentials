@@ -43,6 +43,11 @@ class FrontendCacheService extends Component
    */
   const EVENT_CACHE_KEY = 'cacheKey';
 
+  /**
+   * Triggered when the plugin is looking for the default cache duration.
+   */
+  const EVENT_DEFAULT_CACHE_DURATION = 'defaultCacheDuration';
+
 
   /**
    * FrontendCache constructor.

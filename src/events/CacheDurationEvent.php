@@ -6,7 +6,7 @@ use craft\elements\Entry;
 use DateTime;
 use Exception;
 use lenz\craft\essentials\Plugin;
-use lenz\craft\essentials\services\FrontendCache;
+use lenz\craft\essentials\services\frontendCache\FrontendCacheService;
 use Throwable;
 use yii\base\Event;
 
@@ -103,7 +103,7 @@ class CacheDurationEvent extends Event
         );
 
         Plugin::getInstance()->frontendCache->trigger(
-          FrontendCache::EVENT_DEFAULT_CACHE_DURATION, $event
+          FrontendCacheService::EVENT_DEFAULT_CACHE_DURATION, $event
         );
 
         $duration = $event->duration;
@@ -119,6 +119,7 @@ class CacheDurationEvent extends Event
 
   /**
    * @param DateTime $value
+   * @noinspection PhpUnused
    */
   public function setMinDate(DateTime $value) {
     $this->setMinDuration($value->getTimestamp() - time());
