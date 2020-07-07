@@ -7,7 +7,6 @@ use craft\base\ElementInterface;
 use Exception;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\MailEncoder;
-use lenz\craft\essentials\utils\Translations;
 use lenz\craft\utils\elementCache\ElementCache;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -52,6 +51,7 @@ class Extension extends AbstractExtension
       new TwigFunction('commitHash', [$this, 'getCommitHash']),
       new TwigFunction('currentYear', [$this, 'getCurrentYear']),
       new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
+      new TwigFunction('translations', [$this, 'getTranslations']),
     ];
   }
 
@@ -92,15 +92,19 @@ class Extension extends AbstractExtension
   }
 
   /**
+   * @param ElementInterface|null $element
    * @param array $options
    * @return array
    */
-  public function getTranslations(ElementInterface $element = null, array $options = []) {
-    if (is_null($element)) {
+  public function getTranslations($element = null, array $options = []) {
+    if (!($element instanceof ElementInterface)) {
       $element = Craft::$app->getUrlManager()->getMatchedElement();
     }
 
-    $id = $element->getId();
+    $id = $element instanceof ElementInterface
+      ? $element->getId()
+      : '*';
+
     if (!isset($this->_translations[$id])) {
       $this->_translations[$id] = Plugin::getInstance()
         ->translations

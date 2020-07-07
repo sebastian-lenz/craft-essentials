@@ -69,13 +69,15 @@ class Translations extends Component
   }
 
   /**
-   * @param ElementInterface $element
+   * @param ElementInterface|null $element
    * @param array $options
    * @return array
    */
-  public function getTranslations(ElementInterface $element, array $options = []) {
-    $sites        = $this->getEnabledSites();
-    $translations = $this->loadTranslations($element);
+  public function getTranslations($element = null, array $options = []) {
+    $sites = $this->getEnabledSites();
+    $translations = $element instanceof ElementInterface
+      ? $this->loadTranslations($element)
+      : [];
 
     try {
       $currentSite = Craft::$app->getSites()->getCurrentSite();
