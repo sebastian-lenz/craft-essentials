@@ -108,13 +108,6 @@ class FrontendCacheService extends Component
    * @param ActionEvent $event
    */
   public function onBeforeAction(ActionEvent $event) {
-    if (
-      $event->action->id != 'render' ||
-      $event->action->controller->id != 'templates'
-    ) {
-      return;
-    }
-
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
     if ($cacheKeyEvent->handled || is_null($cacheKeyEvent->cacheKey)) {
@@ -155,6 +148,13 @@ class FrontendCacheService extends Component
       $data = str_replace(self::CSRF_PLACEHOLDER, $token, $data);
     }
 
+    if (
+      array_key_exists('dataFormat', $cacheData) &&
+      $cacheData['dataFormat'] == 'json'
+    ) {
+      $data = json_decode($data);
+    }
+
     $response = Craft::$app->response;
     $response->headers->fromArray($cacheData['headers']);
     $response->headers->add('X-Craft-Cache', 'hit');
@@ -170,7 +170,7 @@ class FrontendCacheService extends Component
    */
   protected function getCacheData(string $key) {
     $cache = ElementCache::getCache();
-    $key   = $this->getCacheKey($key);
+    $key = $this->getCacheKey($key);
 
     return $cache->get($key);
   }
@@ -214,21 +214,32 @@ class FrontendCacheService extends Component
    * @param int $duration
    */
   protected function setCacheData(string $key, Response $response, int $duration) {
-    $cache     = ElementCache::getCache();
-    $tokenName = Craft::$app->getConfig()->general->csrfTokenName;
-    $key       = $this->getCacheKey($key);
-    $data      = $response->data;
+    $data = $response->data;
+    $dataFormat = 'raw';
+
+    if (!is_string($data)) {
+      $data = json_encode($data);
+      $dataFormat = 'json';
+    }
+
+    $tokenName = Craft::$app->getConfig()
+      ->general
+      ->csrfTokenName;
 
     if (strpos($data, $tokenName) !== false) {
       $token = Craft::$app->getRequest()->getCsrfToken();
       $data = str_replace($token, self::CSRF_PLACEHOLDER, $data);
     }
 
-    $cache->set($key, array(
-      'data'    => $data,
-      'format'  => $response->format,
-      'headers' => $response->headers->toArray(),
-    ), $duration);
+    $cacheKey = $this->getCacheKey($key);
+    $cacheData = [
+      'data'       => $data,
+      'dataFormat' => $dataFormat,
+      'format'     => $response->format,
+      'headers'    => $response->headers->toArray(),
+    ];
+
+    ElementCache::getCache()->set($cacheKey, $cacheData, $duration);
   }
 
 
