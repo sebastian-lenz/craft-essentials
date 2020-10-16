@@ -21,6 +21,10 @@ class CompressController extends Controller
     $transforms = Craft::$app->getAssetTransforms();
 
     foreach (Asset::find()->all() as $asset) {
+      if ($asset->kind != Asset::KIND_IMAGE) {
+        continue;
+      }
+
       $queue->push(new AssetJob(['assetId' => $asset->id]));
 
       foreach ($transforms->getAllCreatedTransformsForAsset($asset) as $index) {

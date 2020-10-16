@@ -39,7 +39,10 @@ class ImageCompressor extends Component
       Asset::class,
       Asset::EVENT_BEFORE_SAVE,
       function(ModelEvent $event) {
-        if (!empty($event->sender->tempFilePath)) {
+        if (
+          !empty($event->sender->tempFilePath) &&
+          $event->sender->kind == Asset::KIND_IMAGE
+        ) {
           Craft::$app->getQueue()->push(new jobs\AssetJob([
             'assetId' => $event->sender->id,
           ]));
@@ -51,9 +54,11 @@ class ImageCompressor extends Component
       AssetTransforms::class,
       AssetTransforms::EVENT_GENERATE_TRANSFORM,
       function(GenerateTransformEvent $event) {
-        Craft::$app->getQueue()->push(new jobs\TransformIndexJob([
-          'transformIndexId' => $event->transformIndex->id,
-        ]));
+        if ($event->asset->kind == Asset::KIND_IMAGE) {
+          Craft::$app->getQueue()->push(new jobs\TransformIndexJob([
+            'transformIndexId' => $event->transformIndex->id,
+          ]));
+        }
       }
     );
   }

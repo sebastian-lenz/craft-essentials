@@ -65,7 +65,7 @@ class AssetJob extends AbstractJob
     }
 
     $asset = $this->getAsset();
-    if (is_null($asset)) {
+    if (is_null($asset) || $asset->kind != Asset::KIND_IMAGE) {
       return $this->_format = null;
     }
 
