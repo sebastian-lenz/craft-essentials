@@ -47,6 +47,7 @@ class Plugin extends \craft\base\Plugin
 
     $this->setComponents([
       'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
+      'imageCompressor'   => services\imageCompressor\ImageCompressor::getInstance(),
       'elementCache'      => ElementCache::getInstance(),
       'frontendCache'     => services\frontendCache\FrontendCacheService::getInstance(),
       'gettext'           => services\gettext\Gettext::class,
