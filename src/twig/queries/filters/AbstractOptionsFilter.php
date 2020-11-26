@@ -6,46 +6,46 @@ use craft\helpers\ArrayHelper;
 use craft\helpers\Html;
 use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\options\Option;
+use lenz\craft\essentials\twig\queries\options\OptionInterface;
 
 /**
  * Class AbstractOptionsFilter
  */
-abstract class AbstractOptionsFilter extends AbstractFilter implements DisplayInterface
+abstract class AbstractOptionsFilter extends AbstractValueFilter implements DisplayInterface
 {
   /**
-   * @var int[]|null
+   * @var string[]|int[]|null
    */
-  protected $_customIds = null;
+  protected $_customValues = null;
 
   /**
-   * @var int[]|null
+   * @var string[]|int[]|null
    */
-  protected $_fixedIds = null;
+  protected $_fixedValues = null;
 
   /**
-   * @var Option[]
+   * @var OptionInterface[]
    */
   protected $_options;
+
+  /**
+   * @var string
+   */
+  const GLUE = ',';
 
 
   /**
    * @inheritDoc
    */
   public function allowCustomFilter() {
-    return is_null($this->_fixedIds);
+    return is_null($this->_fixedValues);
   }
 
   /**
    * @param array $variables
    */
   public function display(array $variables = []) {
-    $options = $this->getSelectOptions();
-    $attributes = ArrayHelper::getValue($variables, 'attributes', []) + [
-      'id'   => $this->getName(),
-      'name' => $this->getName(),
-    ];
-
-    echo Html::tag('select', implode('', $options), $attributes);
+    echo $this->renderSelect($variables);
   }
 
   /**
@@ -59,14 +59,14 @@ abstract class AbstractOptionsFilter extends AbstractFilter implements DisplayIn
    * @return string|null
    */
   public function getDescription() {
-    $selectedIds = $this->_customIds;
-    if (is_null($this->_customIds) || !is_array($selectedIds)) {
+    $selectedIds = $this->_customValues;
+    if (is_null($this->_customValues) || !is_array($selectedIds)) {
       return null;
     }
 
     $result = [];
     foreach ($this->getOptions() as $option) {
-      if (in_array($option->id, $selectedIds)) {
+      if (in_array($option->value, $selectedIds)) {
         $result[] = '"' . $option->title . '"';
       }
     }
@@ -75,16 +75,16 @@ abstract class AbstractOptionsFilter extends AbstractFilter implements DisplayIn
   }
 
   /**
-   * @return int[]
+   * @return string[]|int[]
    */
-  public function getOptionIds() {
-    return array_map(function(Option $option) {
-      return $option->id;
+  public function getOptionValues() {
+    return array_map(function(OptionInterface $option) {
+      return $option->getOptionValue();
     }, $this->getOptions());
   }
 
   /**
-   * @return Option[]
+   * @return OptionInterface[]
    */
   public function getOptions() {
     return $this->_options;
@@ -93,44 +93,71 @@ abstract class AbstractOptionsFilter extends AbstractFilter implements DisplayIn
   /**
    * @return string|null
    */
-  public function getQueryParameter() {
-    return is_null($this->_customIds)
+  public function getValue() : ?string {
+    return is_null($this->_customValues)
       ? null
-      : implode(',', $this->_customIds);
+      : implode(static::GLUE, $this->_customValues);
   }
 
   /**
-   * @return int[]
+   * @return string[]|int[]
    */
-  public function getSelectedIds() {
-    if (!is_null($this->_fixedIds)) {
-      return $this->_fixedIds;
+  public function getSelectedValues() {
+    if (!is_null($this->_fixedValues)) {
+      return $this->_fixedValues;
     }
 
-    if (!is_null($this->_customIds)) {
-      return $this->_customIds;
+    if (!is_null($this->_customValues)) {
+      return $this->_customValues;
     }
 
     return [];
   }
 
   /**
-   * @param Option $option
+   * @param OptionInterface $option
    * @return bool
    */
-  public function isSelected(Option $option) {
-    return in_array($option->id, $this->getSelectedIds());
+  public function isSelected(OptionInterface $option) {
+    return in_array($option->getOptionValue(), $this->getSelectedValues());
+  }
+
+  /**
+   * @param array $variables
+   * @return string
+   * @throws \Exception
+   */
+  public function renderSelect(array $variables = []) {
+    $options = $this->renderOptions();
+    $attributes = ArrayHelper::getValue($variables, 'attributes', []) + [
+      'id'   => $this->getName(),
+      'name' => $this->getName(),
+    ];
+
+    return Html::tag('select', implode('', $options), $attributes);
+  }
+
+  /**
+   * @param OptionInterface $option
+   * @param array $selected
+   * @return string
+   */
+  public function renderOption(OptionInterface $option, array $selected) {
+    $value = $option->getOptionValue();
+
+    return Html::tag('option', $option->getOptionTitle(), [
+      'selected' => in_array($value, $selected),
+      'value' => $value,
+    ]);
   }
 
   /**
    * @return array[]
    */
-  public function getSelectOptions() {
-    $selected = $this->getSelectedIds();
-    $options = array_map(function(Option $option) use ($selected) {
-      return $option->getSelectOption([
-        'selected' => in_array($option->id, $selected),
-      ]);
+  public function renderOptions() {
+    $selected = $this->getSelectedValues();
+    $options = array_map(function(OptionInterface $option) use ($selected) {
+      return $this->renderOption($option, $selected);
     }, $this->getOptions());
 
     $all = $this->getAllOption();
@@ -145,49 +172,47 @@ abstract class AbstractOptionsFilter extends AbstractFilter implements DisplayIn
   }
 
   /**
-   * @param int[]|null $value
+   * @param string[]|int[]|null $value
    */
-  public function setFixedIds(array $value = null) {
-    $this->_fixedIds = is_array($value) && count($value) > 0
+  public function setFixedValues(array $value = null) {
+    $this->_fixedValues = is_array($value) && count($value) > 0
       ? $value
       : null;
   }
 
   /**
-   * @param array $options
+   * @param array $values
    */
-  public function setOptions(array $options) {
-    $staticOptions = [];
-
-    foreach ($options as $key => $value) {
-      if ($value instanceof Option) {
-        $staticOptions[] = $value;
+  public function setOptions(array $values) {
+    $options = [];
+    foreach ($values as $key => $value) {
+      if ($value instanceof OptionInterface) {
+        $options[] = $value;
       } else {
-        $staticOptions[] = new Option([
-          'id'    => $key,
+        $options[] = new Option([
+          'value' => $key,
           'title' => $value,
         ]);
       }
     }
 
-    $this->_options = $staticOptions;
+    $this->_options = $options;
   }
 
   /**
    * @inheritDoc
    */
-  public function setQueryParameter($value) {
+  public function setValue(string $value) {
     $result = [];
-    $ids    = $this->getOptionIds();
+    $options = $this->getOptionValues();
 
-    foreach (explode(',', $value) as $id) {
-      $id = intval($id);
-      if (in_array($id, $ids)) {
-        $result[] = $id;
+    foreach (explode(static::GLUE, $value) as $item) {
+      if (in_array($item, $options)) {
+        $result[] = $item;
       }
     }
 
-    $this->_customIds = count($result) > 0
+    $this->_customValues = count($result) > 0
       ? $result
       : null;
   }

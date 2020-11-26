@@ -8,7 +8,7 @@ use lenz\craft\essentials\twig\queries\AbstractQuery;
 /**
  * Class SearchFilter
  */
-class SearchFilter extends AbstractFilter
+class SearchFilter extends AbstractValueFilter
 {
   /**
    * @var string|null
@@ -22,7 +22,7 @@ class SearchFilter extends AbstractFilter
 
 
   /**
-   * @return string|null
+   * @inheritDoc
    */
   public function getDescription() {
     $search = $this->_search;
@@ -34,23 +34,16 @@ class SearchFilter extends AbstractFilter
   }
 
   /**
-   * @return string
+   * @inheritDoc
    */
-  public function getName() {
+  public function getName() : string {
     return self::NAME;
   }
 
   /**
-   * @return string|null
+   * @inheritDoc
    */
-  public function getQueryParameter() {
-    return $this->_search;
-  }
-
-  /**
-   * @return string|null
-   */
-  public function getValue() {
+  public function getValue() : ?string {
     return $this->_search;
   }
 
@@ -68,7 +61,7 @@ class SearchFilter extends AbstractFilter
   /**
    * @inheritDoc
    */
-  public function setQueryParameter($value) {
+  public function setValue(string $value) {
     $value = trim($value);
     $this->_search = empty($value)
       ? null

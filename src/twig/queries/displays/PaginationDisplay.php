@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\twig\queries\displays;
 
 use Craft;
+use craft\db\Paginator;
 use craft\web\twig\variables\Paginate;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\contentfield\twig\DisplayInterface;
@@ -13,10 +14,42 @@ use lenz\contentfield\twig\DisplayInterface;
 class PaginationDisplay extends Paginate implements DisplayInterface
 {
   /**
+   * @var string
+   */
+  public string $template = '_includes/query-pagination.twig';
+
+  /**
+   * @var array
+   */
+  public array $variables = [];
+
+  /**
    * @var AbstractQuery|null
    */
   private $_query = null;
 
+
+  /**
+   * PaginationDisplay constructor.
+   *
+   * @param AbstractQuery $query
+   * @param array $config
+   */
+  public function __construct(AbstractQuery $query, array $config = []) {
+    $paginator = $query->getPaginator();
+    $pageResults = $paginator->getPageResults();
+    $pageOffset = $paginator->getPageOffset();
+
+    parent::__construct(array_merge([
+      'first' => $pageOffset + 1,
+      'last' => $pageOffset + count($pageResults),
+      'total' => $paginator->getTotalResults(),
+      'currentPage' => $paginator->getCurrentPage(),
+      'totalPages' => $paginator->getTotalPages(),
+    ], $config));
+
+    $this->_query = $query;
+  }
 
   /**
    * @inheritDoc
@@ -26,13 +59,16 @@ class PaginationDisplay extends Paginate implements DisplayInterface
       return;
     }
 
+    $variables = array_merge([
+      'paginate' => $this,
+      'query' => $this->_query,
+    ], $this->variables, $variables);
+
     Craft::$app
       ->getView()
       ->getTwig()
-      ->load('_includes/query-pagination.twig')
-      ->display([
-        'paginate' => $this,
-      ] + $variables);
+      ->load($this->template)
+      ->display($variables);
   }
 
   /**
@@ -49,20 +85,5 @@ class PaginationDisplay extends Paginate implements DisplayInterface
     }
 
     return null;
-  }
-
-
-  // Static methods
-  // --------------
-
-  /**
-   * @param AbstractQuery $query
-   * @return PaginationDisplay
-   */
-  public static function createFromQuery(AbstractQuery $query) {
-    /** @var PaginationDisplay $pagination */
-    $pagination = parent::create($query->getPaginator());
-    $pagination->_query = $query;
-    return $pagination;
   }
 }

@@ -2,18 +2,17 @@
 
 namespace lenz\craft\essentials\twig\queries\options;
 
-use craft\helpers\Html;
 use yii\base\BaseObject;
 
 /**
  * Class Option
  */
-class Option extends BaseObject
+class Option extends BaseObject implements OptionInterface
 {
   /**
-   * @var int
+   * @var string|int
    */
-  public $id;
+  public $value;
 
   /**
    * @var string
@@ -22,12 +21,16 @@ class Option extends BaseObject
 
 
   /**
-   * @param array $attributes
-   * @return string
+   * @inheritDoc
    */
-  public function getSelectOption($attributes = []) {
-    return Html::tag('option', $this->title, $attributes + [
-      'value' => $this->id,
-    ]);
+  function getOptionValue() {
+    return $this->value;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  function getOptionTitle(): string {
+    return $this->title;
   }
 }

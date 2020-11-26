@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\twig\queries\filters;
 
 use Craft;
 use craft\elements\db\ElementQuery;
+use craft\web\Request;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use yii\base\BaseObject;
 
@@ -24,15 +25,6 @@ abstract class AbstractFilter extends BaseObject
 
 
   /**
-   * AbstractFilter constructor.
-   *
-   * @param array $config
-   */
-  public function __construct($config = []) {
-    parent::__construct($config);
-  }
-
-  /**
    * @return bool
    */
   public function allowCustomFilter() {
@@ -47,15 +39,10 @@ abstract class AbstractFilter extends BaseObject
   }
 
   /**
-   * @return string
+   * @return string[]
    */
-  abstract function getName();
-
-  /**
-   * @return string|null
-   */
-  public function getQueryParameter() {
-    return null;
+  public function getParameters() : array {
+    return [];
   }
 
   /**
@@ -65,25 +52,9 @@ abstract class AbstractFilter extends BaseObject
   public function prepareQuery(AbstractQuery $owner, ElementQuery $query) { }
 
   /**
-   * @param string $value
+   * @param Request $request
    */
-  public function setQueryParameter($value) { }
-
-
-  // Protected methods
-  // -----------------
-
-  /**
-   * @return void
-   */
-  protected function prepare() {
-    if ($this->allowCustomFilter()) {
-      $custom = Craft::$app->getRequest()->getParam($this->getName());
-      if (!is_null($custom)) {
-        $this->setQueryParameter($custom);
-      }
-    }
-  }
+  public function setRequest(Request $request) { }
 
 
   // Static methods
@@ -94,8 +65,6 @@ abstract class AbstractFilter extends BaseObject
    * @return static
    */
   static public function create(array $config = []) {
-    $filter = new static($config);
-    $filter->prepare();
-    return $filter;
+    return new static($config);
   }
 }

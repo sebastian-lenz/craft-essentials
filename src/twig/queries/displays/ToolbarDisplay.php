@@ -7,12 +7,23 @@ use craft\helpers\UrlHelper;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\craft\essentials\twig\queries\filters\SearchFilter;
 use lenz\contentfield\twig\DisplayInterface;
+use yii\base\BaseObject;
 
 /**
  * Class FilterDisplay
  */
-class ToolbarDisplay implements DisplayInterface
+class ToolbarDisplay extends BaseObject implements DisplayInterface
 {
+  /**
+   * @var string
+   */
+  public string $template = '_includes/query-filter.twig';
+
+  /**
+   * @var array
+   */
+  public array $variables = [];
+
   /**
    * @var AbstractQuery
    */
@@ -21,9 +32,12 @@ class ToolbarDisplay implements DisplayInterface
 
   /**
    * FilterDisplay constructor.
+   *
    * @param AbstractQuery $query
+   * @param array $config
    */
-  public function __construct(AbstractQuery $query) {
+  public function __construct(AbstractQuery $query, array $config = []) {
+    parent::__construct($config);
     $this->_query = $query;
   }
 
@@ -31,14 +45,17 @@ class ToolbarDisplay implements DisplayInterface
    * @inheritDoc
    */
   public function display(array $variables = []) {
+    $variables = array_merge([
+      'display' => $this,
+      'filters' => $this->_query->getFilters(),
+      'query'   => $this->_query,
+    ], $this->variables, $variables);
+
     Craft::$app
       ->getView()
       ->getTwig()
-      ->load('_includes/query-filter.twig')
-      ->display([
-        'display' => $this,
-        'filters' => $this->_query->getFilters(),
-      ] + $variables);
+      ->load($this->template)
+      ->display($variables);
   }
 
   /**

@@ -6,6 +6,7 @@ use Craft;
 use craft\db\Paginator;
 use craft\elements\db\ElementQuery;
 use craft\helpers\UrlHelper;
+use craft\web\Request;
 use lenz\craft\essentials\twig\queries\displays\ToolbarDisplay;
 use lenz\craft\essentials\twig\queries\displays\PaginationDisplay;
 use lenz\craft\essentials\twig\queries\filters\AbstractFilter;
@@ -73,23 +74,8 @@ abstract class AbstractQuery extends BaseObject
     parent::__construct($options);
 
     $this->_filters = $filters;
-
-    $request = Craft::$app->getRequest();
-    $this->setSort(
-      $request->getParam('sort', static::DEFAULT_SORT),
-      $request->getParam('dir', static::DEFAULT_SORT_DIRECTION)
-    );
-
-    $query = $this->createQuery();
-    foreach ($filters as $filter) {
-      $filter->prepareQuery($this, $query);
-    }
-
-    if (is_array($query->relatedTo) && count($query->relatedTo) > 1) {
-      $query->relatedTo = array_merge(['and'], $query->relatedTo);
-    }
-
-    $this->_query = $query;
+    $this->setRequest(Craft::$app->getRequest());
+    $this->setQuery($this->createQuery());
   }
 
   /**
@@ -112,10 +98,11 @@ abstract class AbstractQuery extends BaseObject
   }
 
   /**
+   * @param array $config
    * @return ToolbarDisplay
    */
-  public function getToolbar() {
-    return new ToolbarDisplay($this);
+  public function getToolbar(array $config = []) {
+    return new ToolbarDisplay($this, $config);
   }
 
   /**
@@ -144,11 +131,12 @@ abstract class AbstractQuery extends BaseObject
   }
 
   /**
+   * @param array $config
    * @return PaginationDisplay
    * @throws Throwable
    */
-  public function getPagination() {
-    return PaginationDisplay::createFromQuery($this);
+  public function getPagination($config = []) {
+    return new PaginationDisplay($this, $config);
   }
 
   /**
@@ -166,6 +154,19 @@ abstract class AbstractQuery extends BaseObject
   }
 
   /**
+   * @param array $overrides
+   * @param array $params
+   * @return array
+   */
+  public function getParameters($overrides = [], $params = []) {
+    foreach ($this->_filters as $filter) {
+      $params = array_merge($params, $filter->getParameters());
+    }
+
+    return $this->applySortParameters($params);
+  }
+
+  /**
    * @return array
    */
   public function getResults() {
@@ -176,7 +177,7 @@ abstract class AbstractQuery extends BaseObject
    * @return float|int
    */
   public function getTotalResults() {
-    return $this->getPaginator()->getTotalResults();
+    return intval($this->getPaginator()->getTotalResults());
   }
 
   /**
@@ -185,35 +186,10 @@ abstract class AbstractQuery extends BaseObject
    * @return string
    */
   public function getUrl($overrides = [], $params = []) {
-    foreach ($this->_filters as $filter) {
-      $name = $filter->getName();
-      $value = array_key_exists($name, $overrides)
-        ? $overrides[$name]
-        : $filter->getQueryParameter();
-
-      if (!empty($value)) {
-        $params[$name] = $value;
-      }
-    }
-
-    if (!isset($params['sort']) && !empty($this->sort)) {
-      $params['sort'] = $this->sort;
-    }
-
-    if (!isset($params['dir'])) {
-      $params['dir'] = $this->sortDirection;
-    }
-
-    // Remove default values
-    if (isset($params['sort']) && $params['sort'] == static::DEFAULT_SORT) {
-      unset($params['sort']);
-    }
-
-    if (isset($params['dir']) && $params['dir'] == self::DEFAULT_SORT_DIRECTION) {
-      unset($params['dir']);
-    }
-
-    return UrlHelper::url($this->getBasePath(), $params);
+    return UrlHelper::url(
+      $this->getBasePath(),
+      $this->getParameters($overrides, $params)
+    );
   }
 
   /**
@@ -246,9 +222,63 @@ abstract class AbstractQuery extends BaseObject
   // -----------------
 
   /**
+   * @param array $params
+   * @return array|mixed
+   */
+  public function applySortParameters($params = []) {
+    if (!isset($params['sort']) && !empty($this->sort)) {
+      $params['sort'] = $this->sort;
+    }
+
+    if (!isset($params['dir'])) {
+      $params['dir'] = $this->sortDirection;
+    }
+
+    // Remove default values
+    if (isset($params['sort']) && $params['sort'] == static::DEFAULT_SORT) {
+      unset($params['sort']);
+    }
+
+    if (isset($params['dir']) && $params['dir'] == self::DEFAULT_SORT_DIRECTION) {
+      unset($params['dir']);
+    }
+
+    return $params;
+  }
+
+  /**
    * @return ElementQuery
    */
   abstract protected function createQuery();
+
+  /**
+   * @param ElementQuery $query
+   */
+  protected function setQuery(ElementQuery $query) {
+    foreach ($this->_filters as $filter) {
+      $filter->prepareQuery($this, $query);
+    }
+
+    if (is_array($query->relatedTo) && count($query->relatedTo) > 1) {
+      $query->relatedTo = array_merge(['and'], $query->relatedTo);
+    }
+
+    $this->_query = $query;
+  }
+
+  /**
+   * @param Request $request
+   */
+  protected function setRequest(Request $request) {
+    foreach ($this->_filters as $filter) {
+      $filter->setRequest($request);
+    }
+
+    $this->setSort(
+      $request->getParam('sort', static::DEFAULT_SORT),
+      $request->getParam('dir', static::DEFAULT_SORT_DIRECTION)
+    );
+  }
 
 
   // Static methods
