@@ -28,7 +28,7 @@ class TemplatesSource extends AbstractSource
 
 
   /**
-   * @param Translations $translations
+   * @inheritDoc
    * @throws Exception
    */
   public function extract(Translations $translations) {
@@ -80,7 +80,7 @@ class TemplatesSource extends AbstractSource
     $iterator    = new RecursiveIteratorIterator($dirIterator);
 
     foreach ($iterator as $path) {
-      if (!preg_match('/\.twig$/', $path)) {
+      if (!preg_match('/\.twig$/', $path) || $this->_gettext->isFileExcluded($path)) {
         continue;
       }
 

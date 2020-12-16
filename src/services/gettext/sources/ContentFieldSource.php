@@ -2,9 +2,11 @@
 
 namespace lenz\craft\essentials\services\gettext\sources;
 
+use Gettext\Translation;
 use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
+use lenz\contentfield\models\schemas\TemplateSchema;
 use lenz\contentfield\Plugin;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
@@ -14,7 +16,7 @@ use lenz\craft\essentials\services\gettext\utils\Translations;
 class ContentFieldSource extends AbstractSource
 {
   /**
-   * @param Translations $translations
+   * @inheritDoc
    */
   public function extract(Translations $translations) {
     $schemas = Plugin::getInstance()->schemas->getAllSchemas();
@@ -30,12 +32,12 @@ class ContentFieldSource extends AbstractSource
    * @param Translations $translations
    * @param AbstractField $field
    */
-  private function extractField(Translations $translations, AbstractField $field) {
-    $translations->insertCp($field->label);
-    $translations->insertCp($field->instructions);
+  private function extractField(Translations $translations, AbstractSchema $schema, AbstractField $field) {
+    $this->insert($translations, $schema, $field->label);
+    $this->insert($translations, $schema, $field->instructions);
 
     if ($field instanceof SelectField) {
-      $this->extractSelectField($translations, $field);
+      $this->extractSelectField($translations, $schema, $field);
     }
   }
 
@@ -44,10 +46,10 @@ class ContentFieldSource extends AbstractSource
    * @param AbstractSchema $schema
    */
   private function extractSchema(Translations $translations, AbstractSchema $schema) {
-    $translations->insertCp($schema->label);
+    $this->insert($translations, $schema, $schema->label);
 
     foreach ($schema->fields as $field) {
-      $this->extractField($translations, $field);
+      $this->extractField($translations, $schema, $field);
     }
   }
 
@@ -55,10 +57,22 @@ class ContentFieldSource extends AbstractSource
    * @param Translations $translations
    * @param SelectField $field
    */
-  private function extractSelectField(Translations $translations, SelectField $field) {
+  private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field) {
     $enumeration = $field->getEnumeration();
     foreach ($enumeration->getOptions() as $option) {
-      $translations->insertCp($option['label']);
+      $this->insert($translations, $schema, $option['label']);
+    }
+  }
+
+  /**
+   * @param Translations $translations
+   * @param AbstractSchema $schema
+   * @param string $original
+   */
+  private function insert(Translations $translations, AbstractSchema $schema, $original) {
+    $result = $translations->insertCp($original);
+    if (!is_null($result)) {
+      $result->addReference($schema->qualifier);
     }
   }
 }

@@ -11,6 +11,17 @@ use lenz\craft\essentials\Plugin;
 class GettextController extends Controller
 {
   /**
+   * @var string[]
+   */
+  public $excludeFiles = [];
+
+  /**
+   * @var string[]
+   */
+  public $excludeLanguages = [];
+
+
+  /**
    * Compile all gettext files.
    */
   public function actionCompile() {
@@ -23,6 +34,26 @@ class GettextController extends Controller
    * @param string $ignore
    */
   public function actionExtract($ignore = '') {
-    Plugin::getInstance()->gettext->extract(explode(',', $ignore));
+    $excludeLanguages = empty($ignore)
+      ? $this->excludeLanguages
+      : explode(',', $ignore);
+
+    Plugin::getInstance()->gettext
+      ->setOptions([
+        'excludeFiles' => $this->excludeFiles,
+        'excludeLanguages' => $excludeLanguages,
+      ])
+      ->extract();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function options($actionID) {
+    if ($actionID == 'extract') {
+      return ['excludeFiles', 'excludeLanguages'];
+    }
+
+    return [];
   }
 }

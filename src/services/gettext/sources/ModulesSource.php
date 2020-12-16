@@ -18,7 +18,7 @@ use Throwable;
 class ModulesSource extends AbstractSource
 {
   /**
-   * @param Translations $translations
+   * @inheritDoc
    * @throws Exception
    */
   public function extract(Translations $translations) {
@@ -64,7 +64,7 @@ class ModulesSource extends AbstractSource
     $iterator    = new RecursiveIteratorIterator($dirIterator);
 
     foreach ($iterator as $path) {
-      if (!preg_match('/\.php$/', $path)) {
+      if (!preg_match('/\.php$/', $path) || $this->_gettext->isFileExcluded($path)) {
         continue;
       }
 

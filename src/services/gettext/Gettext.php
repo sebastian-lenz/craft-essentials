@@ -3,12 +3,15 @@
 namespace lenz\craft\essentials\services\gettext;
 
 use Craft;
+use craft\helpers\ArrayHelper;
+use craft\helpers\FileHelper;
 use craft\models\Site;
 use Gettext\Merge;
 use Gettext\Translation;
 use lenz\craft\essentials\services\gettext\sources\AbstractSource;
 use lenz\contentfield\fields\ContentField;
 use lenz\craft\essentials\services\gettext\utils\Translations;
+use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 
@@ -17,6 +20,21 @@ use yii\helpers\VarDumper;
  */
 class Gettext extends Component
 {
+  /**
+   * @var string
+   */
+  public $basePath;
+
+  /**
+   * @var string[]
+   */
+  public $excludeFiles = [];
+
+  /**
+   * @var string[]
+   */
+  public $excludeLanguages = [];
+
   /**
    * @var AbstractSource[]
    */
@@ -27,6 +45,17 @@ class Gettext extends Component
    */
   const EVENT_REGISTER_SOURCES = 'registerSources';
 
+
+  /**
+   * Gettext constructor.
+   *
+   * @param array $config
+   */
+  public function __construct($config = []) {
+    parent::__construct($config);
+
+    $this->basePath = Yii::getAlias('@root');
+  }
 
   /**
    * @param string $handle
@@ -51,10 +80,9 @@ class Gettext extends Component
   }
 
   /**
-   * @param array $ignoredSites
    * @return Translations
    */
-  public function extract(array $ignoredSites) {
+  public function extract() {
     $translations = new Translations();
     foreach ($this->getSources() as $source) {
       $source->extract($translations);
@@ -68,7 +96,7 @@ class Gettext extends Component
       }
     }
 
-    $this->storeTranslations($translations, $ignoredSites);
+    $this->storeTranslations($translations);
     return $translations;
   }
 
@@ -78,20 +106,37 @@ class Gettext extends Component
   public function getSources() {
     if (!isset($this->_sources)) {
       $this->_sources = [
-        'cp-fields'   => new sources\CpFieldsSource(),
-        'cp-elements' => new sources\CpElementsSource(),
-        'modules'     => new sources\ModulesSource(),
-        'templates'   => new sources\TemplatesSource(),
+        'cp-fields'   => new sources\CpFieldsSource($this),
+        'cp-elements' => new sources\CpElementsSource($this),
+        'modules'     => new sources\ModulesSource($this),
+        'templates'   => new sources\TemplatesSource($this),
       ];
 
       if (class_exists(ContentField::class)) {
-        $this->_sources['cp-content-field'] = new sources\ContentFieldSource();
+        $this->_sources['cp-content-field'] = new sources\ContentFieldSource($this);
       }
 
       $this->trigger(self::EVENT_REGISTER_SOURCES);
     }
 
     return $this->_sources;
+  }
+
+  /**
+   * @param string $fileName
+   * @return bool
+   */
+  public function isFileExcluded(string $path) {
+    $result = !FileHelper::filterPath($path, [
+      'basePath' => $this->basePath,
+      'except' => $this->excludeFiles,
+    ]);
+
+    if ($result) {
+      echo ' - Ignoring ' . $path . "`\n";
+    }
+
+    return $result;
   }
 
   /**
@@ -105,10 +150,22 @@ class Gettext extends Component
     unset($this->_sources[$handle]);
   }
 
+  /**
+   * @param array $options
+   * @return $this
+   */
+  public function setOptions(array $options) {
+    Yii::configure($this, $options);
+    return $this;
+  }
+
 
   // Private methods
   // ---------------
 
+  /**
+   * @param Site $site
+   */
   private function compileSiteTranslations(Site $site) {
     $source = $this->getSiteTranslationSource($site);
     $target = implode(DIRECTORY_SEPARATOR, [
@@ -218,17 +275,16 @@ class Gettext extends Component
   private function mergePo(Translations $translations, Site $site, string $path) {
     $existing = new Translations();
     $existing->addFromPoFile($path);
-    $translations->mergeWith($existing, Merge::TRANSLATION_OVERRIDE);
+    $translations->mergeWith($existing, Merge::TRANSLATION_OVERRIDE | Merge::REFERENCES_OURS);
   }
 
   /**
    * @param Translations $translations
-   * @param array $ignoredSites
    */
-  private function storeTranslations(Translations $translations, array $ignoredSites) {
+  private function storeTranslations(Translations $translations) {
     $sites = Craft::$app->getSites()->getAllSites();
     foreach ($sites as $site) {
-      if (in_array($site->language, $ignoredSites)) {
+      if (in_array($site->language, $this->excludeLanguages)) {
         continue;
       }
 

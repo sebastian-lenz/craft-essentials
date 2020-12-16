@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
+use craft\base\Field;
 use craft\models\Section;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
@@ -12,11 +13,11 @@ use lenz\craft\essentials\services\gettext\utils\Translations;
 class CpElementsSource extends AbstractSource
 {
   /**
-   * @param Translations $translations
+   * @inheritDoc
    */
   public function extract(Translations $translations) {
     foreach (Craft::$app->getCategories()->getAllGroups() as $group) {
-      $translations->insertCp($group->name);
+      $this->insert($translations, 'craft:category/' . $group->handle, $group->name);
     }
 
     foreach (Craft::$app->getSections()->getAllSections() as $section) {
@@ -24,7 +25,7 @@ class CpElementsSource extends AbstractSource
     }
 
     foreach (Craft::$app->getSites()->getAllSites() as $site) {
-      $translations->insertCp($site->name);
+      $this->insert($translations, 'craft:sites/' . $site->handle, $site->name);
     }
   }
 
@@ -36,10 +37,23 @@ class CpElementsSource extends AbstractSource
    * @param Section $section
    */
   private function extractSection(Translations $translations, Section $section) {
-    $translations->insertCp($section->name);
+    $hint = 'craft:section/' . $section->handle;
+    $this->insert($translations, $hint, $section->name);
 
     foreach ($section->getEntryTypes() as $entryType) {
-      $translations->insertCp($entryType->name);
+      $this->insert($translations, $hint, $entryType->name);
+    }
+  }
+
+  /**
+   * @param Translations $translations
+   * @param Field $field
+   * @param string $original
+   */
+  private function insert(Translations $translations, string $hint, $original) {
+    $result = $translations->insertCp($original);
+    if (!is_null($result)) {
+      $result->addReference($hint);
     }
   }
 }

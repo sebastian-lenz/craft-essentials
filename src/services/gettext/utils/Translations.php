@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\services\gettext\utils;
 
+use Gettext\Translation;
 use Gettext\Translations as BaseTranslations;
 
 /**
@@ -26,10 +27,13 @@ class Translations extends BaseTranslations
 
   /**
    * @param string $original
+   * @return Translation|null
    */
   public function insertCp($original) {
-    if (!empty($original)) {
-      $this->insert(self::CP_CONTEXT, $original);
+    if (empty($original)) {
+      return null;
     }
+
+    return $this->insert(self::CP_CONTEXT, $original);
   }
 }
