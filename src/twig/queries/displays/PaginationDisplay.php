@@ -7,6 +7,7 @@ use craft\db\Paginator;
 use craft\web\twig\variables\Paginate;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\contentfield\twig\DisplayInterface;
+use Throwable;
 
 /**
  * Class PaginationDisplay
@@ -59,16 +60,11 @@ class PaginationDisplay extends Paginate implements DisplayInterface
       return;
     }
 
-    $variables = array_merge([
-      'paginate' => $this,
-      'query' => $this->_query,
-    ], $this->variables, $variables);
-
     Craft::$app
       ->getView()
       ->getTwig()
       ->load($this->template)
-      ->display($variables);
+      ->display($this->getVariables($variables));
   }
 
   /**
@@ -85,5 +81,33 @@ class PaginationDisplay extends Paginate implements DisplayInterface
     }
 
     return null;
+  }
+
+  /**
+   * @param array $variables
+   * @return array
+   */
+  public function getVariables(array $variables = []) {
+    return array_merge([
+      'paginate' => $this,
+      'query' => $this->_query,
+    ], $this->variables, $variables);
+  }
+
+  /**
+   * @param array $variables
+   * @return string
+   * @throws Throwable
+   */
+  public function render(array $variables = []) {
+    if (!$this->_query->hasPagination()) {
+      return '';
+    }
+
+    return Craft::$app
+      ->getView()
+      ->getTwig()
+      ->load($this->template)
+      ->render($this->getVariables($variables));
   }
 }

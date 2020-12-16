@@ -163,7 +163,7 @@ abstract class AbstractQuery extends BaseObject
       $params = array_merge($params, $filter->getParameters());
     }
 
-    return $this->applySortParameters($params);
+    return $this->applyParameters($params);
   }
 
   /**
@@ -225,7 +225,7 @@ abstract class AbstractQuery extends BaseObject
    * @param array $params
    * @return array|mixed
    */
-  public function applySortParameters($params = []) {
+  protected function applyParameters($params = []) {
     if (!isset($params['sort']) && !empty($this->sort)) {
       $params['sort'] = $this->sort;
     }
