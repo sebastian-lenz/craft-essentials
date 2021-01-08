@@ -6,9 +6,11 @@ use craft\base\ElementInterface;
 use craft\elements\Entry;
 use craft\helpers\Html;
 use craft\helpers\Template;
+use Exception;
 use lenz\craft\essentials\structs\structure\AbstractStructureItem;
 use Twig\Markup;
 use yii\base\InvalidConfigException;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class AbstractMenuItem
@@ -16,7 +18,7 @@ use yii\base\InvalidConfigException;
 abstract class AbstractMenuItem extends AbstractStructureItem
 {
   /**
-   * @var string
+   * @var string|array
    */
   public $customLinkAttributes;
 
@@ -57,16 +59,42 @@ abstract class AbstractMenuItem extends AbstractStructureItem
 
 
   /**
+   * @param array $attributes
    * @return Markup
+   * @noinspection PhpUnused (Public/Template API)
+   * @throws Exception
    */
-  public function getLinkAttributes() {
+  public function getLinkAttributes(array $attributes = []): Markup {
     if (isset($this->customLinkAttributes)) {
-      return Template::raw($this->customLinkAttributes);
+      if (is_string($this->customLinkAttributes)) {
+        if (!empty($attributes) && $_ENV['ENVIRONMENT'] !== 'production') {
+          throw new Exception('Cannot apply attributes when custom attributes are set to a string.');
+        }
+
+        return Template::raw($this->customLinkAttributes);
+      } else {
+        $attributes = array_merge($attributes, $this->customLinkAttributes);
+      }
+    } else {
+      $attributes = array_merge($attributes, [
+        'href' => $this->url
+      ]);
     }
 
-    return Template::raw(Html::renderTagAttributes([
-      'href' => $this->url
-    ]));
+    if ($this->isActive) {
+      $classNames = ArrayHelper::getValue($attributes, 'class', []);
+      if (!is_array($classNames)) {
+        $classNames = array_filter(preg_split('/\s+/', $classNames));
+      }
+
+      if (!in_array('active', $classNames)) {
+        $classNames[] = 'active';
+      }
+
+      $attributes['class'] = $classNames;
+    }
+
+    return Template::raw(Html::renderTagAttributes($attributes));
   }
 
 

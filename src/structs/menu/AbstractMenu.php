@@ -39,7 +39,7 @@ abstract class AbstractMenu extends AbstractStructure
    * @param int|string $type
    * @return AbstractMenuItem[]|AbstractStructureItem[]
    */
-  public function getAllByType($type) {
+  public function getAllByType($type): array {
     $isTypeId = is_numeric($type);
 
     return $this->filter(function(AbstractMenuItem $item) use ($isTypeId, $type) {
@@ -74,7 +74,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @return AbstractMenuItem[]
    */
-  public function getBreadcrumbs() {
+  public function getBreadcrumbs(): array {
     return $this->_breadcrumbs;
   }
 
@@ -133,7 +133,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @return static
    */
-  static function getInstance() {
+  static function getInstance(): AbstractMenu {
     if (!isset(static::$_instance)) {
       static::$_instance = ElementCache::withLanguage(self::class, function() {
         return new static(null);
