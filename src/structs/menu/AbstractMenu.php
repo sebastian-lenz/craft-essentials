@@ -135,7 +135,7 @@ abstract class AbstractMenu extends AbstractStructure
    */
   static function getInstance(): AbstractMenu {
     if (!isset(static::$_instance)) {
-      static::$_instance = ElementCache::withLanguage(self::class, function() {
+      static::$_instance = ElementCache::withLanguage(static::class, function() {
         return new static(null);
       });
 
