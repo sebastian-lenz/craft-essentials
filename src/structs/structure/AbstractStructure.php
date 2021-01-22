@@ -25,7 +25,8 @@ abstract class AbstractStructure implements IteratorAggregate
 
   /**
    * AbstractMenu constructor.
-   * @param ElementQuery $query
+   *
+   * @param ElementQuery|null $query
    */
   public function __construct(ElementQuery $query = null) {
     if (!is_null($query)) {
@@ -37,8 +38,9 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param AbstractStructureItem $parent
    * @param AbstractStructureItem $item
    * @return AbstractStructureItem
+   * @noinspection PhpUnused (Public API)
    */
-  public function attachTo($parent, $item) {
+  public function attachTo(AbstractStructureItem $parent, AbstractStructureItem $item): AbstractStructureItem {
     $insertAt = $parent->nestedLft;
     $insertIndex = -1;
 
@@ -64,7 +66,7 @@ abstract class AbstractStructure implements IteratorAggregate
   /**
    * @return AbstractStructureItem[]
    */
-  public function getAll() {
+  public function getAll(): array {
     return $this->_items;
   }
 
@@ -72,7 +74,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
    * @return AbstractStructureItem[]
    */
-  public function getAncestors($elementOrId) {
+  public function getAncestors($elementOrId): array {
     $child = $this->getById($elementOrId);
     if (is_null($child)) {
       return [];
@@ -88,24 +90,26 @@ abstract class AbstractStructure implements IteratorAggregate
 
   /**
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
-   * @return AbstractStructureItem|mixed|null
+   * @return AbstractStructureItem|null
    */
-  public function getById($elementOrId) {
+  public function getById($elementOrId): ?AbstractStructureItem {
     if ($elementOrId instanceof AbstractStructureItem) {
       return $elementOrId;
     }
 
     $id = self::normalizeId($elementOrId);
-    return array_key_exists($id, $this->_items)
-      ? $this->_items[$id]
-      : null;
+    foreach ($this->_items as $item) {
+      if ($item->id == $id) return $item;
+    }
+
+    return null;
   }
 
   /**
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
    * @return AbstractStructureItem[]
    */
-  public function getChildren($elementOrId) {
+  public function getChildren($elementOrId): array {
     $parent = $this->getById($elementOrId);
     if (is_null($parent)) {
       return [];
@@ -124,7 +128,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
    * @return AbstractStructureItem[]
    */
-  public function getDescendants($elementOrId) {
+  public function getDescendants($elementOrId): array {
     $parent = $this->getById($elementOrId);
     if (is_null($parent)) {
       return [];
@@ -149,7 +153,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
    * @return AbstractStructureItem|null
    */
-  public function getParent($elementOrId) {
+  public function getParent($elementOrId): ?AbstractStructureItem {
     $child = $this->getById($elementOrId);
     if (is_null($child)) {
       return null;
@@ -171,7 +175,7 @@ abstract class AbstractStructure implements IteratorAggregate
   /**
    * @return AbstractStructureItem[]
    */
-  public function getRootItems() {
+  public function getRootItems(): array {
     return $this->filter(function(AbstractStructureItem $item) {
       return $item->nestedLevel === 1;
     });
@@ -185,10 +189,10 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param ElementQuery $query
    * @return AbstractStructureItem[]
    */
-  protected function createItemsFromQuery(ElementQuery $query) : array {
-    $elements  = $query->all();
+  protected function createItemsFromQuery(ElementQuery $query): array {
+    $elements = $query->all();
     $itemClass = static::ITEM_CLASS;
-    $items     = [];
+    $items = [];
 
     foreach ($elements as $element) {
       $item = new $itemClass($this, $element);
@@ -202,7 +206,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param callable $callback
    * @return AbstractStructureItem[]
    */
-  protected function filter(callable $callback) {
+  protected function filter(callable $callback): array {
     return array_values(array_filter($this->_items, $callback));
   }
 
@@ -214,7 +218,7 @@ abstract class AbstractStructure implements IteratorAggregate
    * @param ElementInterface|AbstractStructureItem|int $elementOrId
    * @return int
    */
-  static function normalizeId($elementOrId) {
+  static function normalizeId($elementOrId): int {
     if ($elementOrId instanceof ElementInterface) {
       return intval($elementOrId->getId());
     } elseif ($elementOrId instanceof AbstractStructureItem) {

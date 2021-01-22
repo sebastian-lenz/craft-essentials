@@ -59,7 +59,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
    * @param bool $includeSelf
    * @return AbstractStructureItem[]
    */
-  public function getAncestors($includeSelf = false) {
+  public function getAncestors(bool $includeSelf = false): array {
     $ancestors = $this->_collection->getAncestors($this);
     if ($includeSelf) {
       $ancestors[] = $this;
@@ -71,21 +71,22 @@ abstract class AbstractStructureItem implements IteratorAggregate
   /**
    * @return AbstractStructureItem[]
    */
-  public function getChildren() {
+  public function getChildren(): array {
     return $this->_collection->getChildren($this);
   }
 
   /**
    * @return AbstractStructure
    */
-  public function getCollection() {
+  public function getCollection(): AbstractStructure {
     return $this->_collection;
   }
 
   /**
    * @return AbstractStructureItem[]
+   * @noinspection PhpUnused (Public API)
    */
-  public function getDescendants() {
+  public function getDescendants(): array {
     return $this->_collection->getDescendants($this);
   }
 
@@ -99,21 +100,22 @@ abstract class AbstractStructureItem implements IteratorAggregate
   /**
    * @return AbstractStructureItem|null
    */
-  public function getParent() {
+  public function getParent(): ?AbstractStructureItem {
     return $this->_collection->getParent($this);
   }
 
   /**
    * @return bool
+   * @noinspection PhpUnused (Public API)
    */
-  public function hasChildren() {
+  public function hasChildren(): bool {
     return count($this->getChildren()) > 0;
   }
 
   /**
    * @return bool
    */
-  public function hasParent() {
+  public function hasParent(): bool {
     return !is_null($this->getParent());
   }
 
@@ -143,7 +145,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
    * @param ElementInterface[] $elements
    * @return static[]
    */
-  static public function fromElements(AbstractStructure $collection, $elements) {
+  static public function fromElements(AbstractStructure $collection, array $elements): array {
     $result = [];
     foreach ($elements as $element) {
       $result[] = new static($collection, $element);

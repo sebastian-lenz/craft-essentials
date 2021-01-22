@@ -38,6 +38,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @param int|string $type
    * @return AbstractMenuItem[]|AbstractStructureItem[]
+   * @noinspection PhpUnused (Public API)
    */
   public function getAllByType($type): array {
     $isTypeId = is_numeric($type);
@@ -54,8 +55,9 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @param int|string $type
    * @return AbstractMenuItem|null
+   * @noinspection PhpUnused (Public API)
    */
-  public function getByType($type) {
+  public function getByType($type): ?AbstractMenuItem {
     $isTypeId = is_numeric($type);
 
     foreach ($this->_items as $item) {
@@ -73,6 +75,7 @@ abstract class AbstractMenu extends AbstractStructure
 
   /**
    * @return AbstractMenuItem[]
+   * @noinspection PhpUnused (Public API)
    */
   public function getBreadcrumbs(): array {
     return $this->_breadcrumbs;
@@ -81,7 +84,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @return AbstractMenuItem|null
    */
-  public function getCurrent() {
+  public function getCurrent(): ?AbstractMenuItem {
     return $this->_current;
   }
 
@@ -92,7 +95,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @return AbstractMenuItem|null
    */
-  protected function findCurrent() {
+  protected function findCurrent(): ?AbstractMenuItem {
     $element = Craft::$app->getUrlManager()
       ->getMatchedElement();
 
