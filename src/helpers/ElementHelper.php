@@ -7,20 +7,20 @@ use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 
 /**
- * Class EntryHelper
+ * Class ElementHelper
  */
-class EntryHelper
+class ElementHelper extends \craft\helpers\ElementHelper
 {
   /**
-   * @param Entry $entry
+   * @param ElementInterface $element
    * @param string $attribute
    * @return ElementInterface[]
    */
-  static public function eagerLoad(Entry $entry, string $attribute): array {
-    $result = $entry->$attribute;
+  static public function eagerLoad(ElementInterface $element, string $attribute): array {
+    $result = $element->$attribute;
     if ($result instanceof ElementQuery) {
       $result = $result->all();
-      $entry->setEagerLoadedElements($attribute, $result);
+      $element->setEagerLoadedElements($attribute, $result);
     }
 
     return $result;
