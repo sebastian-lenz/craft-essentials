@@ -4,7 +4,6 @@ namespace lenz\craft\essentials\helpers;
 
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
-use craft\elements\Entry;
 
 /**
  * Class ElementHelper
