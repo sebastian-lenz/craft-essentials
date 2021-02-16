@@ -3,7 +3,6 @@
 namespace lenz\craft\essentials\twig\queries\displays;
 
 use Craft;
-use craft\db\Paginator;
 use craft\web\twig\variables\Paginate;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\contentfield\twig\DisplayInterface;
@@ -17,12 +16,12 @@ class PaginationDisplay extends Paginate implements DisplayInterface
   /**
    * @var string
    */
-  public string $template = '_includes/query-pagination.twig';
+  public $template = '_includes/query-pagination.twig';
 
   /**
    * @var array
    */
-  public array $variables = [];
+  public $variables = [];
 
   /**
    * @var AbstractQuery|null

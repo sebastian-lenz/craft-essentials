@@ -17,12 +17,12 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
   /**
    * @var string
    */
-  public string $template = '_includes/query-filter.twig';
+  public $template = '_includes/query-filter.twig';
 
   /**
    * @var array
    */
-  public array $variables = [];
+  public $variables = [];
 
   /**
    * @var AbstractQuery

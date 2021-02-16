@@ -2,7 +2,6 @@
 
 namespace lenz\craft\essentials\twig\queries\filters;
 
-use Craft;
 use craft\elements\db\ElementQuery;
 use craft\web\Request;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
