@@ -52,7 +52,7 @@ class Translations extends Component
       $sites = array_filter(
         Craft::$app->getSites()->getAllSites(),
         function(Site $site) use ($disabledLanguages) {
-          return !in_array($site->language, $disabledLanguages);
+          return $site->enabled && !in_array($site->language, $disabledLanguages);
         }
       );
 
