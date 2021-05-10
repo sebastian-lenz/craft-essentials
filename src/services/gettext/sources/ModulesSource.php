@@ -22,9 +22,9 @@ class ModulesSource extends AbstractSource
    * @throws Exception
    */
   public function extract(Translations $translations) {
-    foreach ($this->getModules() as $module => $moduleClass) {
-      $path = Craft::getAlias(implode(DIRECTORY_SEPARATOR, ['@root', $module]));
-      if (!file_exists($path)) {
+    foreach (array_keys($this->getModules()) as $module) {
+      $path = $this->getModulePath($module);
+      if (is_null($path)) {
         echo sprintf('\nError: Could not find path to module `%s`.', $module);
         continue;
       }
@@ -84,5 +84,23 @@ class ModulesSource extends AbstractSource
     }
 
     return [];
+  }
+
+  /**
+   * @param string $module
+   * @return string|null
+   */
+  private function getModulePath(string $module): ?string {
+    $path = Craft::getAlias('@' . $module);
+    if (file_exists($path)) {
+      return $path;
+    }
+
+    $path = Craft::getAlias(implode(DIRECTORY_SEPARATOR, ['@root', $module]));
+    if (file_exists($path)) {
+      return $path;
+    }
+
+    return null;
   }
 }
