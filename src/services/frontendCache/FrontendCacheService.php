@@ -23,6 +23,11 @@ class FrontendCacheService extends Component
   private $_cacheKey = null;
 
   /**
+   * @var bool
+   */
+  private $_isIntercepted = false;
+
+  /**
    * @var FrontendCacheService
    */
   static private $_instance;
@@ -65,8 +70,15 @@ class FrontendCacheService extends Component
   /**
    * @return void
    */
+  public function intercept() {
+    $this->_isIntercepted = true;
+  }
+
+  /**
+   * @return void
+   */
   public function onAfterRequest() {
-    if (is_null($this->_cacheKey)) {
+    if (is_null($this->_cacheKey) || $this->_isIntercepted) {
       return;
     }
 
@@ -136,7 +148,7 @@ class FrontendCacheService extends Component
    * @param string $key
    * @return Response|null
    */
-  protected function getCachedResponse(string $key) {
+  protected function getCachedResponse(string $key): ?Response {
     $cacheData = $this->getCacheData($key);
     if ($cacheData === false) {
       return null;
@@ -186,7 +198,7 @@ class FrontendCacheService extends Component
   /**
    * @return bool
    */
-  protected function isEnabled() {
+  protected function isEnabled(): bool {
     $request = Craft::$app->getRequest();
     if (
       $request->isCpRequest ||
@@ -249,7 +261,7 @@ class FrontendCacheService extends Component
   /**
    * @return FrontendCacheService
    */
-  public static function getInstance() {
+  public static function getInstance(): FrontendCacheService {
     if (!isset(self::$_instance)) {
       self::$_instance = new FrontendCacheService();
     }

@@ -36,7 +36,7 @@ class Extension extends AbstractExtension
   /**
    * @inheritdoc
    */
-  public function getFilters() {
+  public function getFilters(): array {
     return [
       new TwigFilter('encodeMail', [$this, 'getEncodedMail']),
       new TwigFilter('translations', [$this, 'getTranslations']),
@@ -46,11 +46,12 @@ class Extension extends AbstractExtension
   /**
    * @inheritdoc
    */
-  public function getFunctions() {
+  public function getFunctions(): array {
     return [
       new TwigFunction('commitHash', [$this, 'getCommitHash']),
       new TwigFunction('currentYear', [$this, 'getCurrentYear']),
       new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
+      new TwigFunction('interceptCache', [$this, 'interceptCache']),
       new TwigFunction('translations', [$this, 'getTranslations']),
     ];
   }
@@ -58,7 +59,7 @@ class Extension extends AbstractExtension
   /**
    * @return string
    */
-  public function getCommitHash() {
+  public function getCommitHash(): string {
     if (!isset($this->_commitHash)) {
       $this->_commitHash = ElementCache::with(self::CACHE_COMMIT, function() {
         try {
@@ -75,7 +76,7 @@ class Extension extends AbstractExtension
   /**
    * @return string
    */
-  public function getCurrentYear() {
+  public function getCurrentYear(): string {
     return date('Y');
   }
 
@@ -83,7 +84,7 @@ class Extension extends AbstractExtension
    * @param string $value
    * @return string
    */
-  public function getEncodedMail($value) {
+  public function getEncodedMail(string $value): string {
     if (!is_string($value)) {
       return $value;
     }
@@ -96,7 +97,7 @@ class Extension extends AbstractExtension
    * @param array $options
    * @return array
    */
-  public function getTranslations($element = null, array $options = []) {
+  public function getTranslations(ElementInterface $element = null, array $options = []): array {
     if (!($element instanceof ElementInterface)) {
       $element = Craft::$app->getUrlManager()->getMatchedElement();
     }
@@ -112,5 +113,12 @@ class Extension extends AbstractExtension
     }
 
     return $this->_translations[$id];
+  }
+
+  /**
+   * @return void
+   */
+  public function interceptCache() {
+    Plugin::getInstance()->frontendCache->intercept();
   }
 }
