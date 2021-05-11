@@ -4,7 +4,9 @@ namespace lenz\craft\essentials\services;
 
 use Craft;
 use craft\events\RegisterCpNavItemsEvent;
+use craft\web\Application;
 use craft\web\twig\variables\Cp;
+use yii\base\BaseObject;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -25,25 +27,31 @@ class RemoveDashboard extends Component
   public function __construct() {
     parent::__construct();
 
-    $request = Craft::$app->getRequest();
-    if ($request->getIsCpRequest()) {
-      if ($request->getSegment(1) == 'dashboard') {
-        Craft::$app->getResponse()->redirect('entries');
-      }
+    if (Craft::$app->getRequest()->getIsCpRequest()) {
+      Event::on(
+        Cp::class,
+        Cp::EVENT_REGISTER_CP_NAV_ITEMS,
+        function(RegisterCpNavItemsEvent $event) {
+          for ($index = 0; $index < count($event->navItems); $index++) {
+            if ($event->navItems[$index]['url'] == 'dashboard') {
+              array_splice($event->navItems, $index, 1);
+              break;
+            }
+          }
+        }
+      );
 
-      Event::on(Cp::class, Cp::EVENT_REGISTER_CP_NAV_ITEMS, [$this, 'onRegisterCpNavItems']);
-    }
-  }
-
-  /**
-   * @param RegisterCpNavItemsEvent $event
-   */
-  public function onRegisterCpNavItems(RegisterCpNavItemsEvent $event) {
-    for ($index = 0; $index < count($event->navItems); $index++) {
-      if ($event->navItems[$index]['url'] == 'dashboard') {
-        unset($event->navItems[$index]);
-        break;
-      }
+      Event::on(
+        Application::class,
+        Application::EVENT_BEFORE_ACTION,
+        function() {
+          $request = Craft::$app->getRequest();
+          if ($request->getSegment(1) == 'dashboard') {
+            $entries = (new Cp())->nav();
+            Craft::$app->getResponse()->redirect(reset($entries)['url']);
+          }
+        }
+      );
     }
   }
 
@@ -54,7 +62,7 @@ class RemoveDashboard extends Component
   /**
    * @return RemoveDashboard
    */
-  public static function getInstance() {
+  public static function getInstance(): RemoveDashboard {
     if (!isset(self::$_instance)) {
       self::$_instance = new RemoveDashboard();
     }
