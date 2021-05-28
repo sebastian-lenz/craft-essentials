@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\helpers\ArrayHelper;
+use craft\helpers\StringHelper;
 use Exception;
 use lenz\craft\essentials\services\gettext\Gettext;
 use lenz\craft\essentials\services\gettext\utils\PhpFunctionsScanner;
@@ -91,7 +92,7 @@ class ModulesSource extends AbstractSource
    * @return string|null
    */
   private function getModulePath(string $module): ?string {
-    $path = Craft::getAlias('@' . $module);
+    $path = Craft::getAlias('@' . StringHelper::camelCase($module));
     if (file_exists($path)) {
       return $path;
     }
