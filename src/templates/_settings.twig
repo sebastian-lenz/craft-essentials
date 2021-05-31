@@ -17,3 +17,12 @@
   options: settings.allLanguages,
   values: settings.disabledLanguages,
 }) }}
+
+<h3>Images</h3>
+
+{{ forms.lightswitchField({
+  errors: settings.getErrors('enableImageSharpening'),
+  label: 'Enable Image Sharpening',
+  name: 'enableImageSharpening',
+  on: settings.enableImageSharpening,
+}) }}

@@ -25,12 +25,18 @@ class Settings extends Model
    */
   public $enableLanguageRedirect = true;
 
+  /**
+   * @var bool
+   */
+  public $enableImageSharpening = false;
+
 
   /**
    * @inheritDoc
    */
   public function afterValidate() {
     $this->enableLanguageRedirect = !!$this->enableLanguageRedirect;
+    $this->enableImageSharpening = !!$this->enableImageSharpening;
 
     $this->cachedRoutes = is_array($this->cachedRoutes)
       ? $this->cachedRoutes
@@ -44,7 +50,7 @@ class Settings extends Model
   /**
    * @return array
    */
-  public function getAllLanguages() {
+  public function getAllLanguages(): array {
     $sites = Craft::$app->getSites()->getAllSites();
     $languages = [];
     $locales = Craft::$app->getI18n()->getAllLocales();

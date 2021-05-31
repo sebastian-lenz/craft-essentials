@@ -18,6 +18,7 @@ use yii\base\Event;
  * @property ElementCache $elementCache
  * @property services\frontendCache\FrontendCacheService $frontendCache
  * @property services\gettext\Gettext $gettext
+ * @property services\imageSharpener\ImageSharpener $imageSharpener
  * @property services\MailEncoder $mailEncoder
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
@@ -47,10 +48,11 @@ class Plugin extends \craft\base\Plugin
 
     $this->setComponents([
       'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
-      'imageCompressor'   => services\imageCompressor\ImageCompressor::getInstance(),
       'elementCache'      => ElementCache::getInstance(),
       'frontendCache'     => services\frontendCache\FrontendCacheService::getInstance(),
       'gettext'           => services\gettext\Gettext::class,
+      'imageCompressor'   => services\imageCompressor\ImageCompressor::getInstance(),
+      'imageSharpener'    => services\imageSharpener\ImageSharpener::getInstance(),
       'mailEncoder'       => services\MailEncoder::getInstance(),
       'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),
       'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
