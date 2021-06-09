@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\events;
 
 use craft\elements\Entry;
 use DateTime;
+use DateTimeZone;
 use Exception;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\frontendCache\FrontendCacheService;
@@ -43,18 +44,18 @@ class CacheDurationEvent extends Event
    * @throws Exception
    */
   private function getNextEntryChangeDate() {
-    $now = new DateTime();
-    $nowAtom = $now->format(DateTime::ATOM);
+    $now = (new DateTime('now', new DateTimeZone('UTC')))
+      ->format('Y-m-d H:i:s');
 
     $nextPost = Entry::find()
       ->status(null)
-      ->postDate("> {$nowAtom}")
+      ->postDate("> $now")
       ->orderBy('postDate')
       ->one();
 
     $nextExpiry = Entry::find()
       ->status(null)
-      ->expiryDate("> {$nowAtom}")
+      ->expiryDate("> $now")
       ->orderBy('expiryDate')
       ->one();
 
