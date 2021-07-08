@@ -30,6 +30,11 @@ class Settings extends Model
    */
   public $enableImageSharpening = false;
 
+  /**
+   * @var bool
+   */
+  public $enableWebp = false;
+
 
   /**
    * @inheritDoc
@@ -37,6 +42,7 @@ class Settings extends Model
   public function afterValidate() {
     $this->enableLanguageRedirect = !!$this->enableLanguageRedirect;
     $this->enableImageSharpening = !!$this->enableImageSharpening;
+    $this->enableWebp = !!$this->enableWebp;
 
     $this->cachedRoutes = is_array($this->cachedRoutes)
       ? $this->cachedRoutes

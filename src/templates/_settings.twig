@@ -26,3 +26,10 @@
   name: 'enableImageSharpening',
   on: settings.enableImageSharpening,
 }) }}
+
+{{ forms.lightswitchField({
+  errors: settings.getErrors('enableWebp'),
+  label: 'Enable automatic WebP transforms',
+  name: 'enableWebp',
+  on: settings.enableWebp,
+}) }}

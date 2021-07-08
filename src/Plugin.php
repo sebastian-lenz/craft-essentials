@@ -60,6 +60,7 @@ class Plugin extends \craft\base\Plugin
       'removeStopWords'   => services\RemoveStopWords::getInstance(),
       'translations'      => services\translations\Translations::class,
       'siteMap'           => services\siteMap\SiteMapService::getInstance(),
+      'webp'              => services\webp\Webp::getInstance(),
     ]);
 
     RegisterCpTemplates::register();
