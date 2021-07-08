@@ -2,11 +2,10 @@
 
 namespace lenz\craft\essentials\services\gettext\sources;
 
-use Gettext\Translation;
 use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
-use lenz\contentfield\models\schemas\TemplateSchema;
+use lenz\contentfield\models\schemas\AbstractSchemaContainer;
 use lenz\contentfield\Plugin;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
@@ -30,6 +29,7 @@ class ContentFieldSource extends AbstractSource
 
   /**
    * @param Translations $translations
+   * @param AbstractSchema $schema
    * @param AbstractField $field
    */
   private function extractField(Translations $translations, AbstractSchema $schema, AbstractField $field) {
@@ -51,10 +51,17 @@ class ContentFieldSource extends AbstractSource
     foreach ($schema->fields as $field) {
       $this->extractField($translations, $schema, $field);
     }
+
+    if ($schema instanceof AbstractSchemaContainer) {
+      foreach ($schema->getLocalStructures() as $structure) {
+        $this->extractSchema($translations, $structure);
+      }
+    }
   }
 
   /**
    * @param Translations $translations
+   * @param AbstractSchema $schema
    * @param SelectField $field
    */
   private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field) {
@@ -69,7 +76,7 @@ class ContentFieldSource extends AbstractSource
    * @param AbstractSchema $schema
    * @param string $original
    */
-  private function insert(Translations $translations, AbstractSchema $schema, $original) {
+  private function insert(Translations $translations, AbstractSchema $schema, string $original) {
     $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $result->addReference($schema->qualifier);
