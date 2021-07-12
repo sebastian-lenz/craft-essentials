@@ -74,9 +74,13 @@ class ContentFieldSource extends AbstractSource
   /**
    * @param Translations $translations
    * @param AbstractSchema $schema
-   * @param string $original
+   * @param mixed $original
    */
-  private function insert(Translations $translations, AbstractSchema $schema, string $original) {
+  private function insert(Translations $translations, AbstractSchema $schema, $original) {
+    if (!is_string($original) || empty($original)) {
+      return;
+    }
+
     $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $result->addReference($schema->qualifier);
