@@ -12,6 +12,7 @@ use craft\events\GenerateTransformEvent;
 use craft\helpers\FileHelper;
 use craft\models\AssetTransformIndex;
 use craft\services\AssetTransforms;
+use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\siteMap\SiteMapService;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -28,9 +29,13 @@ class Webp
 
 
   /**
-   * Webp constructor.
+   * @inheritDoc
    */
-  public function __construct() {
+  public function init() {
+    if (!Plugin::getInstance()->getSettings()->enableWebp) {
+      return;
+    }
+
     Event::on(
       AssetTransforms::class, AssetTransforms::EVENT_AFTER_DELETE_TRANSFORMS,
       [$this, 'onAfterDeleteTransforms']
