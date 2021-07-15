@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\utils;
 
 use Craft;
 use craft\fields\Matrix;
+use craft\services\Deprecator;
 use lenz\craft\utils\elementCache\ElementCache;
 
 /**
@@ -21,8 +22,10 @@ trait IdentifiersTrait
    * @param string $name
    * @return string|null
    */
-  public function getIdentifier($name) {
+  public function getIdentifier(string $name): ?string {
     self::loadIdentifiers();
+
+    Craft::$app->deprecator->log(self::class, 'Class IdentifiersTrait is deprecated.');
 
     return array_key_exists($name, self::$_identifiers)
       ? self::$_identifiers[$name]
