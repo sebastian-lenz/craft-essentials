@@ -13,6 +13,7 @@ use craft\models\AssetTransform;
 use craft\models\AssetTransformIndex;
 use craft\services\Assets;
 use craft\services\AssetTransforms;
+use lenz\craft\essentials\Plugin;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -28,12 +29,12 @@ class ImageCompressor extends Component
 
 
   /**
-   * ImageCompressor constructor.
-   *
-   * @param array $config
+   * @inheritDoc
    */
-  public function __construct($config = []) {
-    parent::__construct($config);
+  public function init() {
+    if (!Plugin::getInstance()->getSettings()->enableImageCompressor) {
+      return;
+    }
 
     Event::on(
       Asset::class,

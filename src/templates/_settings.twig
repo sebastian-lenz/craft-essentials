@@ -21,6 +21,13 @@
 <h3>Images</h3>
 
 {{ forms.lightswitchField({
+  errors: settings.getErrors('enableImageCompressor'),
+  label: 'Enable Image Compressor',
+  name: 'enableImageCompressor',
+  on: settings.enableImageCompressor,
+}) }}
+
+{{ forms.lightswitchField({
   errors: settings.getErrors('enableImageSharpening'),
   label: 'Enable Image Sharpening',
   name: 'enableImageSharpening',

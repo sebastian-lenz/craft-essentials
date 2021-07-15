@@ -28,6 +28,11 @@ class Settings extends Model
   /**
    * @var bool
    */
+  public $enableImageCompressor = true;
+
+  /**
+   * @var bool
+   */
   public $enableImageSharpening = false;
 
   /**
@@ -41,6 +46,7 @@ class Settings extends Model
    */
   public function afterValidate() {
     $this->enableLanguageRedirect = !!$this->enableLanguageRedirect;
+    $this->enableImageCompressor = !!$this->enableImageCompressor;
     $this->enableImageSharpening = !!$this->enableImageSharpening;
     $this->enableWebp = !!$this->enableWebp;
 
