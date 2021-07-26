@@ -1,0 +1,32 @@
+{% extends "_layouts/cp" %}
+
+{% set title = table ? table.label : 'Tables' %}
+{% set docTitle = title %}
+
+{% block actionButton %}
+  <input type="submit" class="btn submit" value="{{ "Save"|t('app') }}" />
+{% endblock %}
+
+{% block content %}
+  <style>
+    #global-footer { display: none; }
+    #main, #main-container, #main-content, #main-form, #content-container, #content { display: flex; flex-flow: column nowrap; align-items: stretch; flex-grow: 1; }
+    #main-content { padding-bottom: 24px; }
+    #content { padding: 0; }
+    #content-header { margin: 0; }
+    #content-frame { flex: 1; }
+  </style>
+
+  <iframe id="content-frame" src="{{ contentUrl }}"></iframe>
+
+  <script>
+    var submit = document.querySelector('#action-button input');
+    if (submit) {
+      submit.addEventListener('click', function(event) {
+        event.preventDefault();
+        var iframe = document.getElementById('content-frame');
+        iframe.contentWindow.postMessage('save-table', '*');
+      });
+    }
+  </script>
+{% endblock %}

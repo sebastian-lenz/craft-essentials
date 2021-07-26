@@ -1,0 +1,7 @@
+{% set selectizeOptions = {dropdownParent: 'body'}|merge(selectizeOptions ?? []) %}
+
+{% include '_includes/forms/select' with _context %}
+
+{% js %}
+  $("#{{ id|namespaceInputId|e('js') }}").selectize({{ selectizeOptions|json_encode|raw }});
+{% endjs %}

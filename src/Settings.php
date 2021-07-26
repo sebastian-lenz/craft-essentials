@@ -18,6 +18,11 @@ class Settings extends Model
   /**
    * @var string[]
    */
+  public $dataTables = [];
+
+  /**
+   * @var string[]
+   */
   public $disabledLanguages = [];
 
   /**
@@ -50,6 +55,8 @@ class Settings extends Model
     $this->enableImageSharpening = !!$this->enableImageSharpening;
     $this->enableWebp = !!$this->enableWebp;
 
+    $this->dataTables = self::parseList($this->dataTables);
+
     $this->cachedRoutes = is_array($this->cachedRoutes)
       ? $this->cachedRoutes
       : [];
@@ -61,6 +68,7 @@ class Settings extends Model
 
   /**
    * @return array
+   * @noinspection PhpUnused (Template helper)
    */
   public function getAllLanguages(): array {
     $sites = Craft::$app->getSites()->getAllSites();
@@ -83,5 +91,20 @@ class Settings extends Model
     }
 
     return $languages;
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param mixed $value
+   * @return array
+   */
+  static function parseList($value): array {
+    $list = is_array($value) ? $value : explode("\n", $value);
+    return array_filter(array_map(function($value) {
+      return trim($value);
+    }, $list));
   }
 }

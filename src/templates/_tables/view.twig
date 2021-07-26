@@ -1,0 +1,91 @@
+{% do view.registerAssetBundle("lenz\\craft\\essentials\\assets\\HandsontableAsset") %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Table</title>
+  <style>
+    html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font: inherit; vertical-align: baseline; }
+    article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+    body { line-height: 1; }
+    ol, ul { list-style: none; }
+    blockquote, q { quotes: none; }
+    blockquote:before, blockquote:after, q:before, q:after { content: none; }
+    table { border-collapse: separate; border-spacing: 0; }
+    a { text-decoration: none; }
+    button { -webkit-appearance: none; appearance: none; background-color: transparent; border: none; padding: 0; margin: 0; }
+    input, textarea { margin: 0; font-family: 'Lucida Grande', sans-serif; font-size: 100%; }
+    textarea { resize: vertical; }
+    select { margin: 0; }
+    body { width: 100vw; overflow-x: hidden; font-size: 14px; line-height: 20px; color: #3f4d5a; -webkit-font-smoothing: subpixel-antialiased; }
+    body, input, select, textarea { font-family: system-ui, BlinkMacSystemFont, -apple-system, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; }
+
+    body { margin: 0; padding: 0; }
+    #table { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <form id="table-form" method="post" url="{{ url }}">
+    {{ csrfInput() }}
+    <input id="table-data" name="table-data" type="hidden" value="{{ table.rows|json_encode }}" />
+  </form>
+
+  <div id="table"></div>
+
+  {{ endBody() }}
+
+  <script type="text/javascript">
+    (function() {
+      var form = document.getElementById('table-form');
+      var input = document.getElementById('table-data');
+      var element = document.getElementById('table');
+      if (!form || !input || !element) {
+        return;
+      }
+
+      var data = JSON.parse(input.value);
+      var settings = Object.assign({
+        allowInsertColumn: false,
+        allowRemoveColumn: false,
+        data: data,
+        minSpareRows: 1,
+        height: window.innerHeight,
+        width: window.innerWidth,
+
+        stretchH: 'all',
+        rowHeaders: true,
+        contextMenu: true,
+        filters: true,
+        dropdownMenu: true,
+
+        columnSorting: {
+          initialConfig: {
+            column: 0,
+            sortOrder: 'asc'
+          }
+        },
+
+        manualRowResize: true,
+        manualColumnResize: true
+      }, {{ table.jsOptions|json_encode|raw }});
+
+      var table = new Handsontable(element, settings);
+
+      window.addEventListener('resize', function() {
+        table.updateSettings({
+          height: window.innerHeight,
+          width: window.innerWidth
+        });
+      });
+
+      window.addEventListener('message', function(event) {
+        if (event.data === 'save-table') {
+          table.destroyEditor();
+          input.value = JSON.stringify(data);
+          form.submit();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

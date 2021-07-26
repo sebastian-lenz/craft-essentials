@@ -23,6 +23,7 @@ use yii\base\Event;
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
  * @property services\RemoveDashboard $removeDashboard
+ * @property services\tables\Service $tables
  * @property services\translations\Translations $translations
  * @property services\siteMap\SiteMapService $siteMap
  * @method Settings getSettings()
@@ -58,6 +59,7 @@ class Plugin extends \craft\base\Plugin
       'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
       'removeDashboard'   => services\RemoveDashboard::getInstance(),
       'removeStopWords'   => services\RemoveStopWords::getInstance(),
+      'tables'            => services\tables\Service::getInstance(),
       'translations'      => services\translations\Translations::class,
       'siteMap'           => services\siteMap\SiteMapService::getInstance(),
       'webp'              => services\webp\Webp::getInstance(),
@@ -78,7 +80,7 @@ class Plugin extends \craft\base\Plugin
   /**
    * @inheritdoc
    */
-  public function createSettingsModel() {
+  public function createSettingsModel(): Settings {
     return new Settings();
   }
 
@@ -90,7 +92,7 @@ class Plugin extends \craft\base\Plugin
    * @inheritdoc
    * @throws Throwable
    */
-  protected function settingsHtml() {
+  protected function settingsHtml(): ?string {
     return Craft::$app->view->renderTemplate(
       'lenz-craft-essentials/_settings',
       [

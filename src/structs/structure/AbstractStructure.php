@@ -41,13 +41,24 @@ abstract class AbstractStructure implements IteratorAggregate
    * @noinspection PhpUnused (Public API)
    */
   public function attachTo(AbstractStructureItem $parent, AbstractStructureItem $item): AbstractStructureItem {
-    $insertAt = $parent->nestedLft;
     $insertIndex = -1;
+    $children = $parent->getChildren();
 
-    foreach ($this->_items as $index => $existing) {
-      if ($existing->nestedLft == $insertAt) $insertIndex = $index;
-      if ($existing->nestedLft > $insertAt) $existing->nestedLft += 2;
-      if ($existing->nestedRgt > $insertAt) $existing->nestedRgt += 2;
+    if (count($children)) {
+      $lastChild = $children[count($children) - 1];
+      $insertAt = $lastChild->nestedRgt;
+      foreach ($this->_items as $index => $existing) {
+        if ($existing === $lastChild) $insertIndex = $index + 1;
+        if ($existing->nestedLft > $insertAt) $existing->nestedLft += 2;
+        if ($existing->nestedRgt > $insertAt) $existing->nestedRgt += 2;
+      }
+    } else {
+      $insertAt = $parent->nestedLft;
+      foreach ($this->_items as $index => $existing) {
+        if ($existing->nestedLft == $insertAt) $insertIndex = $index + 1;
+        if ($existing->nestedLft > $insertAt) $existing->nestedLft += 2;
+        if ($existing->nestedRgt > $insertAt) $existing->nestedRgt += 2;
+      }
     }
 
     $item->nestedLevel = $parent->nestedLevel + 1;
@@ -196,7 +207,7 @@ abstract class AbstractStructure implements IteratorAggregate
 
     foreach ($elements as $element) {
       $item = new $itemClass($this, $element);
-      $items[intval($item->id)] = $item;
+      $items[] = $item;
     }
 
     return $items;

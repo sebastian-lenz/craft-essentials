@@ -35,7 +35,7 @@ class SeoField extends ForeignField
    * @inheritDoc
    */
   public static function inputTemplate(): string {
-    return 'lenz-craft-essentials/_seo-field';
+    return 'lenz-craft-essentials/_seo/field';
   }
 
   /**
