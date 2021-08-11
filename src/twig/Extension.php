@@ -48,12 +48,42 @@ class Extension extends AbstractExtension
    */
   public function getFunctions(): array {
     return [
+      new TwigFunction('cx', [$this, 'getClassNames']),
       new TwigFunction('commitHash', [$this, 'getCommitHash']),
       new TwigFunction('currentYear', [$this, 'getCurrentYear']),
       new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
       new TwigFunction('interceptCache', [$this, 'interceptCache']),
       new TwigFunction('translations', [$this, 'getTranslations']),
     ];
+  }
+
+  /**
+   * @return string
+   */
+  public function getClassNames(): string {
+    $args = func_get_args();
+    $result = [];
+
+    foreach ($args as $arg) {
+      if (is_string($arg)) {
+        $arg = explode(' ', $arg);
+      }
+
+      if (!is_array($arg)) {
+        continue;
+      }
+
+      foreach ($arg as $key => $value) {
+        if (!$value) continue;
+        $className = is_numeric($key) ? $value : $key;
+
+        if (!empty($className) && !in_array($className, $result)) {
+          $result[] = $className;
+        }
+      }
+    }
+
+    return implode(' ', $result);
   }
 
   /**
