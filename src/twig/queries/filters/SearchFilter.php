@@ -3,12 +3,14 @@
 namespace lenz\craft\essentials\twig\queries\filters;
 
 use craft\elements\db\ElementQuery;
+use craft\helpers\Html;
+use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 
 /**
  * Class SearchFilter
  */
-class SearchFilter extends AbstractValueFilter
+class SearchFilter extends AbstractValueFilter implements DisplayInterface
 {
   /**
    * @var string|null
@@ -20,6 +22,13 @@ class SearchFilter extends AbstractValueFilter
    */
   const NAME = 'q';
 
+
+  /**
+   * @inheritDoc
+   */
+  public function display(array $variables = []) {
+    echo Html::input('search', $this->getName(), $this->getValue());
+  }
 
   /**
    * @inheritDoc
