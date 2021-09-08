@@ -5,9 +5,11 @@ namespace lenz\craft\essentials\twig;
 use Craft;
 use craft\base\ElementInterface;
 use Exception;
+use lenz\craft\essentials\helpers\ElementHelper;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\MailEncoder;
 use lenz\craft\utils\elementCache\ElementCache;
+use lenz\craft\utils\models\Attributes;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -38,6 +40,7 @@ class Extension extends AbstractExtension
    */
   public function getFilters(): array {
     return [
+      new TwigFilter('eagerLoad', [ElementHelper::class, 'eagerLoad']),
       new TwigFilter('encodeMail', [$this, 'getEncodedMail']),
       new TwigFilter('translations', [$this, 'getTranslations']),
     ];
@@ -53,6 +56,7 @@ class Extension extends AbstractExtension
       new TwigFunction('currentYear', [$this, 'getCurrentYear']),
       new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
       new TwigFunction('interceptCache', [$this, 'interceptCache']),
+      new TwigFunction('toAttributes', [$this, 'toAttributes']),
       new TwigFunction('translations', [$this, 'getTranslations']),
     ];
   }
@@ -150,5 +154,13 @@ class Extension extends AbstractExtension
    */
   public function interceptCache() {
     Plugin::getInstance()->frontendCache->intercept();
+  }
+
+  /**
+   * @param array $value
+   * @return Attributes
+   */
+  public function toAttributes(array $value = []): Attributes {
+    return new Attributes($value);
   }
 }
