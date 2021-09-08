@@ -3,7 +3,6 @@
 namespace lenz\craft\essentials\services\gettext;
 
 use Craft;
-use craft\helpers\ArrayHelper;
 use craft\helpers\FileHelper;
 use craft\models\Site;
 use Gettext\Merge;
@@ -60,6 +59,7 @@ class Gettext extends Component
   /**
    * @param string $handle
    * @param AbstractSource $source
+   * @noinspection PhpUnused Public API
    */
   public function addSource(string $handle, AbstractSource $source) {
     if (!isset($this->_sources)) {
@@ -82,7 +82,7 @@ class Gettext extends Component
   /**
    * @return Translations
    */
-  public function extract() {
+  public function extract(): Translations {
     $translations = new Translations();
     foreach ($this->getSources() as $source) {
       $source->extract($translations);
@@ -103,7 +103,7 @@ class Gettext extends Component
   /**
    * @return AbstractSource[]
    */
-  public function getSources() {
+  public function getSources(): array {
     if (!isset($this->_sources)) {
       $this->_sources = [
         'cp-fields'   => new sources\CpFieldsSource($this),
@@ -123,10 +123,10 @@ class Gettext extends Component
   }
 
   /**
-   * @param string $fileName
+   * @param string $path
    * @return bool
    */
-  public function isFileExcluded(string $path) {
+  public function isFileExcluded(string $path): bool {
     $result = !FileHelper::filterPath($path, [
       'basePath' => $this->basePath,
       'except' => $this->excludeFiles,
@@ -154,7 +154,7 @@ class Gettext extends Component
    * @param array $options
    * @return $this
    */
-  public function setOptions(array $options) {
+  public function setOptions(array $options): Gettext {
     Yii::configure($this, $options);
     return $this;
   }
@@ -200,14 +200,14 @@ class Gettext extends Component
    * @param Site $site
    * @return string
    */
-  private function getSiteTranslationPath(Site $site) {
+  private function getSiteTranslationPath(Site $site): string {
     $path = Craft::getAlias(implode(
       DIRECTORY_SEPARATOR,
       ['@root', 'translations', $site->language]
     ));
 
     if (!file_exists($path)) {
-      mkdir($path);
+      mkdir($path, 0777, true);
     }
 
     return $path;
@@ -217,7 +217,7 @@ class Gettext extends Component
    * @param Site $site
    * @return string
    */
-  private function getSiteTranslationSource(Site $site) {
+  private function getSiteTranslationSource(Site $site): string {
     return Craft::getAlias(implode(
       DIRECTORY_SEPARATOR,
       ['@root', 'translations', $site->language . '.po']
@@ -230,7 +230,7 @@ class Gettext extends Component
    * @param string $path
    * @return Translations
    */
-  private function merge(Translations $translations, Site $site, string $path) {
+  private function merge(Translations $translations, Site $site, string $path): Translations {
     $translations = $translations->clone();
 
     foreach (scandir($path) as $existingName) {
@@ -309,7 +309,7 @@ class Gettext extends Component
    * @param string $type
    * @param string $name
    */
-  static function printSource($type, $name) {
+  static function printSource(string $type, string $name) {
     echo ' - ' . ucfirst($type) . ' `' . $name . "`\n";
   }
 }

@@ -31,7 +31,7 @@ class Translations extends Component
    * @param string $language
    * @return Site|null
    */
-  public function getEnabledSite($language) {
+  public function getEnabledSite(string $language): ?Site {
     foreach ($this->getEnabledSites() as $site) {
       if ($site->language == $language) {
         return $site;
@@ -44,7 +44,7 @@ class Translations extends Component
   /**
    * @return Site[]
    */
-  public function getEnabledSites() {
+  public function getEnabledSites(): array {
     if (!isset($this->_enabledSites)) {
       $settings = Plugin::getInstance()->getSettings();
       $disabledLanguages = $settings->disabledLanguages;
@@ -70,10 +70,9 @@ class Translations extends Component
 
   /**
    * @param ElementInterface|null $element
-   * @param array $options
    * @return array
    */
-  public function getTranslations($element = null, array $options = []) {
+  public function getTranslations(ElementInterface $element = null): array {
     $sites = $this->getEnabledSites();
     $translations = $element instanceof ElementInterface
       ? $this->loadTranslations($element)
@@ -109,7 +108,7 @@ class Translations extends Component
    * @param ElementInterface $element
    * @return ElementInterface[]
    */
-  public function loadTranslations(ElementInterface $element) {
+  public function loadTranslations(ElementInterface $element): array {
     foreach (AbstractLoader::getLoaders() as $loader) {
       $result = $loader->load($element);
       if ($result !== false) {

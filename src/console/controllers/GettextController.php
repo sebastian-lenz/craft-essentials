@@ -33,7 +33,7 @@ class GettextController extends Controller
    *
    * @param string $ignore
    */
-  public function actionExtract($ignore = '') {
+  public function actionExtract(string $ignore = '') {
     $excludeLanguages = empty($ignore)
       ? $this->excludeLanguages
       : explode(',', $ignore);
@@ -49,7 +49,7 @@ class GettextController extends Controller
   /**
    * @inheritDoc
    */
-  public function options($actionID) {
+  public function options($actionID): array {
     if ($actionID == 'extract') {
       return ['excludeFiles', 'excludeLanguages'];
     }

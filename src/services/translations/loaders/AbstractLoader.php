@@ -11,7 +11,7 @@ abstract class AbstractLoader
 {
   /**
    * @param ElementInterface $element
-   * @return ElementInterface[]
+   * @return ElementInterface[]|false
    */
   abstract public function load(ElementInterface $element);
 

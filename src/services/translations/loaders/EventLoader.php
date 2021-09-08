@@ -13,8 +13,7 @@ use Solspace\Calendar\Elements\Event;
 class EventLoader extends AbstractLoader
 {
   /**
-   * @param ElementInterface $element
-   * @return false|ElementInterface[]
+   * @inheritDoc
    */
   public function load(ElementInterface $element) {
     if (!($element instanceof Event)) {

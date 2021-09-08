@@ -11,8 +11,7 @@ use craft\elements\Entry;
 class EntryLoader extends AbstractLoader
 {
   /**
-   * @param ElementInterface $element
-   * @return false|ElementInterface[]
+   * @inheritDoc
    */
   public function load(ElementInterface $element) {
     if (!($element instanceof Entry)) {
