@@ -13,13 +13,17 @@ class ElementHelper extends \craft\helpers\ElementHelper
   /**
    * @param ElementInterface $element
    * @param string $attribute
-   * @return ElementInterface[]|null
+   * @return ElementInterface[]
    */
-  static public function eagerLoad(ElementInterface $element, string $attribute): ?array {
+  static public function eagerLoad(ElementInterface $element, string $attribute): array {
     $result = $element->$attribute;
-    if ($result instanceof ElementQuery) {
-      $result = $result->all();
-      $element->setEagerLoadedElements($attribute, $result);
+    if (!is_array($result)) {
+      if ($result instanceof ElementQuery) {
+        $result = $result->all();
+        $element->setEagerLoadedElements($attribute, $result);
+      } else {
+        $result = [];
+      }
     }
 
     return $result;
