@@ -127,18 +127,21 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @param ElementInterface|null $element
+   * @param mixed $element
    * @param array $options
    * @return array
    */
-  public function getTranslations(ElementInterface $element = null, array $options = []): array {
+  public function getTranslations($element = null, array $options = []): array {
     if (!($element instanceof ElementInterface)) {
       $element = Craft::$app->getUrlManager()->getMatchedElement();
     }
 
-    $id = $element instanceof ElementInterface
-      ? $element->getId()
-      : '*';
+    if ($element instanceof ElementInterface) {
+      $id = $element->getId();
+    } else {
+      $element = null;
+      $id = '*';
+    }
 
     if (!isset($this->_translations[$id])) {
       $this->_translations[$id] = Plugin::getInstance()
