@@ -5,7 +5,9 @@ namespace lenz\craft\essentials\services\imageCompressor\jobs;
 use Craft;
 use craft\elements\Asset;
 use craft\errors\AssetLogicException;
+use craft\errors\AssetTransformException;
 use craft\models\AssetTransformIndex;
+use craft\volumes\Local;
 
 /**
  * Class AssetJob
@@ -25,6 +27,11 @@ class TransformIndexJob extends AbstractJob
   /**
    * @var string|null
    */
+  private $_fileName;
+
+  /**
+   * @var string|null
+   */
   private $_format;
 
   /**
@@ -40,8 +47,12 @@ class TransformIndexJob extends AbstractJob
    * @inheritDoc
    */
   protected function getFileName() {
-    $index = $this->getTransformIndex();
-    return is_null($index) ? null : $index->filename;
+    if (!isset($this->_fileName)) {
+      $index = $this->getTransformIndex();
+      $this->_fileName = self::resolveTransformFileName($index);
+    }
+
+    return $this->_fileName;
   }
 
   /**
@@ -100,5 +111,37 @@ class TransformIndexJob extends AbstractJob
     return $this->_transformIndex = Craft::$app
       ->assetTransforms
       ->getTransformIndexModelById($this->transformIndexId);
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param AssetTransformIndex|null $index
+   * @return string|null
+   */
+  static public function resolveTransformFileName(?AssetTransformIndex $index, ?Asset $asset = null): ?string {
+    if (is_null($index)) {
+      return null;
+    }
+
+    if (!empty($index->filename)) {
+      return $index->filename;
+    }
+
+    $asset = $asset ?? Craft::$app->getAssets()->getAssetById($index->assetId);
+    $volume = $asset->getVolume();
+    if (!($volume instanceof Local)) {
+      return null;
+    }
+
+    $transforms = Craft::$app->getAssetTransforms();
+
+    return implode('', [
+      $volume->getRootPath(), DIRECTORY_SEPARATOR,
+      $asset->folderPath,
+      $transforms->getTransformSubpath($asset, $index)
+    ]);
   }
 }

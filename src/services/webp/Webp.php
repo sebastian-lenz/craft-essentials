@@ -12,15 +12,18 @@ use craft\events\GenerateTransformEvent;
 use craft\helpers\FileHelper;
 use craft\models\AssetTransformIndex;
 use craft\services\AssetTransforms;
+use craft\volumes\Local;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
 use lenz\craft\essentials\services\siteMap\SiteMapService;
+use yii\base\Component;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 
 /**
  * Class WebP
  */
-class Webp
+class Webp extends Component
 {
   /**
    * @var Webp
@@ -49,15 +52,16 @@ class Webp
 
   /**
    * @param Asset $asset
-   * @param AssetTransformIndex $transformIndex
-   * @return string
+   * @param AssetTransformIndex $index
+   * @return string|null
    */
-  public function getWebpPath(Asset $asset, AssetTransformIndex $transformIndex): string {
-    return implode('', [
-      $asset->folderPath,
-      Craft::$app->assetTransforms->getTransformSubpath($asset, $transformIndex),
-      '.webp'
-    ]);
+  public function getWebpPath(Asset $asset, AssetTransformIndex $index): ?string {
+    $fileName = TransformIndexJob::resolveTransformFileName($index, $asset);
+    if (is_null($fileName)) {
+      return null;
+    }
+
+    return $fileName . '.webp';
   }
 
   /**
@@ -84,21 +88,11 @@ class Webp
     $asset = $event->asset;
     $index = $event->transformIndex;
     $transformPath = $this->getWebpPath($asset, $index);
-
-    $tempFilename = uniqid(pathinfo($index->filename, PATHINFO_FILENAME), true) . '.webp';
-    $tempPath = Craft::$app->getPath()->getTempPath() . DIRECTORY_SEPARATOR . $tempFilename;
-    $event->image->saveAs($tempPath);
-
-    clearstatcache(true, $tempPath);
-    $stream = fopen($tempPath, 'rb');
-
-    try {
-      $asset->getVolume()->createFileByStream($transformPath, $stream, []);
-    } catch (VolumeObjectExistsException $e) {
-      // We're fine with that.
+    if (is_null($transformPath)) {
+      return;
     }
 
-    FileHelper::unlink($tempPath);
+    $event->image->saveAs($transformPath);
   }
 
 
