@@ -92,6 +92,11 @@ class Webp extends Component
       return;
     }
 
+    $dir = dirname($transformPath);
+    if (!file_exists($dir)) {
+      mkdir($dir, 0777, true);
+    }
+
     $event->image->saveAs($transformPath);
   }
 

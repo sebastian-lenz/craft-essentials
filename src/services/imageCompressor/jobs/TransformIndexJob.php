@@ -126,17 +126,12 @@ class TransformIndexJob extends AbstractJob
       return null;
     }
 
-    if (!empty($index->filename)) {
-      return $index->filename;
-    }
-
+    $transforms = Craft::$app->getAssetTransforms();
     $asset = $asset ?? Craft::$app->getAssets()->getAssetById($index->assetId);
     $volume = $asset->getVolume();
     if (!($volume instanceof Local)) {
       return null;
     }
-
-    $transforms = Craft::$app->getAssetTransforms();
 
     return implode('', [
       $volume->getRootPath(), DIRECTORY_SEPARATOR,
