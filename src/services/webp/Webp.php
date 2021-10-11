@@ -54,6 +54,7 @@ class Webp extends Component
    * @param Asset $asset
    * @param AssetTransformIndex $index
    * @return string|null
+   * @throws InvalidConfigException
    */
   public function getWebpPath(Asset $asset, AssetTransformIndex $index): ?string {
     $fileName = TransformIndexJob::resolveTransformFileName($index, $asset);
@@ -81,7 +82,6 @@ class Webp extends Component
   /**
    * @param GenerateTransformEvent $event
    * @throws InvalidConfigException
-   * @throws VolumeException
    * @throws ImageException
    */
   public function onGenerateTransform(GenerateTransformEvent $event) {

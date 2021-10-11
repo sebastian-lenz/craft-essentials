@@ -8,6 +8,7 @@ use craft\errors\AssetLogicException;
 use craft\errors\AssetTransformException;
 use craft\models\AssetTransformIndex;
 use craft\volumes\Local;
+use yii\base\InvalidConfigException;
 
 /**
  * Class AssetJob
@@ -119,7 +120,9 @@ class TransformIndexJob extends AbstractJob
 
   /**
    * @param AssetTransformIndex|null $index
+   * @param Asset|null $asset
    * @return string|null
+   * @throws InvalidConfigException
    */
   static public function resolveTransformFileName(?AssetTransformIndex $index, ?Asset $asset = null): ?string {
     if (is_null($index)) {
