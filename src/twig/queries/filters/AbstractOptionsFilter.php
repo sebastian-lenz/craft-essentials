@@ -14,6 +14,11 @@ use lenz\craft\essentials\twig\queries\options\OptionInterface;
 abstract class AbstractOptionsFilter extends AbstractValueFilter implements DisplayInterface
 {
   /**
+   * @var string
+   */
+  public $displayFormat = '"%s"';
+
+  /**
    * @var string[]|int[]|null
    */
   protected $_customValues = null;
@@ -67,7 +72,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
     $result = [];
     foreach ($this->getOptions() as $option) {
       if (in_array($option->value, $selectedIds)) {
-        $result[] = '"' . $option->title . '"';
+        $result[] = sprintf($this->displayFormat, $option->title);
       }
     }
 
