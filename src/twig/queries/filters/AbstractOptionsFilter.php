@@ -103,8 +103,8 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
     if (is_null($this->_customValues)) {
       return null;
     }
-    
-    $vales = array_map('urlencode', $this->_customValues);
+
+    $values = array_map('urlencode', $this->_customValues);
     return new UrlParameter(implode(static::GLUE, $values));
   }
 
