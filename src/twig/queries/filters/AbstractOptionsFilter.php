@@ -7,6 +7,7 @@ use craft\helpers\Html;
 use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\options\Option;
 use lenz\craft\essentials\twig\queries\options\OptionInterface;
+use lenz\craft\utils\models\UrlParameter;
 
 /**
  * Class AbstractOptionsFilter
@@ -98,10 +99,13 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @return string|null
    */
-  public function getValue() : ?string {
-    return is_null($this->_customValues)
-      ? null
-      : implode(static::GLUE, $this->_customValues);
+  public function getValue() : ?UrlParameter {
+    if (is_null($this->_customValues)) {
+      return null;
+    }
+    
+    $vales = array_map('urlencode', $this->_customValues);
+    return new UrlParameter(implode(static::GLUE, $values));
   }
 
   /**
@@ -123,8 +127,11 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
    * @param OptionInterface $option
    * @return bool
    */
-  public function isSelected(OptionInterface $option) {
-    return in_array($option->getOptionValue(), $this->getSelectedValues());
+  public function isSelected(OptionInterface $option): bool {
+    $value = $option->getOptionValue();
+    $selected = $this->getSelectedValues();
+
+    return in_array($value, $selected) || (empty($value) && empty($selected));
   }
 
   /**

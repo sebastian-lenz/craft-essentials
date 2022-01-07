@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\twig\queries\filters;
 
 use craft\web\Request;
+use lenz\craft\utils\models\UrlParameter;
 
 /**
  * Class AbstractValueFilter
@@ -34,9 +35,9 @@ abstract class AbstractValueFilter extends AbstractFilter
   }
 
   /**
-   * @return string|null
+   * @return string|UrlParameter|null
    */
-  public function getValue() : ?string {
+  public function getValue() {
     return null;
   }
 

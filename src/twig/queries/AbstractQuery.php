@@ -10,6 +10,7 @@ use craft\web\Request;
 use lenz\craft\essentials\twig\queries\displays\ToolbarDisplay;
 use lenz\craft\essentials\twig\queries\displays\PaginationDisplay;
 use lenz\craft\essentials\twig\queries\filters\AbstractFilter;
+use lenz\craft\utils\models\Url;
 use Throwable;
 use yii\base\BaseObject;
 
@@ -186,7 +187,7 @@ abstract class AbstractQuery extends BaseObject
    * @return string
    */
   public function getUrl($overrides = [], $params = []) {
-    return UrlHelper::url(
+    return Url::compose(
       $this->getBasePath(),
       $this->getParameters($overrides, $params)
     );
