@@ -8,6 +8,7 @@ use lenz\contentfield\models\schemas\AbstractSchema;
 use lenz\contentfield\models\schemas\AbstractSchemaContainer;
 use lenz\contentfield\Plugin;
 use lenz\craft\essentials\services\gettext\utils\Translations;
+use lenz\craft\essentials\services\gettext\utils\UntranslatedModel;
 
 /**
  * Class ContentFieldSource
@@ -66,6 +67,10 @@ class ContentFieldSource extends AbstractSource
    */
   private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field) {
     $enumeration = $field->getEnumeration();
+    if ($enumeration instanceof UntranslatedModel) {
+      return;
+    }
+
     foreach ($enumeration->getOptions() as $option) {
       $this->insert($translations, $schema, $option['label']);
     }

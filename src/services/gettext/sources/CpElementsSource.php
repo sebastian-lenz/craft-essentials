@@ -3,7 +3,6 @@
 namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
-use craft\base\Field;
 use craft\models\Section;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
@@ -47,10 +46,10 @@ class CpElementsSource extends AbstractSource
 
   /**
    * @param Translations $translations
-   * @param Field $field
+   * @param string $hint
    * @param string $original
    */
-  private function insert(Translations $translations, string $hint, $original) {
+  private function insert(Translations $translations, string $hint, string $original) {
     $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $result->addReference($hint);

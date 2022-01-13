@@ -4,12 +4,16 @@ namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
 use craft\base\Field;
+use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
+use craft\fieldlayoutelements\Heading;
+use craft\fieldlayoutelements\Tip;
 use craft\fields\BaseOptionsField;
 use craft\fields\Matrix;
-use craft\records\FieldLayoutTab;
+use craft\models\FieldLayoutTab;
+use craft\records\FieldLayoutTab as FieldLayoutTabRecord;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
@@ -21,8 +25,8 @@ class CpFieldsSource extends AbstractSource
    * @inheritDoc
    */
   public function extract(Translations $translations) {
-    foreach (FieldLayoutTab::find()->all() as $tab) {
-      $this->insert($translations, $this->getTabHint($tab), $tab->name);
+    foreach (FieldLayoutTabRecord::find()->all() as $tab) {
+      $this->extractFieldLayoutTab($translations, $tab);
     }
 
     foreach (Craft::$app->getFields()->getAllFields(false) as $field) {
@@ -45,9 +49,9 @@ class CpFieldsSource extends AbstractSource
 
   /**
    * @param Translations $translations
-   * @param Field $field
+   * @param FieldInterface $field
    */
-  private function extractField(Translations $translations, Field $field) {
+  private function extractField(Translations $translations, FieldInterface $field) {
     $this->insert($translations, $field, $field->name);
     $this->insert($translations, $field, $field->instructions);
 
@@ -55,6 +59,28 @@ class CpFieldsSource extends AbstractSource
       $this->extractBaseOptionsField($translations, $field);
     } elseif ($field instanceof Matrix) {
       $this->extractMatrixField($translations, $field);
+    }
+  }
+
+  /**
+   * @param Translations $translations
+   * @param FieldLayoutTabRecord $record
+   * @return void
+   */
+  private function extractFieldLayoutTab(Translations $translations, FieldLayoutTabRecord $record) {
+    $hint = $this->getTabHint($record);
+    $this->insert($translations, $hint, $record->name);
+
+    $model = FieldLayoutTab::createFromConfig($record->getAttributes([
+      'id', 'layoutId', 'name', 'elements', 'sortOrder', 'uid'
+    ]));
+
+    foreach ($model->elements as $element) {
+      if ($element instanceof Heading) {
+        $this->insert($translations, $hint, $element->heading);
+      } elseif ($element instanceof Tip) {
+        $this->insert($translations, $hint, $element->tip);
+      }
     }
   }
 
@@ -73,12 +99,12 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTab $tab
+   * @param FieldLayoutTabRecord $record
    * @return string
    */
-  private function getAssetTabHint(FieldLayoutTab $tab) {
+  private function getAssetTabHint(FieldLayoutTabRecord $record): string {
     foreach (Craft::$app->getVolumes()->getAllVolumes() as $volume) {
-      if ($volume->fieldLayoutId == $tab->layoutId) {
+      if ($volume->fieldLayoutId == $record->layoutId) {
         return 'tab/volume/' . $volume->handle;
       }
     }
@@ -87,12 +113,12 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTab $tab
+   * @param FieldLayoutTabRecord $record
    * @return string
    */
-  private function getCategoryTabHint(FieldLayoutTab $tab) {
+  private function getCategoryTabHint(FieldLayoutTabRecord $record): string {
     foreach (Craft::$app->getCategories()->getAllGroups() as $group) {
-      if ($group->fieldLayoutId == $tab->layoutId) {
+      if ($group->fieldLayoutId == $record->layoutId) {
         return 'tab/category/' . $group->handle;
       }
     }
@@ -101,13 +127,13 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTab $tab
+   * @param FieldLayoutTabRecord $record
    * @return string
    */
-  private function getEntryTabHint(FieldLayoutTab $tab) {
+  private function getEntryTabHint(FieldLayoutTabRecord $record): string {
     foreach (Craft::$app->getSections()->getAllSections() as $section)
     foreach ($section->entryTypes as $entryType) {
-      if ($entryType->fieldLayoutId == $tab->layoutId) {
+      if ($entryType->fieldLayoutId == $record->layoutId) {
         return 'tab/entry/' . $section->handle . '/' . $entryType->handle;
       }
     }
@@ -116,18 +142,19 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTab $tab
+   * @param FieldLayoutTabRecord $record
    * @return string
    */
-  private function getTabHint(FieldLayoutTab $tab) {
-    $layout = $tab->layout;
+  private function getTabHint(FieldLayoutTabRecord $record): string {
+    $layout = $record->layout;
+
     switch ($layout ? $layout->type : null) {
       case Asset::class:
-        return $this->getAssetTabHint($tab);
+        return $this->getAssetTabHint($record);
       case Category::class:
-        return $this->getCategoryTabHint($tab);
+        return $this->getCategoryTabHint($record);
       case Entry::class:
-        return $this->getEntryTabHint($tab);
+        return $this->getEntryTabHint($record);
     }
 
     return 'tab';
@@ -135,14 +162,16 @@ class CpFieldsSource extends AbstractSource
 
   /**
    * @param Translations $translations
-   * @param Field|null $field
+   * @param Field|FieldInterface|string $fieldOrHint
    * @param string|null|mixed $original
    */
   private function insert(Translations $translations, $fieldOrHint, $original) {
     $result = $translations->insertCp($original);
+
     if (!is_null($result)) {
       $reference = 'craft:fields';
-      if ($fieldOrHint instanceof Field) {
+
+      if ($fieldOrHint instanceof FieldInterface) {
         $reference .= '/' . $fieldOrHint->handle;
       } elseif (is_string($fieldOrHint)) {
         $reference .= '/' . $fieldOrHint;

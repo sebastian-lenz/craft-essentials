@@ -107,6 +107,7 @@ class Gettext extends Component
     if (!isset($this->_sources)) {
       $this->_sources = [
         'cp-fields'   => new sources\CpFieldsSource($this),
+        'cp-element-indexes' => new sources\CpElementIndexesSource($this),
         'cp-elements' => new sources\CpElementsSource($this),
         'modules'     => new sources\ModulesSource($this),
         'templates'   => new sources\TemplatesSource($this),
