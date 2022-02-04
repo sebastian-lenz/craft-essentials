@@ -3,12 +3,20 @@
 namespace lenz\craft\essentials\services\redirectNotFound;
 
 use Craft;
+use craft\base\Element;
+use craft\base\ElementInterface;
+use craft\db\Query;
+use craft\db\Table;
+use craft\events\ElementEvent;
 use craft\events\ExceptionEvent;
+use craft\services\Elements;
 use craft\services\Plugins;
 use craft\web\ErrorHandler;
+use lenz\craft\essentials\records\UriHistoryRecord;
 use lenz\craft\essentials\services\redirectNotFound\redirects\AbstractRedirect;
 use yii\base\Component;
 use yii\base\Event;
+use yii\base\ModelEvent;
 use yii\web\HttpException;
 
 /**
@@ -29,6 +37,8 @@ class RedirectNotFound extends Component
     parent::__construct();
 
     Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, [$this, 'onAfterLoadPlugins']);
+    Event::on(Element::class, Element::EVENT_BEFORE_SAVE, [$this, 'onBeforeElementSave']);
+    Event::on(Elements::class, Elements::EVENT_BEFORE_UPDATE_SLUG_AND_URI, [$this, 'onBeforeUpdateSlug']);
   }
 
   /**
@@ -65,6 +75,49 @@ class RedirectNotFound extends Component
     }
   }
 
+  /**
+   * @param ModelEvent $event
+   */
+  public function onBeforeElementSave(ModelEvent $event) {
+    $element = $event->sender;
+    if (!($element instanceof Element) || empty($event->sender->id) || empty($element->uri)) {
+      return;
+    }
+
+    $state = (object)['uri' => $element->uri];
+    $state->handler = function(ModelEvent $event) use ($state) {
+      $element = $event->sender;
+      $element->off(Element::EVENT_AFTER_SAVE, $state->handler);
+      if ($element instanceof Element && $element->uri !== $state->uri) {
+        $this->storeUriHistory($element, $state->uri, $element->uri);
+      }
+    };
+
+    $element->on(Element::EVENT_AFTER_SAVE, $state->handler);
+  }
+
+  /**
+   * @param ElementEvent $event
+   */
+  public function onBeforeUpdateSlug(ElementEvent $event) {
+    $element = $event->element;
+    if (empty($element->uri)) {
+      return;
+    }
+
+    $oldUri = (new Query())
+      ->select('uri')
+      ->from(Table::ELEMENTS_SITES)
+      ->where([
+        'elementId' => $element->id,
+        'siteId' => $element->siteId,
+      ])->scalar();
+
+    if (!empty($oldUri) && $oldUri !== $element->uri) {
+      $this->storeUriHistory($element, $oldUri, $element->uri);
+    }
+  }
+
 
   // Private methods
   // ---------------
@@ -82,6 +135,24 @@ class RedirectNotFound extends Component
     }
 
     return false;
+  }
+
+  /**
+   * @param ElementInterface $element
+   * @param string $oldUri
+   * @param string $newUri
+   */
+  private function storeUriHistory(ElementInterface $element, string $oldUri, string $newUri) {
+    UriHistoryRecord::deleteAll([
+      'siteId' => $element->siteId,
+      'uri' => [$oldUri, $newUri],
+    ]);
+
+    (new UriHistoryRecord([
+      'elementId' => $element->id,
+      'siteId' => $element->siteId,
+      'uri' => $oldUri,
+    ]))->save();
   }
 
 

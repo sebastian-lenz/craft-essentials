@@ -48,6 +48,7 @@ abstract class AbstractRedirect
    */
   static public function getRedirects(): array {
     $result  = [
+      new UriHistoryRedirect(),
       new SiteMapRedirect(),
     ];
 

@@ -2,11 +2,13 @@
 
 namespace lenz\craft\essentials\fields\seo;
 
+use Craft;
 use craft\base\ElementInterface;
 use craft\helpers\Html;
 use craft\helpers\Template;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\utils\foreignField\ForeignFieldModel;
+use Twig\Markup;
 use yii\base\InvalidConfigException;
 use yii\behaviors\AttributeTypecastBehavior;
 
@@ -21,12 +23,12 @@ class SeoModel extends ForeignFieldModel
   public $enabled;
 
   /**
-   * @var string
+   * @var string|null
    */
   public $description;
 
   /**
-   * @var string
+   * @var string|null
    */
   public $keywords;
 
@@ -36,9 +38,9 @@ class SeoModel extends ForeignFieldModel
    */
   public function getAttributeLabel($attribute): string {
     switch ($attribute) {
-      case 'enabled': return \Craft::t('lenz-craft-essentials', 'List this page in the search engine sitemap');
-      case 'description': return \Craft::t('lenz-craft-essentials', 'Description');
-      case 'keywords': return \Craft::t('lenz-craft-essentials', 'Keywords');
+      case 'enabled': return Craft::t('lenz-craft-essentials', 'List this page in the search engine sitemap');
+      case 'description': return Craft::t('lenz-craft-essentials', 'Description');
+      case 'keywords': return Craft::t('lenz-craft-essentials', 'Keywords');
     }
 
     return parent::getAttributeLabel($attribute);
@@ -93,14 +95,14 @@ class SeoModel extends ForeignFieldModel
   /**
    * @return string
    */
-  public function getMetaDescription(): string {
+  public function getMetaDescription(): ?string {
     return $this->description;
   }
 
   /**
    * @return string
    */
-  public function getMetaKeywords(): string {
+  public function getMetaKeywords(): ?string {
     return $this->keywords;
   }
 
@@ -122,10 +124,10 @@ class SeoModel extends ForeignFieldModel
   }
 
   /**
-   * @return string
+   * @return Markup
    * @throws InvalidConfigException
    */
-  public function getHeaderTags(): string {
+  public function getHeaderTags(): Markup {
     return Template::raw(implode("\n  ",
       $this->getCanonicalTags() +
       $this->getMetaTags()
