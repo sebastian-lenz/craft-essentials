@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\services\siteMap;
 
 use craft\helpers\Html;
+use lenz\craft\essentials\assets\SitemapAsset;
 
 /**
  * Class Writer
@@ -44,11 +45,14 @@ class SiteMap
   /**
    * @return string
    */
-  public function getXml() {
-    return implode('', [
+  public function getXml(): string {
+    $bundle = SitemapAsset::register(\Craft::$app->view);
+
+    return implode("\n", [
       '<?xml version="1.0" encoding="UTF-8"?>',
+      '<?xml-stylesheet type="text/xsl" href="', $bundle->baseUrl, '/sitemap.xsl"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-        implode('', $this->_buffer),
+        implode("\n", $this->_buffer),
       '</urlset>'
     ]);
   }
@@ -85,6 +89,6 @@ class SiteMap
    * @return string
    */
   static public function xmlLink(array $attributes) {
-    return '<xhtml:link ' . Html::renderTagAttributes($attributes) . '/>';
+    return '<xhtml:link' . Html::renderTagAttributes($attributes) . '/>';
   }
 }
