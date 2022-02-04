@@ -28,17 +28,13 @@ class RedirectNotFound extends Component
   public function __construct() {
     parent::__construct();
 
-    Event::on(
-      Plugins::class,
-      Plugins::EVENT_AFTER_LOAD_PLUGINS,
-      [$this, 'onAfterLoadPlugins']
-    );
+    Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, [$this, 'onAfterLoadPlugins']);
   }
 
   /**
-   * @param Event $event
+   * @return void
    */
-  public function onAfterLoadPlugins(Event $event) {
+  public function onAfterLoadPlugins() {
     $request = Craft::$app->getRequest();
     if (!$request->getIsSiteRequest() || $request->getIsConsoleRequest()) {
       return;
@@ -61,7 +57,7 @@ class RedirectNotFound extends Component
         $exception instanceof HttpException &&
         $exception->statusCode === 404
       ) {
-        $event->handled = $this->handleError($exception);
+        $event->handled = $this->handleError();
         return;
       }
 
@@ -74,10 +70,9 @@ class RedirectNotFound extends Component
   // ---------------
 
   /**
-   * @param HttpException $exception
    * @return bool
    */
-  private function handleError(HttpException $exception) {
+  private function handleError(): bool {
     $request = Craft::$app->getRequest();
 
     foreach (AbstractRedirect::getRedirects() as $redirect) {
@@ -96,7 +91,7 @@ class RedirectNotFound extends Component
   /**
    * @return RedirectNotFound
    */
-  public static function getInstance() {
+  public static function getInstance(): RedirectNotFound {
     if (!isset(self::$_instance)) {
       self::$_instance = new RedirectNotFound();
     }
