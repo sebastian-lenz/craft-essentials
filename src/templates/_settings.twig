@@ -9,6 +9,13 @@
   on: settings.enableLanguageRedirect,
 }) }}
 
+{{ forms.lightswitchField({
+  errors: settings.getErrors('ensureSiteSegment'),
+  label: 'Ensure URLs start with the site segment',
+  name: 'ensureSiteSegment',
+  on: settings.ensureSiteSegment,
+}) }}
+
 {{ forms.checkboxGroupField({
   errors: settings.getErrors('disabledLanguages'),
   label: 'Disabled languages',

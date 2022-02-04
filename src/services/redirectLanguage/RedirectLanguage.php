@@ -3,12 +3,17 @@
 namespace lenz\craft\essentials\services\redirectLanguage;
 
 use Craft;
+use craft\controllers\TemplatesController;
 use craft\web\Application;
+use craft\web\Response;
 use Exception;
 use lenz\craft\essentials\Plugin;
 use Throwable;
+use yii\base\ActionEvent;
 use yii\base\Component;
 use yii\base\Event;
+use yii\base\InlineAction;
+use yii\base\Module;
 
 /**
  * Class RedirectLanguage
@@ -42,13 +47,12 @@ class RedirectLanguage extends Component
   }
 
   /**
-   * @param Event $event
+   * @return void
    */
-  public function onApplicationInit(Event $event) {
+  public function onApplicationInit() {
     $request = Craft::$app->getRequest();
-    $enabled = Plugin::getInstance()
-      ->getSettings()
-      ->enableLanguageRedirect;
+    $settings = Plugin::getInstance()->getSettings();
+    $enabled = $settings->enableLanguageRedirect;
 
     if (
       $enabled &&
@@ -64,6 +68,32 @@ class RedirectLanguage extends Component
         exit;
       }
     }
+
+    if ($settings->ensureSiteSegment && $request->isSiteRequest) {
+      Craft::$app->on(Module::EVENT_BEFORE_ACTION, function(ActionEvent $event) {
+        echo '';
+        if (
+          !($event->action instanceof InlineAction) ||
+          !($event->action->controller instanceof TemplatesController) ||
+          $event->action->id !== 'render'
+        ) {
+          return;
+        }
+
+        $uri = Craft::$app->request->getFullUri();
+        $baseUrl = Craft::$app->sites->currentSite->getBaseUrl();
+        $baseSegment = trim($baseUrl, '/');
+        if (str_starts_with($baseSegment, 'http')) {
+          $baseSegment = substr($baseSegment, strpos($baseSegment, '/', 7) + 1);
+        }
+
+        if (!str_starts_with($uri, $baseSegment)) {
+          $response = new Response();
+          $response->redirect($baseUrl . $uri, 301)->send();
+          die();
+        }
+      });
+    }
   }
 
   /**
@@ -72,7 +102,7 @@ class RedirectLanguage extends Component
    * @return string
    * @throws Exception
    */
-  public function getBestLanguage() {
+  public function getBestLanguage(): string {
     $stack = $this->getLanguageStack();
     if (count($stack) == 0) {
       throw new Exception('No available languages.');
@@ -90,7 +120,7 @@ class RedirectLanguage extends Component
   /**
    * @return string|null
    */
-  public function getBestSiteUrl() {
+  public function getBestSiteUrl(): ?string {
     try {
       $language = $this->getBestLanguage();
     } catch (Throwable $error) {
@@ -107,7 +137,7 @@ class RedirectLanguage extends Component
   /**
    * @return LanguageStack
    */
-  public function getLanguageStack() {
+  public function getLanguageStack(): LanguageStack {
     if (!isset($this->_languageStack)) {
       $stack = new LanguageStack();
       $sites = Plugin::getInstance()->translations->getEnabledSites();
@@ -129,7 +159,7 @@ class RedirectLanguage extends Component
   /**
    * @return RedirectLanguage
    */
-  public static function getInstance() {
+  public static function getInstance(): RedirectLanguage {
     if (!isset(self::$_instance)) {
       self::$_instance = new RedirectLanguage();
     }

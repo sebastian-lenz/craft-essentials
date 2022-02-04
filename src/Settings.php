@@ -45,6 +45,10 @@ class Settings extends Model
    */
   public $enableWebp = false;
 
+  /**
+   * @var bool
+   */
+  public $ensureSiteSegment = true;
 
   /**
    * @inheritDoc
@@ -54,6 +58,7 @@ class Settings extends Model
     $this->enableImageCompressor = !!$this->enableImageCompressor;
     $this->enableImageSharpening = !!$this->enableImageSharpening;
     $this->enableWebp = !!$this->enableWebp;
+    $this->ensureSiteSegment = !!$this->ensureSiteSegment;
 
     $this->dataTables = self::parseList($this->dataTables);
 
