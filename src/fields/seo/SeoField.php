@@ -4,7 +4,9 @@ namespace lenz\craft\essentials\fields\seo;
 
 use Craft;
 use craft\base\ElementInterface;
+use lenz\craft\essentials\records\SeoRecord;
 use lenz\craft\utils\foreignField\ForeignField;
+use lenz\craft\utils\foreignField\ForeignFieldModel;
 
 /**
  * Class SeoField
@@ -57,8 +59,20 @@ class SeoField extends ForeignField
    */
   public static function recordModelAttributes(): array {
     return [
+      'enabled',
       'description',
       'keywords',
     ];
+  }
+
+  /**
+   * @param ForeignFieldModel $model
+   * @param ElementInterface $element
+   * @return array
+   */
+  protected function toRecordAttributes(ForeignFieldModel $model, ElementInterface $element): array {
+    $result = parent::toRecordAttributes($model, $element);
+    $result['enabled'] = $result['enabled'] ? 1 : 0;
+    return $result;
   }
 }

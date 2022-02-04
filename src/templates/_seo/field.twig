@@ -3,4 +3,7 @@
 {% namespace field.handle %}
   {{ forms.textareaField(value, 'description') }}
   {{ forms.textareaField(value, 'keywords') }}
+  {{ forms.checkboxField(value, 'enabled', {
+    info: 'In most cases this option should be left activated.<br>The option must be deactivated for pages that search engines should not list (e.g. error or success pages).'|t('lenz-craft-essentials'),
+  }) }}
 {% endnamespace %}

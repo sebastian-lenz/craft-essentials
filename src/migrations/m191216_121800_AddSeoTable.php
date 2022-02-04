@@ -3,7 +3,7 @@
 namespace lenz\craft\essentials\migrations;
 
 use craft\db\Migration;
-use lenz\craft\essentials\fields\seo\SeoRecord;
+use lenz\craft\essentials\records\SeoRecord;
 
 /**
  * Class m191216_121800_AddSeoTable
@@ -23,7 +23,8 @@ class m191216_121800_AddSeoTable extends Migration
   /**
    * @inheritdoc
    */
-  public function safeDown() {
-    return false;
+  public function safeDown(): bool {
+    $this->dropTable(SeoRecord::tableName());
+    return true;
   }
 }

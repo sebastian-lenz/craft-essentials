@@ -15,6 +15,7 @@ abstract class AbstractElementSource extends AbstractSource
 {
   /**
    * @param SiteMap $siteMap
+   * @throws InvalidConfigException
    */
   public function collect(SiteMap $siteMap) {
     $groups = $this->toGroups($this->getElements());
@@ -30,7 +31,7 @@ abstract class AbstractElementSource extends AbstractSource
   /**
    * @return Element[]
    */
-  abstract protected function getElements();
+  abstract protected function getElements(): array;
 
 
   // Protected methods
@@ -51,7 +52,7 @@ abstract class AbstractElementSource extends AbstractSource
     }
 
     $links = count($links) > 1 ? implode('', $links) : null;
-    foreach ($group as $language => $item) {
+    foreach ($group as $item) {
       $siteMap->addUrl($item['url'], $item['lastmod'], $links);
     }
   }
@@ -59,7 +60,7 @@ abstract class AbstractElementSource extends AbstractSource
   /**
    * @return string[]
    */
-  protected function getQuerySites() {
+  protected function getQuerySites(): array {
     $allSites = Craft::$app->getSites()->getAllSites();
     $sites = [];
     $disabled = Plugin::getInstance()->disabledLanguages;
@@ -78,7 +79,7 @@ abstract class AbstractElementSource extends AbstractSource
    * @return array
    * @throws InvalidConfigException
    */
-  protected function toGroups($elements) {
+  protected function toGroups(array $elements): array {
     $groups = [];
 
     foreach ($elements as $element) {

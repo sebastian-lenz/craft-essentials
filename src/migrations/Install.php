@@ -3,7 +3,7 @@
 namespace lenz\craft\essentials\migrations;
 
 use craft\db\Migration;
-use lenz\craft\essentials\fields\seo\SeoRecord;
+use lenz\craft\essentials\records\SeoRecord;
 
 /**
  * Class Install
