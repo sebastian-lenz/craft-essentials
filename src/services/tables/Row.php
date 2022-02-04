@@ -3,12 +3,14 @@
 namespace lenz\craft\essentials\services\tables;
 
 use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use JsonSerializable;
 
 /**
  * Class Row
  */
-class Row implements ArrayAccess, JsonSerializable
+class Row implements ArrayAccess, JsonSerializable, IteratorAggregate
 {
   /**
    * @var array
@@ -56,6 +58,13 @@ class Row implements ArrayAccess, JsonSerializable
    */
   public function __unset($offset) {
     unset($this->attributes[$offset]);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getIterator() {
+    return new ArrayIterator($this->attributes);
   }
 
   /**

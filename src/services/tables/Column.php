@@ -2,12 +2,13 @@
 
 namespace lenz\craft\essentials\services\tables;
 
+use yii\base\BaseObject;
 use yii\helpers\Inflector;
 
 /**
  * Class DataColumn
  */
-class Column
+class Column extends BaseObject
 {
   /**
    * @var array
@@ -32,10 +33,13 @@ class Column
 
   /**
    * DataColumn constructor.
-   * @param string $type
+   * @param string|array $typeOrConfig
    */
-  public function __construct(string $type = 'text') {
-    $this->type = $type;
+  public function __construct($typeOrConfig = 'text') {
+    parent::__construct(is_array($typeOrConfig)
+      ? array_merge(['type' => 'text'], $typeOrConfig)
+      : ['type' => $typeOrConfig]
+    );
   }
 
   /**

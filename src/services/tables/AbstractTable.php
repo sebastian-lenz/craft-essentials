@@ -2,8 +2,6 @@
 
 namespace lenz\craft\essentials\services\tables;
 
-use Yii;
-use yii\base\InvalidConfigException;
 use yii\helpers\Inflector;
 
 /**
@@ -52,6 +50,7 @@ abstract class AbstractTable
 
   /**
    * @return array
+   * @noinspection PhpUnused (Template method)
    */
   public function getJsOptions(): array {
     $columns = [];
@@ -97,7 +96,6 @@ abstract class AbstractTable
 
   /**
    * @param array $rows
-   * @throws InvalidConfigException
    */
   public function setRows(array $rows) {
     $columns = $this->getColumns();
@@ -122,7 +120,7 @@ abstract class AbstractTable
       $result[] = $row;
     }
 
-    $this->_rows = $result;
+    $this->_rows = $this->filterRows($result);
     $this->saveRows($result);
   }
 
@@ -148,6 +146,7 @@ abstract class AbstractTable
    * @param Row $lft
    * @param Row $rgt
    * @return bool
+   * @noinspection PhpUnusedParameterInspection (API)
    */
   protected function isRowEqual(Row $lft, Row $rgt): bool {
     return false;
@@ -183,5 +182,13 @@ abstract class AbstractTable
     }
 
     return $this->createRow($attributes);
+  }
+
+  /**
+   * @param Row[] $rows
+   * @return Row[]
+   */
+  protected function filterRows(array $rows): array {
+    return $rows;
   }
 }

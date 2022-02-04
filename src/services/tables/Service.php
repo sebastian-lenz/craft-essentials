@@ -49,7 +49,7 @@ class Service extends AbstractService
       function(RegisterCpNavItemsEvent $event) {
         array_splice($event->navItems, 2, 0, [[
           'url'      => 'tables',
-          'label'    => 'Tables',
+          'label'    => Craft::t('lenz-craft-essentials', 'Tables'),
           'fontIcon' => 'list'
         ]]);
       }
