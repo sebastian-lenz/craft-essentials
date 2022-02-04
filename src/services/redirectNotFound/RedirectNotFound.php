@@ -139,20 +139,22 @@ class RedirectNotFound extends Component
 
   /**
    * @param ElementInterface $element
-   * @param string $oldUri
-   * @param string $newUri
+   * @param string|null $oldUri
+   * @param string|null $newUri
    */
-  private function storeUriHistory(ElementInterface $element, string $oldUri, string $newUri) {
+  private function storeUriHistory(ElementInterface $element, ?string $oldUri, ?string $newUri) {
     UriHistoryRecord::deleteAll([
       'siteId' => $element->siteId,
-      'uri' => [$oldUri, $newUri],
+      'uri' => array_filter([$oldUri, $newUri]),
     ]);
 
-    (new UriHistoryRecord([
-      'elementId' => $element->id,
-      'siteId' => $element->siteId,
-      'uri' => $oldUri,
-    ]))->save();
+    if (!empty($oldUri)) {
+      (new UriHistoryRecord([
+        'elementId' => $element->id,
+        'siteId' => $element->siteId,
+        'uri' => $oldUri,
+      ]))->save();
+    }
   }
 
 
