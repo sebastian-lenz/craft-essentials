@@ -84,7 +84,7 @@ class RedirectLanguage extends Component
         $baseUrl = Craft::$app->sites->currentSite->getBaseUrl();
         $baseSegment = trim($baseUrl, '/');
         if (str_starts_with($baseSegment, 'http')) {
-          $baseSegment = substr($baseSegment, strpos($baseSegment, '/', 7) + 1);
+          $baseSegment = parse_url($baseSegment, strpos($baseSegment, '/', 8) + 1);
         }
 
         if (!str_starts_with($uri, $baseSegment)) {
