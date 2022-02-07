@@ -117,9 +117,9 @@ class RedirectNotFound extends Component
 
   /**
    * @param ElementInterface $element
-   * @return string
+   * @return string|null
    */
-  private function getCurrentUri(ElementInterface $element): string {
+  private function getCurrentUri(ElementInterface $element): ?string {
     return (new Query())
       ->select('uri')
       ->from(Table::ELEMENTS_SITES)
