@@ -80,11 +80,11 @@ class RedirectNotFound extends Component
    */
   public function onBeforeElementSave(ModelEvent $event) {
     $element = $event->sender;
-    if (!($element instanceof Element) || empty($event->sender->id) || empty($element->uri)) {
+    if (!($element instanceof Element) || empty($event->sender->id)) {
       return;
     }
 
-    $state = (object)['uri' => $element->uri];
+    $state = (object)['uri' => $this->getCurrentUri($element)];
     $state->handler = function(ModelEvent $event) use ($state) {
       $element = $event->sender;
       $element->off(Element::EVENT_AFTER_SAVE, $state->handler);
@@ -105,14 +105,7 @@ class RedirectNotFound extends Component
       return;
     }
 
-    $oldUri = (new Query())
-      ->select('uri')
-      ->from(Table::ELEMENTS_SITES)
-      ->where([
-        'elementId' => $element->id,
-        'siteId' => $element->siteId,
-      ])->scalar();
-
+    $oldUri = $this->getCurrentUri($element);
     if (!empty($oldUri) && $oldUri !== $element->uri) {
       $this->storeUriHistory($element, $oldUri, $element->uri);
     }
@@ -121,6 +114,20 @@ class RedirectNotFound extends Component
 
   // Private methods
   // ---------------
+
+  /**
+   * @param ElementInterface $element
+   * @return string
+   */
+  private function getCurrentUri(ElementInterface $element): string {
+    return (new Query())
+      ->select('uri')
+      ->from(Table::ELEMENTS_SITES)
+      ->where([
+        'elementId' => $element->id,
+        'siteId' => $element->siteId,
+      ])->scalar();
+  }
 
   /**
    * @return bool
