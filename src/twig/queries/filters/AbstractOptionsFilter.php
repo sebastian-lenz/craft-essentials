@@ -104,8 +104,10 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
       return null;
     }
 
-    $values = array_map('urlencode', $this->_customValues);
-    return new UrlParameter(implode(static::GLUE, $values));
+    $values = array_map('urlencode', array_filter($this->_customValues));
+    return empty($values)
+      ? null
+      : new UrlParameter(implode(static::GLUE, $values));
   }
 
   /**
@@ -142,9 +144,9 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   public function renderSelect(array $variables = []) {
     $options = $this->renderOptions();
     $attributes = ArrayHelper::getValue($variables, 'attributes', []) + [
-      'id'   => $this->getName(),
-      'name' => $this->getName(),
-    ];
+        'id'   => $this->getName(),
+        'name' => $this->getName(),
+      ];
 
     return Html::tag('select', implode('', $options), $attributes);
   }
