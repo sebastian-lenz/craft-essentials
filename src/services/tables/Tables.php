@@ -13,7 +13,7 @@ use lenz\craft\essentials\services\AbstractService;
 use yii\base\Event;
 
 /**
- * Class Service
+ * Class Tables
  */
 class Tables extends AbstractService
 {

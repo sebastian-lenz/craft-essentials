@@ -23,7 +23,7 @@ use yii\base\Event;
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
  * @property services\RemoveDashboard $removeDashboard
- * @property services\tables\Service $tables
+ * @property services\tables\Tables $tables
  * @property services\translations\Translations $translations
  * @property services\siteMap\SiteMapService $siteMap
  * @method Settings getSettings()
@@ -59,7 +59,7 @@ class Plugin extends \craft\base\Plugin
       'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
       'removeDashboard'   => services\RemoveDashboard::getInstance(),
       'removeStopWords'   => services\RemoveStopWords::getInstance(),
-      'tables'            => services\tables\Service::getInstance(),
+      'tables'            => services\tables\Tables::getInstance(),
       'translations'      => services\translations\Translations::class,
       'siteMap'           => services\siteMap\SiteMapService::getInstance(),
       'webp'              => services\webp\Webp::getInstance(),
