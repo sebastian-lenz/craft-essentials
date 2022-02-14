@@ -16,6 +16,21 @@ class Column extends BaseObject
   public $classNames = [];
 
   /**
+   * @var array|null
+   */
+  public $config = null;
+
+  /**
+   * @var array|null
+   */
+  public $source = null;
+
+  /**
+   * @var bool
+   */
+  public $readOnly = false;
+
+  /**
    * @var string
    */
   public $title = '';
@@ -76,6 +91,18 @@ class Column extends BaseObject
       'type' => $this->type,
     ];
 
+    if ($this->readOnly) {
+      $config['readOnly'] = true;
+    }
+
+    if (!is_null($this->source)) {
+      $config['source'] = $this->source;
+    }
+
+    if (!is_null($this->config)) {
+      $config = array_merge($config, $this->config);
+    }
+
     if (!empty($this->classNames)) {
       $config[] = implode(' ', $this->classNames);
     }
@@ -98,6 +125,24 @@ class Column extends BaseObject
    */
   public function getJsWidth(): int {
     return $this->width;
+  }
+
+  /**
+   * @param bool $value
+   * @return $this
+   */
+  function readOnly(bool $value = true): Column {
+    $this->readOnly = $value;
+    return $this;
+  }
+
+  /**
+   * @param array $value
+   * @return $this
+   */
+  function source(array $value): Column {
+    $this->source = $value;
+    return $this;
   }
 
   /**

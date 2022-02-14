@@ -42,6 +42,17 @@ abstract class AbstractTable
   }
 
   /**
+   * @param array $options
+   * @return Column
+   */
+  public function dropdown(array $options): Column {
+    return new Column([
+      'type' => 'dropdown',
+      'source' => array_values($options),
+    ]);
+  }
+
+  /**
    * @return string
    */
   public function getId(): string {
@@ -120,7 +131,7 @@ abstract class AbstractTable
       $result[] = $row;
     }
 
-    $this->_rows = $this->filterRows($result);
+    $result = $this->_rows = $this->filterRows($result);
     $this->saveRows($result);
   }
 
