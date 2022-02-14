@@ -15,7 +15,7 @@ use yii\base\Event;
 /**
  * Class Service
  */
-class Service extends AbstractService
+class Tables extends AbstractService
 {
   /**
    * @var AbstractTable[]
