@@ -160,10 +160,16 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @param array $value
+   * @param array|Attributes $value
    * @return Attributes
    */
-  public function toAttributes(array $value = []): Attributes {
-    return new Attributes($value);
+  public function toAttributes($value = []): Attributes {
+    if ($value instanceof Attributes) {
+      return $value;
+    } elseif (is_array($value)) {
+      return new Attributes($value);
+    }
+
+    return new Attributes();
   }
 }
