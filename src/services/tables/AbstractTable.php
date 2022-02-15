@@ -42,6 +42,13 @@ abstract class AbstractTable
   }
 
   /**
+   * @return Column
+   */
+  public function date(): Column {
+    return new Column('date');
+  }
+
+  /**
    * @param array $options
    * @return Column
    */
@@ -106,6 +113,13 @@ abstract class AbstractTable
   }
 
   /**
+   * @return Column
+   */
+  public function numeric(): Column {
+    return new Column('numeric');
+  }
+
+  /**
    * @param array $rows
    */
   public function setRows(array $rows) {
@@ -140,6 +154,13 @@ abstract class AbstractTable
    */
   public function text(): Column {
     return new Column('text');
+  }
+
+  /**
+   * @return Column
+   */
+  public function time(): Column {
+    return new Column('time');
   }
 
 
