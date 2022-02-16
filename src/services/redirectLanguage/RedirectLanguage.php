@@ -71,11 +71,11 @@ class RedirectLanguage extends Component
 
     if ($settings->ensureSiteSegment && $request->isSiteRequest) {
       Craft::$app->on(Module::EVENT_BEFORE_ACTION, function(ActionEvent $event) {
-        echo '';
         if (
           !($event->action instanceof InlineAction) ||
           !($event->action->controller instanceof TemplatesController) ||
-          $event->action->id !== 'render'
+          $event->action->id !== 'render' ||
+          !Craft::$app->urlManager->getMatchedElement()
         ) {
           return;
         }
