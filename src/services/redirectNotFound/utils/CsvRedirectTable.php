@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\services\redirectNotFound\utils;
 
 use Craft;
+use craft\helpers\UrlHelper;
 use lenz\craft\essentials\services\tables\AbstractCsvTable;
 use lenz\craft\essentials\services\tables\Column;
 use lenz\craft\essentials\services\tables\Row;
@@ -51,8 +52,11 @@ class CsvRedirectTable extends AbstractCsvTable
     $isEmpty = true;
     foreach ($attributes as $key => $value) {
       $value = trim(trim($value), '/');
-      $attributes[$key] = $value;
+      if (!UrlHelper::isFullUrl($value)) {
+        $value = '/' . $value;
+      }
 
+      $attributes[$key] = $value;
       if (!empty($value)) {
         $isEmpty = false;
       }
