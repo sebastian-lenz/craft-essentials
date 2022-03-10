@@ -5,7 +5,6 @@ namespace lenz\craft\essentials\services\imageCompressor\jobs;
 use Craft;
 use craft\elements\Asset;
 use craft\errors\AssetLogicException;
-use craft\errors\AssetTransformException;
 use craft\models\AssetTransformIndex;
 use craft\volumes\Local;
 use yii\base\InvalidConfigException;
@@ -46,8 +45,9 @@ class TransformIndexJob extends AbstractJob
 
   /**
    * @inheritDoc
+   * @throws InvalidConfigException
    */
-  protected function getFileName() {
+  protected function getFileName(): ?string {
     if (!isset($this->_fileName)) {
       $index = $this->getTransformIndex();
       $this->_fileName = self::resolveTransformFileName($index);
@@ -60,7 +60,7 @@ class TransformIndexJob extends AbstractJob
    * @inheritDoc
    * @throws AssetLogicException
    */
-  protected function getFormat() {
+  protected function getFormat(): ?string {
     if (isset($this->_format)) {
       return $this->_format;
     }
@@ -86,7 +86,7 @@ class TransformIndexJob extends AbstractJob
   /**
    * @return Asset|null
    */
-  private function getAsset() {
+  private function getAsset(): ?Asset {
     if (isset($this->_asset)) {
       return $this->_asset;
     }
@@ -100,7 +100,7 @@ class TransformIndexJob extends AbstractJob
   /**
    * @return AssetTransformIndex|null
    */
-  private function getTransformIndex() {
+  private function getTransformIndex(): ?AssetTransformIndex {
     if (isset($this->_transformIndex)) {
       return $this->_transformIndex;
     }

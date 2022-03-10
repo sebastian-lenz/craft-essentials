@@ -4,6 +4,8 @@ namespace lenz\craft\essentials\services\imageCompressor\jobs;
 
 use Craft;
 use craft\elements\Asset;
+use craft\errors\AssetLogicException;
+use Throwable;
 
 /**
  * Class AssetJob
@@ -26,40 +28,47 @@ class AssetJob extends AbstractJob
   private $_format;
 
 
-  /**
-   * @inheritDoc
-   */
-  public function execute($queue) {
-    parent::execute($queue);
-
-    $asset = $this->getAsset();
-    $fileName = $this->getFileName();
-
-    if (!is_null($asset) && !is_null($fileName)) {
-      $size = filesize($fileName);
-
-      if ($asset->size != $size) {
-        $asset->size = $size;
-        Craft::$app->elements->saveElement($asset);
-      }
-    }
-  }
-
   // Protected methods
   // -----------------
 
   /**
-   * @inheritDoc
+   * @return void
    */
-  protected function getFileName() {
+  protected function afterExecution() {
     $asset = $this->getAsset();
-    return is_null($asset) ? null : $asset->getImageTransformSourcePath();
+    $fileName = $this->getFileName();
+    if (is_null($asset) || is_null($fileName)) {
+      return;
+    }
+
+    $size = filesize($fileName);
+    if ($asset->size == $size) {
+      return;
+    }
+
+    try {
+      $asset->size = $size;
+      Craft::$app->elements->saveElement($asset);
+    } catch (Throwable $e) {
+      // Ignore this
+    }
   }
 
   /**
    * @inheritDoc
    */
-  protected function getFormat() {
+  protected function getFileName(): ?string {
+    $asset = $this->getAsset();
+    return is_null($asset)
+      ? null
+      : $asset->getImageTransformSourcePath();
+  }
+
+  /**
+   * @inheritDoc
+   * @throws AssetLogicException
+   */
+  protected function getFormat(): ?string {
     if (isset($this->_format)) {
       return $this->_format;
     }
@@ -81,7 +90,7 @@ class AssetJob extends AbstractJob
   /**
    * @return Asset|null
    */
-  private function getAsset() {
+  private function getAsset(): ?Asset {
     if (isset($this->_asset)) {
       return $this->_asset;
     }

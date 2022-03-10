@@ -19,7 +19,7 @@ abstract class AbstractJob extends BaseJob
 
     if (empty($this->description)) {
       $name = pathinfo($this->getFileName(), PATHINFO_BASENAME);
-      $this->description = "Compress `{$name}`";
+      $this->description = "Compress `$name`";
     }
   }
 
@@ -29,8 +29,7 @@ abstract class AbstractJob extends BaseJob
   public function execute($queue) {
     $fileName = $this->getFileName();
     $format = $this->getFormat();
-
-    if (is_null($fileName) || is_null($format)) {
+    if (is_null($fileName) || is_null($format) || !file_exists($fileName)) {
       return;
     }
 
@@ -43,6 +42,8 @@ abstract class AbstractJob extends BaseJob
         break;
       }
     }
+
+    $this->afterExecution();
   }
 
 
@@ -50,12 +51,17 @@ abstract class AbstractJob extends BaseJob
   // -----------------
 
   /**
-   * @return string|null
+   * @return void
    */
-  abstract protected function getFileName();
+  protected function afterExecution() { }
 
   /**
    * @return string|null
    */
-  abstract protected function getFormat();
+  abstract protected function getFileName(): ?string;
+
+  /**
+   * @return string|null
+   */
+  abstract protected function getFormat(): ?string;
 }

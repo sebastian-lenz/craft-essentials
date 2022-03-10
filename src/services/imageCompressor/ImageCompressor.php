@@ -5,13 +5,8 @@ namespace lenz\craft\essentials\services\imageCompressor;
 use Craft;
 use craft\base\Element;
 use craft\elements\Asset;
-use craft\events\AssetTransformEvent;
-use craft\events\ElementEvent;
 use craft\events\GenerateTransformEvent;
 use craft\events\ModelEvent;
-use craft\models\AssetTransform;
-use craft\models\AssetTransformIndex;
-use craft\services\Assets;
 use craft\services\AssetTransforms;
 use lenz\craft\essentials\Plugin;
 use yii\base\Component;
@@ -38,7 +33,7 @@ class ImageCompressor extends Component
 
     Event::on(
       Asset::class,
-      Asset::EVENT_BEFORE_SAVE,
+      Element::EVENT_BEFORE_SAVE,
       function(ModelEvent $event) {
         if (
           !empty($event->sender->tempFilePath) &&
@@ -71,7 +66,7 @@ class ImageCompressor extends Component
   /**
    * @return ImageCompressor
    */
-  public static function getInstance() {
+  public static function getInstance(): ImageCompressor {
     if (!isset(self::$_instance)) {
       self::$_instance = new ImageCompressor();
     }
