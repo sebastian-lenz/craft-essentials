@@ -17,17 +17,17 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * @var AbstractMenuItem[]
    */
-  protected $_breadcrumbs;
+  protected array $_breadcrumbs;
 
   /**
    * @var AbstractMenuItem|null
    */
-  protected $_current;
+  protected ?AbstractMenuItem $_current;
 
   /**
    * @var AbstractMenu
    */
-  static protected $_instance;
+  static protected AbstractMenu $_instance;
 
   /**
    * @var string
