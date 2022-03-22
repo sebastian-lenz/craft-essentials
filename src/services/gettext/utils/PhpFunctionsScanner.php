@@ -57,11 +57,12 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
       $parts = [];
       while ($index < $count) {
         $token = $this->tokens[$index++];
-        if ($token[0] == T_STRING) {
+
+        if (is_array($token) && in_array($token[0], [T_STRING, T_NAME_QUALIFIED])) {
           $parts[] = $token[1];
-        } elseif ($token[0] == T_NS_SEPARATOR) {
+        } elseif (is_array($token) && $token[0] == T_NS_SEPARATOR) {
           continue;
-        } elseif (count($parts)) {
+        } else {
           break;
         }
       }
@@ -122,7 +123,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
       try {
         $this->saveClass($translations, $className);
       } catch (Throwable $error) {
-        // Ignore errors here
+        echo "Error: $error\n";
       }
     });
   }
