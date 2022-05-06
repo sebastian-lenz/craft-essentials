@@ -6,7 +6,7 @@
   "require": {
     "php": "^7.4.0",
     "ext-json": "*",
-    "craftcms/cms": "^3.6.0",
+    "craftcms/cms": "^3.7.0",
     "sebastianlenz/craft-utils": "^2.1.0",
     "gettext/gettext": "^4.7"
   },
@@ -24,5 +24,14 @@
     "name": "Essentials",
     "developer": "Sebastian Lenz",
     "developerUrl": "https://github.com/sebastian-lenz/"
+  },
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    },
+    "platform": {
+      "php": "7.4.14"
+    }
   }
 }

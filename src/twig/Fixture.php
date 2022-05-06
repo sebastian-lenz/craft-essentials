@@ -33,6 +33,6 @@ class Fixture
    * @return mixed
    */
   static public function load(string $name) {
-    return Yaml::parseFile(App::env("@config/fixtures/$name.yml"), Yaml::PARSE_OBJECT);
+    return Yaml::parseFile(App::parseEnv("@config/fixtures/$name.yml"), Yaml::PARSE_OBJECT);
   }
 }
