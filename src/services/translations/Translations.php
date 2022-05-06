@@ -19,7 +19,7 @@ class Translations extends Component
   /**
    * @var Site[]
    */
-  private $_enabledSites;
+  private array $_enabledSites;
 
   /**
    * Event triggered when looking for available sites.
@@ -70,7 +70,7 @@ class Translations extends Component
 
   /**
    * @param ElementInterface|null $element
-   * @return array
+   * @return Translation[]
    */
   public function getTranslations(ElementInterface $element = null): array {
     $sites = $this->getEnabledSites();
@@ -93,14 +93,10 @@ class Translations extends Component
         }
       }
 
-      return [
-        'isCurrent'  => $currentSite === $site,
-        'isFallback' => is_null($target),
-        'name'       => $site->name,
-        'site'       => $site,
-        'target'     => $target,
-        'url'        => is_null($target) ? $site->baseUrl : $target->getUrl(),
-      ];
+      return new Translation($site, [
+        'isCurrent' => $currentSite === $site,
+        'target' => $target,
+      ]);
     }, $sites);
   }
 
@@ -117,5 +113,35 @@ class Translations extends Component
     }
 
     return [];
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param mixed $element
+   * @return Translation[]
+   */
+  static public function forElement($element = null): array {
+    static $cache;
+    if (!($element instanceof ElementInterface)) {
+      $element = Craft::$app->getUrlManager()->getMatchedElement();
+    }
+
+    if ($element instanceof ElementInterface) {
+      $id = $element->getId();
+    } else {
+      $element = null;
+      $id = '*';
+    }
+
+    if (!isset($cache[$id])) {
+      $cache[$id] = Plugin::getInstance()
+        ->translations
+        ->getTranslations($element);
+    }
+
+    return $cache[$id];
   }
 }

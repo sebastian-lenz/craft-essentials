@@ -2,14 +2,17 @@
 
 namespace lenz\craft\essentials\twig;
 
-use Craft;
-use craft\base\ElementInterface;
+use craft\helpers\App;
+use craft\helpers\StringHelper;
 use Exception;
 use lenz\craft\essentials\helpers\ElementHelper;
+use lenz\craft\essentials\helpers\HtmlHelper;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\MailEncoder;
+use lenz\craft\essentials\services\translations\Translations;
 use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\models\Attributes;
+use Symfony\Component\Yaml\Yaml;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -22,12 +25,7 @@ class Extension extends AbstractExtension
   /**
    * @var string
    */
-  private $_commitHash;
-
-  /**
-   * @var array
-   */
-  private $_translations;
+  private string $_commitHash;
 
   /**
    * The cache key of the commit hash.
@@ -41,8 +39,8 @@ class Extension extends AbstractExtension
   public function getFilters(): array {
     return [
       new TwigFilter('eagerLoad', [ElementHelper::class, 'eagerLoad']),
-      new TwigFilter('encodeMail', [$this, 'getEncodedMail']),
-      new TwigFilter('translations', [$this, 'getTranslations']),
+      new TwigFilter('encodeMail', [MailEncoder::class, 'encode']),
+      new TwigFilter('translations', [Translations::class, 'forElement']),
     ];
   }
 
@@ -51,43 +49,15 @@ class Extension extends AbstractExtension
    */
   public function getFunctions(): array {
     return [
-      new TwigFunction('cx', [$this, 'getClassNames']),
+      new TwigFunction('cx', [HtmlHelper::class, 'joinClassNames']),
       new TwigFunction('commitHash', [$this, 'getCommitHash']),
       new TwigFunction('currentYear', [$this, 'getCurrentYear']),
-      new TwigFunction('encodeMail', [$this, 'getEncodedMail']),
+      new TwigFunction('encodeMail', [MailEncoder::class, 'encode']),
+      new TwigFunction('fixture', [Fixture::class, 'get']),
       new TwigFunction('interceptCache', [$this, 'interceptCache']),
-      new TwigFunction('toAttributes', [$this, 'toAttributes']),
-      new TwigFunction('translations', [$this, 'getTranslations']),
+      new TwigFunction('toAttributes', [Attributes::class, 'create']),
+      new TwigFunction('translations', [Translations::class, 'forElement']),
     ];
-  }
-
-  /**
-   * @return string
-   */
-  public function getClassNames(): string {
-    $args = func_get_args();
-    $result = [];
-
-    foreach ($args as $arg) {
-      if (is_string($arg)) {
-        $arg = explode(' ', $arg);
-      }
-
-      if (!is_array($arg)) {
-        continue;
-      }
-
-      foreach ($arg as $key => $value) {
-        if (!$value) continue;
-        $className = is_numeric($key) ? $value : $key;
-
-        if (!empty($className) && !in_array($className, $result)) {
-          $result[] = $className;
-        }
-      }
-    }
-
-    return implode(' ', $result);
   }
 
   /**
@@ -115,61 +85,9 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @param string $value
-   * @return string
-   */
-  public function getEncodedMail(string $value): string {
-    if (!is_string($value)) {
-      return $value;
-    }
-
-    return MailEncoder::encode($value);
-  }
-
-  /**
-   * @param mixed $element
-   * @param array $options
-   * @return array
-   */
-  public function getTranslations($element = null, array $options = []): array {
-    if (!($element instanceof ElementInterface)) {
-      $element = Craft::$app->getUrlManager()->getMatchedElement();
-    }
-
-    if ($element instanceof ElementInterface) {
-      $id = $element->getId();
-    } else {
-      $element = null;
-      $id = '*';
-    }
-
-    if (!isset($this->_translations[$id])) {
-      $this->_translations[$id] = Plugin::getInstance()
-        ->translations
-        ->getTranslations($element, $options);
-    }
-
-    return $this->_translations[$id];
-  }
-
-  /**
    * @return void
    */
   public function interceptCache() {
     Plugin::getInstance()->frontendCache->intercept();
-  }
-
-  /**
-   * @param array|Attributes $value
-   * @return Attributes
-   */
-  public function toAttributes($value = []): Attributes {
-    if ($value instanceof Attributes) {
-      return $value;
-    } elseif (is_array($value)) {
-      return new Attributes($value);
-    }
-
-    return new Attributes();
   }
 }
