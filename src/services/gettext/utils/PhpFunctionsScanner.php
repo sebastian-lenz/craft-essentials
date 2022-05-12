@@ -20,7 +20,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
    * @param array $options
    * @throws Exception
    */
-  public function save($translations, array $options) {
+  public function save(Translations|array $translations, array $options) {
     $translations = is_array($translations)
       ? $translations
       : [$translations];
@@ -36,7 +36,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
   /**
    * @param callable $callback
    */
-  protected function eachClassName(callable $callback) {
+  protected function eachClassName(callable $callback): void {
     $namespace = '';
     $count = count($this->tokens);
     $index = 0;
@@ -92,7 +92,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
    * @param string $className
    * @throws Throwable
    */
-  protected function saveClass(array $translations, string $className) {
+  protected function saveClass(array $translations, string $className): void {
     if (
       !class_exists($className) ||
       !is_subclass_of($className, Model::class) ||
@@ -118,7 +118,7 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
   /**
    * @param Translations[] $translations
    */
-  protected function saveClasses(array $translations) {
+  protected function saveClasses(array $translations): void {
     $this->eachClassName(function($className) use ($translations) {
       try {
         $this->saveClass($translations, $className);

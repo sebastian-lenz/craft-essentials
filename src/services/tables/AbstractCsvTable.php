@@ -2,9 +2,7 @@
 
 namespace lenz\craft\essentials\services\tables;
 
-use Craft;
-use craft\helpers\Json;
-use Throwable;
+use craft\helpers\App;
 
 /**
  * Class AbstractCsvTable
@@ -14,27 +12,27 @@ abstract class AbstractCsvTable extends AbstractTable
   /**
    * @var string
    */
-  public $delimiter = ",";
+  public string $delimiter = ",";
 
   /**
    * @var string
    */
-  public $enclosure = '"';
+  public string $enclosure = '"';
 
   /**
    * @var string
    */
-  public $escape = "\\";
+  public string $escape = "\\";
 
   /**
    * @var bool
    */
-  public $hasHeaderRow = true;
+  public bool $hasHeaderRow = true;
 
   /**
    * @var int
    */
-  public $length = 0;
+  public int $length = 0;
 
 
   /**
@@ -50,7 +48,7 @@ abstract class AbstractCsvTable extends AbstractTable
    * @inheritDoc
    */
   protected function loadRows(): array {
-    $fileName = Craft::parseEnv($this->getFileName());
+    $fileName = App::parseEnv($this->getFileName());
     if (!file_exists($fileName)) {
       return [];
     }
@@ -83,7 +81,7 @@ abstract class AbstractCsvTable extends AbstractTable
    * @inheritDoc
    */
   protected function saveRows(array $rows) {
-    $fileName = Craft::parseEnv($this->getFileName());
+    $fileName = App::parseEnv($this->getFileName());
     $handle = fopen($fileName, 'w');
     $header = array_keys($this->getColumns());
 

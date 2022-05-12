@@ -10,7 +10,7 @@ interface OptionInterface
   /**
    * @return string|int
    */
-  function getOptionValue();
+  function getOptionValue(): int|string;
 
   /**
    * @return string

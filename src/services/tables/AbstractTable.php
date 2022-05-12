@@ -12,7 +12,7 @@ abstract class AbstractTable
   /**
    * @var Row[]
    */
-  private $_rows;
+  private array $_rows;
 
 
   /**
@@ -122,7 +122,7 @@ abstract class AbstractTable
   /**
    * @param array $rows
    */
-  public function setRows(array $rows) {
+  public function setRows(array $rows): void {
     $columns = $this->getColumns();
     $result = [];
 

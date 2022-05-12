@@ -27,7 +27,7 @@ class RedirectNotFound extends Component
   /**
    * @var RedirectNotFound
    */
-  static private $_instance;
+  static private RedirectNotFound $_instance;
 
 
   /**
@@ -44,7 +44,7 @@ class RedirectNotFound extends Component
   /**
    * @return void
    */
-  public function onAfterLoadPlugins() {
+  public function onAfterLoadPlugins(): void {
     $request = Craft::$app->getRequest();
     if (!$request->getIsSiteRequest() || $request->getIsConsoleRequest()) {
       return;

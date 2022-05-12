@@ -17,17 +17,17 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
   /**
    * @var string
    */
-  public $template = '_includes/query-filter.twig';
+  public string $template = '_includes/query-filter.twig';
 
   /**
    * @var array
    */
-  public $variables = [];
+  public array $variables = [];
 
   /**
    * @var AbstractQuery
    */
-  private $_query;
+  private AbstractQuery $_query;
 
 
   /**
@@ -61,15 +61,16 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
   /**
    * @return string
    */
-  public function getBaseUrl() {
+  public function getBaseUrl(): string {
     return UrlHelper::url($this->_query->getBasePath());
   }
 
   /**
    * @return string
    */
-  public function getDescription() {
+  public function getDescription(): string {
     $result = [];
+
     foreach ($this->_query->getFilters() as $filter) {
       $description = $filter->getDescription();
       if (!is_null($description)) {
@@ -84,15 +85,16 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
 
   /**
    * @return int
+   * @noinspection PhpUnused
    */
-  public function getTotalResults() {
+  public function getTotalResults(): int {
     return $this->_query->getPaginator()->totalResults;
   }
 
   /**
    * @return SearchFilter|null
    */
-  public function getSearch() {
+  public function getSearch(): ?SearchFilter {
     foreach ($this->_query->getFilters() as $filter) {
       if ($filter instanceof SearchFilter) {
         return $filter;
@@ -104,8 +106,9 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
 
   /**
    * @return bool
+   * @noinspection PhpUnused
    */
-  public function hasSearch() {
+  public function hasSearch(): bool {
     return !is_null($this->getSearch());
   }
 }

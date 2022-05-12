@@ -22,22 +22,22 @@ class Gettext extends Component
   /**
    * @var string
    */
-  public $basePath;
+  public string $basePath;
 
   /**
    * @var string[]
    */
-  public $excludeFiles = [];
+  public array $excludeFiles = [];
 
   /**
    * @var string[]
    */
-  public $excludeLanguages = [];
+  public array $excludeLanguages = [];
 
   /**
    * @var AbstractSource[]
    */
-  private $_sources;
+  private array $_sources;
 
   /**
    * Triggered wh
@@ -61,7 +61,7 @@ class Gettext extends Component
    * @param AbstractSource $source
    * @noinspection PhpUnused Public API
    */
-  public function addSource(string $handle, AbstractSource $source) {
+  public function addSource(string $handle, AbstractSource $source): void {
     if (!isset($this->_sources)) {
       $this->getSources();
     }
@@ -72,7 +72,7 @@ class Gettext extends Component
   /**
    * @return void
    */
-  public function compile() {
+  public function compile(): void {
     $sites = Craft::$app->getSites()->getAllSites();
     foreach ($sites as $site) {
       $this->compileSiteTranslations($site);
@@ -142,8 +142,9 @@ class Gettext extends Component
 
   /**
    * @param string $handle
+   * @noinspection PhpUnused Public API
    */
-  public function removeSource(string $handle) {
+  public function removeSource(string $handle): void {
     if (!isset($this->_sources)) {
       $this->getSources();
     }
@@ -167,7 +168,7 @@ class Gettext extends Component
   /**
    * @param Site $site
    */
-  private function compileSiteTranslations(Site $site) {
+  private function compileSiteTranslations(Site $site): void {
     $source = $this->getSiteTranslationSource($site);
     $target = implode(DIRECTORY_SEPARATOR, [
       $this->getSiteTranslationPath($site),
@@ -237,15 +238,15 @@ class Gettext extends Component
     foreach (scandir($path) as $existingName) {
       $existingPath = implode(DIRECTORY_SEPARATOR, [$path, $existingName]);
       if (preg_match('/\.php$/', $existingName)) {
-        $this->mergePhp($translations, $site, $existingPath);
+        $this->mergePhp($translations, $existingPath);
       } elseif (preg_match('/\.po$/', $existingName)) {
-        $this->mergePo($translations, $site, $existingPath);
+        $this->mergePo($translations, $existingPath);
       }
     }
 
     $source = $this->getSiteTranslationSource($site);
     if (file_exists($source)) {
-      $this->mergePo($translations, $site, $source);
+      $this->mergePo($translations, $source);
     }
 
     return $translations;
@@ -253,10 +254,9 @@ class Gettext extends Component
 
   /**
    * @param Translations $translations
-   * @param Site $site
    * @param string $path
    */
-  private function mergePhp(Translations $translations, Site $site, string $path) {
+  private function mergePhp(Translations $translations, string $path): void {
     $messages = require $path;
 
     foreach ($messages as $original => $value) {
@@ -270,10 +270,9 @@ class Gettext extends Component
 
   /**
    * @param Translations $translations
-   * @param Site $site
    * @param string $path
    */
-  private function mergePo(Translations $translations, Site $site, string $path) {
+  private function mergePo(Translations $translations, string $path): void {
     $existing = new Translations();
     $existing->addFromPoFile($path);
     $translations->mergeWith($existing, Merge::TRANSLATION_OVERRIDE | Merge::REFERENCES_OURS);
@@ -282,7 +281,7 @@ class Gettext extends Component
   /**
    * @param Translations $translations
    */
-  private function storeTranslations(Translations $translations) {
+  private function storeTranslations(Translations $translations): void {
     $sites = Craft::$app->getSites()->getAllSites();
     foreach ($sites as $site) {
       if (in_array($site->language, $this->excludeLanguages)) {
@@ -297,7 +296,7 @@ class Gettext extends Component
    * @param Translations $translations
    * @param Site $site
    */
-  private function storeSiteTranslations(Translations $translations, Site $site) {
+  private function storeSiteTranslations(Translations $translations, Site $site): void {
     $this->merge($translations, $site, $this->getSiteTranslationPath($site))
       ->setLanguage($site->language)
       ->toPoFile($this->getSiteTranslationSource($site));
@@ -310,7 +309,7 @@ class Gettext extends Component
    * @param string $type
    * @param string $name
    */
-  static function printSource(string $type, string $name) {
+  static function printSource(string $type, string $name): void {
     echo ' - ' . ucfirst($type) . ' `' . $name . "`\n";
   }
 }

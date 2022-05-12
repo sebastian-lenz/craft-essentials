@@ -6,6 +6,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
+use Traversable;
 
 /**
  * Class Row
@@ -15,7 +16,7 @@ class Row implements ArrayAccess, JsonSerializable, IteratorAggregate
   /**
    * @var array
    */
-  public $attributes;
+  public array $attributes;
 
 
   /**
@@ -31,7 +32,7 @@ class Row implements ArrayAccess, JsonSerializable, IteratorAggregate
    * @param string|int $offset
    * @return mixed
    */
-  public function __get(string $offset) {
+  public function __get(string|int $offset) {
     return array_key_exists($offset, $this->attributes)
       ? $this->attributes[$offset]
       : null;
@@ -41,7 +42,7 @@ class Row implements ArrayAccess, JsonSerializable, IteratorAggregate
    * @param string|int $offset
    * @return bool
    */
-  public function __isset($offset): bool {
+  public function __isset(string|int $offset): bool {
     return array_key_exists($offset, $this->attributes);
   }
 
@@ -49,21 +50,21 @@ class Row implements ArrayAccess, JsonSerializable, IteratorAggregate
    * @param string|int $offset
    * @param mixed $value
    */
-  public function __set($offset, $value) {
+  public function __set(string|int $offset, mixed $value) {
     $this->attributes[$offset] = $value;
   }
 
   /**
    * @param string|int $offset
    */
-  public function __unset($offset) {
+  public function __unset(string|int $offset) {
     unset($this->attributes[$offset]);
   }
 
   /**
    * @inheritDoc
    */
-  public function getIterator() {
+  public function getIterator(): Traversable {
     return new ArrayIterator($this->attributes);
   }
 

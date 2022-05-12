@@ -13,7 +13,7 @@ abstract class AbstractSource
   /**
    * @var Gettext
    */
-  protected $_gettext;
+  protected Gettext $_gettext;
 
 
   /**
@@ -28,5 +28,5 @@ abstract class AbstractSource
   /**
    * @param Translations $translations
    */
-  abstract function extract(Translations $translations);
+  abstract function extract(Translations $translations): void;
 }

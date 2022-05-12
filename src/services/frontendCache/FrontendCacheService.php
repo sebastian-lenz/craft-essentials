@@ -8,8 +8,10 @@ use lenz\craft\essentials\events\CacheDurationEvent;
 use lenz\craft\essentials\events\CacheKeyEvent;
 use lenz\craft\utils\elementCache\ElementCache;
 use yii\base\ActionEvent;
+use yii\base\Application as YiiApplication;
 use yii\base\Component;
 use yii\base\Event;
+use yii\base\Module;
 use yii\base\Response;
 
 /**
@@ -18,19 +20,19 @@ use yii\base\Response;
 class FrontendCacheService extends Component
 {
   /**
-   * @var string
+   * @var string|null
    */
-  private $_cacheKey = null;
+  private ?string $_cacheKey = null;
 
   /**
    * @var bool
    */
-  private $_isIntercepted = false;
+  private bool $_isIntercepted = false;
 
   /**
    * @var FrontendCacheService
    */
-  static private $_instance;
+  static private FrontendCacheService $_instance;
 
   /**
    * Placeholder used to represent CSRF tokens when caching pages.
@@ -70,14 +72,14 @@ class FrontendCacheService extends Component
   /**
    * @return void
    */
-  public function intercept() {
+  public function intercept(): void {
     $this->_isIntercepted = true;
   }
 
   /**
    * @return void
    */
-  public function onAfterRequest() {
+  public function onAfterRequest(): void {
     if (is_null($this->_cacheKey) || $this->_isIntercepted) {
       return;
     }
@@ -85,7 +87,7 @@ class FrontendCacheService extends Component
     $response = Craft::$app->response;
     if (
       $response->statusCode != 200 ||
-      strpos($response->data, 'actions/assets/generate-transform') !== false
+      str_contains($response->data, 'actions/assets/generate-transform')
     ) {
       return;
     }
@@ -104,14 +106,14 @@ class FrontendCacheService extends Component
   /**
    * @return void
    */
-  public function onApplicationInit() {
+  public function onApplicationInit(): void {
     if (!$this->isEnabled()) {
       return;
     }
 
     Event::on(
       Application::class,
-      Application::EVENT_BEFORE_ACTION,
+      Module::EVENT_BEFORE_ACTION,
       [$this, 'onBeforeAction']
     );
   }
@@ -131,7 +133,7 @@ class FrontendCacheService extends Component
       $this->_cacheKey = $cacheKeyEvent->cacheKey;
       Event::on(
         Application::class,
-        Application::EVENT_AFTER_REQUEST,
+        YiiApplication::EVENT_AFTER_REQUEST,
         [$this, 'onAfterRequest']
       );
     } else {
@@ -155,7 +157,7 @@ class FrontendCacheService extends Component
     }
 
     $data = $cacheData['data'];
-    if (strpos($data, self::CSRF_PLACEHOLDER) !== false) {
+    if (str_contains($data, self::CSRF_PLACEHOLDER)) {
       $token = Craft::$app->getRequest()->getCsrfToken();
       $data = str_replace(self::CSRF_PLACEHOLDER, $token, $data);
     }
@@ -180,7 +182,7 @@ class FrontendCacheService extends Component
    * @param string $key
    * @return mixed
    */
-  protected function getCacheData(string $key) {
+  protected function getCacheData(string $key): mixed {
     $cache = ElementCache::getCache();
     $key = $this->getCacheKey($key);
 
@@ -238,7 +240,7 @@ class FrontendCacheService extends Component
       ->general
       ->csrfTokenName;
 
-    if (strpos($data, $tokenName) !== false) {
+    if (str_contains($data, $tokenName)) {
       $token = Craft::$app->getRequest()->getCsrfToken();
       $data = str_replace($token, self::CSRF_PLACEHOLDER, $data);
     }

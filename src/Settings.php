@@ -13,42 +13,43 @@ class Settings extends Model
   /**
    * @var string[]
    */
-  public $cachedRoutes = ['templates/render'];
+  public array $cachedRoutes = ['templates/render'];
 
   /**
    * @var string[]
    */
-  public $dataTables = [];
+  public array $dataTables = [];
 
   /**
    * @var string[]
    */
-  public $disabledLanguages = [];
+  public array $disabledLanguages = [];
 
   /**
    * @var bool
    */
-  public $enableLanguageRedirect = true;
+  public bool $enableLanguageRedirect = true;
 
   /**
    * @var bool
    */
-  public $enableImageCompressor = true;
+  public bool $enableImageCompressor = true;
 
   /**
    * @var bool
    */
-  public $enableImageSharpening = false;
+  public bool $enableImageSharpening = false;
 
   /**
    * @var bool
    */
-  public $enableWebp = false;
+  public bool $enableWebp = false;
 
   /**
    * @var bool
    */
-  public $ensureSiteSegment = true;
+  public bool $ensureSiteSegment = true;
+
 
   /**
    * @inheritDoc
@@ -59,16 +60,7 @@ class Settings extends Model
     $this->enableImageSharpening = !!$this->enableImageSharpening;
     $this->enableWebp = !!$this->enableWebp;
     $this->ensureSiteSegment = !!$this->ensureSiteSegment;
-
     $this->dataTables = self::parseList($this->dataTables);
-
-    $this->cachedRoutes = is_array($this->cachedRoutes)
-      ? $this->cachedRoutes
-      : [];
-
-    $this->disabledLanguages = is_array($this->disabledLanguages)
-      ? $this->disabledLanguages
-      : [];
   }
 
   /**
@@ -106,8 +98,9 @@ class Settings extends Model
    * @param mixed $value
    * @return array
    */
-  static function parseList($value): array {
+  static function parseList(mixed $value): array {
     $list = is_array($value) ? $value : explode("\n", $value);
+
     return array_filter(array_map(function($value) {
       return trim($value);
     }, $list));

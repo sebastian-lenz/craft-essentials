@@ -15,7 +15,7 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @var string|null
    */
-  private $_search = null;
+  private ?string $_search = null;
 
   /**
    * The parameter name of this filter.
@@ -26,7 +26,7 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function display(array $variables = []) {
+  public function display(array $variables = []): void {
     echo Html::input('search', $this->getName(), $this->getValue());
   }
 

@@ -80,7 +80,7 @@ class Translations extends Component
 
     try {
       $currentSite = Craft::$app->getSites()->getCurrentSite();
-    } catch (SiteNotFoundException $exception) {
+    } catch (SiteNotFoundException) {
       $currentSite = null;
     }
 
@@ -120,10 +120,10 @@ class Translations extends Component
   // --------------
 
   /**
-   * @param mixed $element
+   * @param mixed|null $element
    * @return Translation[]
    */
-  static public function forElement($element = null): array {
+  static public function forElement(mixed $element = null): array {
     static $cache;
     if (!($element instanceof ElementInterface)) {
       $element = Craft::$app->getUrlManager()->getMatchedElement();

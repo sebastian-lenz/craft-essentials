@@ -2,12 +2,13 @@
 
 namespace lenz\craft\essentials\services\tables;
 
-use Craft;
+use craft\helpers\App;
 use craft\helpers\Json;
 use Throwable;
 
 /**
  * Class AbstractJsonDataTable
+ * @noinspection PhpUnused
  */
 abstract class AbstractJsonTable extends AbstractTable
 {
@@ -24,24 +25,22 @@ abstract class AbstractJsonTable extends AbstractTable
    * @inheritDoc
    */
   protected function loadRows(): array {
-    $fileName = Craft::parseEnv($this->getFileName());
+    $fileName = App::parseEnv($this->getFileName());
 
     try {
-      $rows = array_map(function($data) {
+      return array_map(function($data) {
         return $this->createRow($data);
       }, Json::decode(file_get_contents($fileName)));
-    } catch (Throwable $error) {
-      $rows = [];
+    } catch (Throwable) {
+      return [];
     }
-
-    return is_array($rows) ? $rows : [];
   }
 
   /**
    * @inheritDoc
    */
   protected function saveRows(array $rows) {
-    $fileName = Craft::parseEnv($this->getFileName());
+    $fileName = App::parseEnv($this->getFileName());
 
     file_put_contents($fileName, Json::encode(array_map(function($row) {
       return $row->attributes;

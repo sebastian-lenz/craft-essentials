@@ -14,26 +14,24 @@ class SvgCleaner extends AbstractCompressor
 
 
   /**
-   * OptiPng constructor.
+   * SvgCleaner constructor.
    */
   public function __construct() {
-    $this->_command = array_key_exists('CMD_SVGCLEANER', $_ENV)
-      ? $_ENV['CMD_SVGCLEANER']
-      : null;
+    $this->_command = $_ENV['CMD_SVGCLEANER'] ?? null;
   }
 
   /**
    * @inheritDoc
    */
-  function canCompress(string $format) {
-    return !is_null($this->_command) && in_array($format, ['svg']);
+  function canCompress(string $format): bool {
+    return !is_null($this->_command) && $format == 'svg';
   }
 
   /**
    * @inheritDoc
    */
-  function compress(string $fileName) {
-    shell_exec($cmd = escapeshellcmd(
+  function compress(string $fileName): bool {
+    shell_exec(escapeshellcmd(
       implode(' ', array_map('escapeshellarg', [
         $this->_command,
         $fileName,

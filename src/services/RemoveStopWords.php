@@ -14,12 +14,12 @@ class RemoveStopWords extends Component
   /**
    * @var string[]
    */
-  public $stopWords;
+  public array $stopWords;
 
   /**
    * @var RemoveStopWords
    */
-  static private $_instance;
+  static private RemoveStopWords $_instance;
 
 
   /**
@@ -38,7 +38,7 @@ class RemoveStopWords extends Component
   /**
    * @return string[]
    */
-  public function getStopWords() {
+  public function getStopWords(): array {
     if (!isset($this->stopWords)) {
       $this->stopWords = require(__DIR__ . '/../../data/stopwords.php');
     }
@@ -86,14 +86,13 @@ class RemoveStopWords extends Component
   }
 
 
-
   // Static methods
   // --------------
 
   /**
    * @return RemoveStopWords
    */
-  public static function getInstance() {
+  public static function getInstance(): RemoveStopWords {
     if (!isset(self::$_instance)) {
       self::$_instance = new RemoveStopWords();
     }

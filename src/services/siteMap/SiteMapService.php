@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\services\siteMap;
 use lenz\craft\essentials\services\siteMap\sources\AbstractSource;
 use lenz\craft\essentials\services\siteMap\sources\EntrySource;
 use yii\base\Component;
+use yii\base\InvalidConfigException;
 
 /**
  * Class SiteMap
@@ -14,7 +15,7 @@ class SiteMapService extends Component
   /**
    * @var SiteMapService
    */
-  static private $_instance;
+  static private SiteMapService $_instance;
 
   /**
    * @var string
@@ -23,17 +24,10 @@ class SiteMapService extends Component
 
 
   /**
-   * SiteMap constructor.
-   * @param array $config
-   */
-  public function __construct($config = []) {
-    parent::__construct($config);
-  }
-
-  /**
    * @return SiteMap
+   * @throws InvalidConfigException
    */
-  public function create() {
+  public function create(): SiteMap {
     $siteMap = new SiteMap();
 
     foreach ($this->getSources() as $source) {
@@ -46,7 +40,7 @@ class SiteMapService extends Component
   /**
    * @return AbstractSource[]
    */
-  public function getSources() {
+  public function getSources(): array {
     return [
       new EntrySource(),
     ];
@@ -59,7 +53,7 @@ class SiteMapService extends Component
   /**
    * @return SiteMapService
    */
-  public static function getInstance() {
+  public static function getInstance(): SiteMapService {
     if (!isset(self::$_instance)) {
       self::$_instance = new SiteMapService();
     }

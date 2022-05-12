@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\services\translations;
 
+use ArrayAccess;
 use craft\base\ElementInterface;
 use craft\models\Site;
 use lenz\craft\utils\models\Attributes;
@@ -15,7 +16,7 @@ use yii\base\BaseObject;
  * @property string $name
  * @property string $url
  */
-class Translation extends BaseObject implements \ArrayAccess
+class Translation extends BaseObject implements ArrayAccess
 {
   /**
    * @var bool
@@ -44,6 +45,7 @@ class Translation extends BaseObject implements \ArrayAccess
 
   /**
    * @return Attributes
+   * @noinspection PhpUnused
    */
   public function getLinkAttributes(): Attributes {
     return new Attributes([
@@ -69,6 +71,7 @@ class Translation extends BaseObject implements \ArrayAccess
 
   /**
    * @return bool
+   * @noinspection PhpUnused
    */
   public function getIsFallback(): bool {
     return is_null($this->target);

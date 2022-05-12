@@ -17,7 +17,7 @@ class CacheKeyEvent extends Event
   /**
    * @var string|null
    */
-  public $cacheKey = null;
+  public ?string $cacheKey = null;
 
 
   /**
@@ -35,7 +35,7 @@ class CacheKeyEvent extends Event
   /**
    * @return bool
    */
-  private function generateCacheKey() {
+  private function generateCacheKey(): bool {
     $request = Craft::$app->request;
     if (!($request instanceof Request)) {
       return true;
@@ -62,14 +62,14 @@ class CacheKeyEvent extends Event
    * @param string $path
    * @return array|false
    */
-  static public function getFlattened($items, $path = '') {
-    $result = array();
+  static public function getFlattened(array $items, string $path = ''): array|false {
+    $result = [];
 
     foreach ($items as $key => $item) {
       if ($item instanceof Element) {
         $result[] = $path . $key . '=' . $item->getId();
       } elseif (is_string($item) || is_numeric($item)) {
-        $result[] = $path . $key . '=' . (string)$item;
+        $result[] = $path . $key . '=' . $item;
       } elseif (is_array($item)) {
         $flattened = self::getFlattened($item, $path . $key . '.');
         if ($flattened === false) return false;
@@ -84,12 +84,12 @@ class CacheKeyEvent extends Event
   }
 
   /**
-   * @return string
+   * @return string|null
    */
-  static public function getUrlCacheKey() {
+  static public function getUrlCacheKey(): ?string {
     try {
       return 'url:' . Craft::$app->request->getUrl();
-    } catch (Throwable $error) {
+    } catch (Throwable) {
       return null;
     }
   }
@@ -97,7 +97,7 @@ class CacheKeyEvent extends Event
   /**
    * @return string
    */
-  static public function getRouteCacheKey() {
+  static public function getRouteCacheKey(): string {
     $request = Craft::$app->request;
     $params  = Craft::$app->getUrlManager()->getRouteParams();
     if (!is_array($params)) {

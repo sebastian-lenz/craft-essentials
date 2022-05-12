@@ -19,7 +19,7 @@ class DisabledLanguages extends Component
   /**
    * @var DisabledLanguages
    */
-  static private $_instance;
+  static private DisabledLanguages $_instance;
 
 
   /**
@@ -40,7 +40,7 @@ class DisabledLanguages extends Component
   /**
    * @return string[]
    */
-  public function getDisabledLanguages() {
+  public function getDisabledLanguages(): array {
     return Plugin::getInstance()
       ->getSettings()
       ->disabledLanguages;
@@ -49,7 +49,7 @@ class DisabledLanguages extends Component
   /**
    * @return bool
    */
-  public function hasDisabledLanguages() {
+  public function hasDisabledLanguages(): bool {
     return count($this->getDisabledLanguages()) > 0;
   }
 
@@ -57,7 +57,7 @@ class DisabledLanguages extends Component
    * @param string $language
    * @return bool
    */
-  public function isLanguageDisabled($language) {
+  public function isLanguageDisabled(string $language): bool {
     return in_array($language, $this->getDisabledLanguages());
   }
 
@@ -65,7 +65,7 @@ class DisabledLanguages extends Component
    * @param SetElementRouteEvent $event
    * @throws NotFoundHttpException
    */
-  public function onElementSetRoute(SetElementRouteEvent $event) {
+  public function onElementSetRoute(SetElementRouteEvent $event): void {
     /** @var Entry $entry */
     $entry = $event->sender;
 
@@ -84,7 +84,7 @@ class DisabledLanguages extends Component
   /**
    * @return DisabledLanguages
    */
-  public static function getInstance() {
+  public static function getInstance(): DisabledLanguages {
     if (!isset(self::$_instance)) {
       self::$_instance = new DisabledLanguages();
     }

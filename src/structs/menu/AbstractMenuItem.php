@@ -10,6 +10,8 @@ use yii\base\InvalidConfigException;
 
 /**
  * Class AbstractMenuItem
+ * @template T of AbstractMenu
+ * @extends AbstractStructureItem<T>
  */
 abstract class AbstractMenuItem extends AbstractStructureItem
 {

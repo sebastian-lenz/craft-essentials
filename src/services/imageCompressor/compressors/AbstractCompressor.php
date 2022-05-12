@@ -12,13 +12,13 @@ abstract class AbstractCompressor
    * @param string $format
    * @return bool
    */
-  abstract function canCompress(string $format);
+  abstract function canCompress(string $format): bool;
 
   /**
    * @param string $fileName
    * @return bool
    */
-  abstract function compress(string $fileName);
+  abstract function compress(string $fileName): bool;
 
 
   // Static methods
@@ -27,7 +27,7 @@ abstract class AbstractCompressor
   /**
    * @return array
    */
-  static public function createCompressors() {
+  static public function createCompressors(): array {
     return [
       new JpegOptim(),
       new OptiPng(),

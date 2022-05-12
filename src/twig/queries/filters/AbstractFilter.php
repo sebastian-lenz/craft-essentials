@@ -15,25 +15,25 @@ abstract class AbstractFilter extends BaseObject
   /**
    * @var string
    */
-  public $label;
+  public string $label;
 
   /**
    * @var string
    */
-  public $type;
+  public string $type;
 
 
   /**
    * @return bool
    */
-  public function allowCustomFilter() {
+  public function allowCustomFilter(): bool {
     return true;
   }
 
   /**
    * @return string|null
    */
-  public function getDescription() {
+  public function getDescription(): ?string {
     return null;
   }
 
@@ -48,12 +48,12 @@ abstract class AbstractFilter extends BaseObject
    * @param AbstractQuery $owner
    * @param ElementQuery $query
    */
-  public function prepareQuery(AbstractQuery $owner, ElementQuery $query) { }
+  public function prepareQuery(AbstractQuery $owner, ElementQuery $query): void { }
 
   /**
    * @param Request $request
    */
-  public function setRequest(Request $request) { }
+  public function setRequest(Request $request): void { }
 
 
   // Static methods
@@ -63,7 +63,7 @@ abstract class AbstractFilter extends BaseObject
    * @param array $config
    * @return static
    */
-  static public function create(array $config = []) {
+  static public function create(array $config = []): static {
     return new static($config);
   }
 }

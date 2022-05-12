@@ -14,7 +14,7 @@ abstract class AbstractJob extends BaseJob
    * AbstractJob constructor.
    * @param array $config
    */
-  public function __construct($config = []) {
+  public function __construct(array $config = []) {
     parent::__construct($config);
 
     if (empty($this->description)) {
@@ -26,7 +26,7 @@ abstract class AbstractJob extends BaseJob
   /**
    * @inheritDoc
    */
-  public function execute($queue) {
+  public function execute($queue): void {
     $fileName = $this->getFileName();
     $format = $this->getFormat();
     if (is_null($fileName) || is_null($format) || !file_exists($fileName)) {
@@ -53,7 +53,7 @@ abstract class AbstractJob extends BaseJob
   /**
    * @return void
    */
-  protected function afterExecution() { }
+  protected function afterExecution(): void { }
 
   /**
    * @return string|null

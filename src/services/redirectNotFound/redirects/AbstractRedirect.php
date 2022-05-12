@@ -33,7 +33,7 @@ abstract class AbstractRedirect
   /**
    * @param string $url
    */
-  protected function sendRedirect(string $url) {
+  protected function sendRedirect(string $url): void {
     $response = new Response();
     $response->redirect($url, 301)->send();
     die();

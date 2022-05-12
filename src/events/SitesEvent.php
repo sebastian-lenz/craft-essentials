@@ -13,5 +13,5 @@ class SitesEvent extends Event
   /**
    * @var Site[]
    */
-  public $sites;
+  public array $sites;
 }

@@ -14,7 +14,7 @@ class CpElementsSource extends AbstractSource
   /**
    * @inheritDoc
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     foreach (Craft::$app->getCategories()->getAllGroups() as $group) {
       $this->insert($translations, 'craft:category/' . $group->handle, $group->name);
     }
@@ -35,7 +35,7 @@ class CpElementsSource extends AbstractSource
    * @param Translations $translations
    * @param Section $section
    */
-  private function extractSection(Translations $translations, Section $section) {
+  private function extractSection(Translations $translations, Section $section): void {
     $hint = 'craft:section/' . $section->handle;
     $this->insert($translations, $hint, $section->name);
 
@@ -49,7 +49,7 @@ class CpElementsSource extends AbstractSource
    * @param string $hint
    * @param string $original
    */
-  private function insert(Translations $translations, string $hint, string $original) {
+  private function insert(Translations $translations, string $hint, string $original): void {
     $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $result->addReference($hint);

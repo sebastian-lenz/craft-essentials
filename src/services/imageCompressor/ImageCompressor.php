@@ -7,7 +7,6 @@ use craft\base\Element;
 use craft\elements\Asset;
 use craft\events\GenerateTransformEvent;
 use craft\events\ModelEvent;
-use craft\services\AssetTransforms;
 use lenz\craft\essentials\Plugin;
 use yii\base\Component;
 use yii\base\Event;
@@ -20,7 +19,7 @@ class ImageCompressor extends Component
   /**
    * @var ImageCompressor
    */
-  static private $_instance;
+  static private ImageCompressor $_instance;
 
 
   /**
@@ -47,12 +46,15 @@ class ImageCompressor extends Component
     );
 
     Event::on(
-      AssetTransforms::class,
-      AssetTransforms::EVENT_GENERATE_TRANSFORM,
+      Asset::class,
+      Asset::EVENT_AFTER_GENERATE_TRANSFORM,
       function(GenerateTransformEvent $event) {
         if ($event->asset->kind == Asset::KIND_IMAGE) {
+          $transformIndex = ImageTransformer::getInstance()
+            ->getTransformIndex($event->asset, $event->transform);
+
           Craft::$app->getQueue()->push(new jobs\TransformIndexJob([
-            'transformIndexId' => $event->transformIndex->id,
+            'transformIndexId' => $transformIndex->id,
           ]));
         }
       }

@@ -12,7 +12,7 @@ class SitemapAsset extends AssetBundle
   /**
    * @return void
    */
-  public function init() {
+  public function init(): void {
     $this->sourcePath = __DIR__ . '/sitemap';
     parent::init();
   }

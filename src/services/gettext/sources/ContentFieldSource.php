@@ -18,7 +18,7 @@ class ContentFieldSource extends AbstractSource
   /**
    * @inheritDoc
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     $schemas = Plugin::getInstance()->schemas->getAllSchemas();
     foreach ($schemas as $schema) {
       $this->extractSchema($translations, $schema);
@@ -33,7 +33,7 @@ class ContentFieldSource extends AbstractSource
    * @param AbstractSchema $schema
    * @param AbstractField $field
    */
-  private function extractField(Translations $translations, AbstractSchema $schema, AbstractField $field) {
+  private function extractField(Translations $translations, AbstractSchema $schema, AbstractField $field): void {
     $this->insert($translations, $schema, $field->label);
     $this->insert($translations, $schema, $field->instructions);
 
@@ -46,7 +46,7 @@ class ContentFieldSource extends AbstractSource
    * @param Translations $translations
    * @param AbstractSchema $schema
    */
-  private function extractSchema(Translations $translations, AbstractSchema $schema) {
+  private function extractSchema(Translations $translations, AbstractSchema $schema): void {
     $this->insert($translations, $schema, $schema->label);
 
     foreach ($schema->fields as $field) {
@@ -65,7 +65,7 @@ class ContentFieldSource extends AbstractSource
    * @param AbstractSchema $schema
    * @param SelectField $field
    */
-  private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field) {
+  private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field): void {
     $enumeration = $field->getEnumeration();
     if ($enumeration instanceof UntranslatedModel) {
       return;
@@ -81,7 +81,7 @@ class ContentFieldSource extends AbstractSource
    * @param AbstractSchema $schema
    * @param mixed $original
    */
-  private function insert(Translations $translations, AbstractSchema $schema, $original) {
+  private function insert(Translations $translations, AbstractSchema $schema, mixed $original): void {
     if (!is_string($original) || empty($original)) {
       return;
     }

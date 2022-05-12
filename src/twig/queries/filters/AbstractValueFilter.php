@@ -13,7 +13,7 @@ abstract class AbstractValueFilter extends AbstractFilter
   /**
    * @return string
    */
-  abstract function getName() : string;
+  abstract function getName(): string;
 
   /**
    * @param string $value
@@ -23,7 +23,7 @@ abstract class AbstractValueFilter extends AbstractFilter
   /**
    * @inheritDoc
    */
-  public function getParameters() : array {
+  public function getParameters(): array {
     $value = $this->getValue();
     if (empty($value)) {
       return [];
@@ -37,14 +37,14 @@ abstract class AbstractValueFilter extends AbstractFilter
   /**
    * @return string|UrlParameter|null
    */
-  public function getValue() {
+  public function getValue(): UrlParameter|string|null {
     return null;
   }
 
   /**
    * @param Request $request
    */
-  public function setRequest(Request $request) {
+  public function setRequest(Request $request): void {
     if ($this->allowCustomFilter()) {
       $custom = $request->getParam($this->getName());
 

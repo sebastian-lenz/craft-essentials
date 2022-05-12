@@ -5,16 +5,13 @@ namespace lenz\craft\essentials\services\tables;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
-use craft\base\Serializable;
-use craft\helpers\DateTimeHelper;
-use craft\helpers\Db;
 use craft\helpers\Html;
 use lenz\craft\essentials\Plugin;
 use Throwable;
-use yii\base\Arrayable;
 
 /**
  * Class AbstractTableField
+ * @noinspection PhpUnused
  */
 abstract class AbstractTableField extends Field
 {
@@ -66,7 +63,7 @@ abstract class AbstractTableField extends Field
    * @return string
    * @throws Throwable
    */
-  protected function inputHtml($value, ElementInterface $element = null): string {
+  protected function inputHtml(mixed $value, ElementInterface $element = null): string {
     $selected = $value instanceof Row ? $this->getRowId($value) : null;
     $id = Html::id($this->handle);
     $options = [];
@@ -94,7 +91,7 @@ abstract class AbstractTableField extends Field
   /**
    * @inheritDoc
    */
-  public function normalizeValue($value, ElementInterface $element = null) {
+  public function normalizeValue(mixed $value, ElementInterface $element = null): ?Row {
     if ($value instanceof Row) {
       return $value;
     }
@@ -107,7 +104,7 @@ abstract class AbstractTableField extends Field
   /**
    * @inheritDoc
    */
-  public function serializeValue($value, ElementInterface $element = null) {
+  public function serializeValue(mixed $value, ElementInterface $element = null): ?string {
     return $value instanceof Row
       ? $this->getRowId($value)
       : null;

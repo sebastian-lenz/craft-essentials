@@ -14,7 +14,7 @@ abstract class AbstractService extends Component
   /**
    * @var AbstractService[]
    */
-  static private $_INSTANCES = [];
+  static private array $_INSTANCES = [];
 
 
   /**

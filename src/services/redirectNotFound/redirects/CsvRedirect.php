@@ -12,7 +12,7 @@ class CsvRedirect extends AbstractRedirect
   /**
    * @var string
    */
-  private $_fileName;
+  private string $_fileName;
 
 
   /**
@@ -33,7 +33,7 @@ class CsvRedirect extends AbstractRedirect
     $url    = trim($request->url, '/');
     $handle = fopen($this->_fileName, 'r');
 
-    while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+    while (($data = fgetcsv($handle, 1000)) !== false) {
       if (count($data) >= 2 && trim($data[0], '/') == $url) {
         $result = trim($data[1]);
         break;

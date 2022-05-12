@@ -19,7 +19,7 @@ class CacheDurationEvent extends Event
   /**
    * @var int
    */
-  public $duration = 0;
+  public int $duration = 0;
 
   /**
    * Key used to store the default cache duration.
@@ -40,10 +40,37 @@ class CacheDurationEvent extends Event
   }
 
   /**
+   * @param DateTime $value
+   * @noinspection PhpUnused
+   */
+  public function setMinDate(DateTime $value): void {
+    $this->setMinDuration($value->getTimestamp() - time());
+  }
+
+  /**
+   * @param int $value
+   */
+  public function setMinDuration(int $value): void {
+    if ($value <= 0) {
+      return;
+    }
+
+    if ($this->duration == 0) {
+      $this->duration = $value;
+    } else {
+      $this->duration = min($this->duration, $value);
+    }
+  }
+
+
+  // Private methods
+  // ---------------
+
+  /**
    * @return DateTime|null
    * @throws Exception
    */
-  private function getNextEntryChangeDate() {
+  private function getNextEntryChangeDate(): ?DateTime {
     $now = (new DateTime('now', new DateTimeZone('UTC')))
       ->format('Y-m-d H:i:s');
 
@@ -80,7 +107,7 @@ class CacheDurationEvent extends Event
    * @return int
    * @throws Exception
    */
-  private function getDurationTillNextEntryChange() {
+  private function getDurationTillNextEntryChange(): int {
     $entry = $this->getNextEntryChangeDate();
 
     if (is_null($entry)) {
@@ -93,7 +120,7 @@ class CacheDurationEvent extends Event
   /**
    * @return int
    */
-  private function getDefaultDuration() {
+  private function getDefaultDuration(): int {
     $cache = Plugin::getInstance()->elementCache->cache;
     $duration = $cache->get(self::CACHE_KEY);
 
@@ -108,7 +135,7 @@ class CacheDurationEvent extends Event
         );
 
         $duration = $event->duration;
-      } catch (Throwable $error) {
+      } catch (Throwable) {
         $duration = 0;
       }
 
@@ -116,25 +143,5 @@ class CacheDurationEvent extends Event
     }
 
     return $duration;
-  }
-
-  /**
-   * @param DateTime $value
-   * @noinspection PhpUnused
-   */
-  public function setMinDate(DateTime $value) {
-    $this->setMinDuration($value->getTimestamp() - time());
-  }
-
-  /**
-   * @param int $value
-   */
-  public function setMinDuration($value) {
-    if ($value <= 0) return;
-    if ($this->duration == 0) {
-      $this->duration = $value;
-    } else {
-      $this->duration = min($this->duration, $value);
-    }
   }
 }

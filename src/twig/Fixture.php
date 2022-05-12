@@ -20,7 +20,7 @@ class Fixture
    * @param string $name
    * @return mixed
    */
-  static public function get(string $name) {
+  static public function get(string $name): mixed {
     if (!array_key_exists($name, self::$FIXTURES)) {
       self::$FIXTURES[$name] = self::load($name);
     }
@@ -32,7 +32,7 @@ class Fixture
    * @param string $name
    * @return mixed
    */
-  static public function load(string $name) {
+  static public function load(string $name): mixed {
     return Yaml::parseFile(App::parseEnv("@config/fixtures/$name.yml"), Yaml::PARSE_OBJECT);
   }
 }

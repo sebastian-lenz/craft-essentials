@@ -2,9 +2,7 @@
 
 namespace lenz\craft\essentials\services\redirectNotFound\redirects;
 
-use Craft;
 use craft\web\Request;
-use craft\web\Response;
 use lenz\craft\essentials\Plugin;
 
 /**

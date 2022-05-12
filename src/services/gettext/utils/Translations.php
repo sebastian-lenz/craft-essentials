@@ -19,7 +19,7 @@ class Translations extends BaseTranslations
   /**
    * @return Translations
    */
-  public function clone() {
+  public function clone(): Translations {
     $result = new Translations();
     $result->addFromPoString($this->toPoString());
     return $result;
@@ -29,7 +29,7 @@ class Translations extends BaseTranslations
    * @param string $original
    * @return Translation|null
    */
-  public function insertCp($original) {
+  public function insertCp(string $original): ?Translation {
     if (empty($original)) {
       return null;
     }

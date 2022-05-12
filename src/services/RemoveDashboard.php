@@ -6,9 +6,9 @@ use Craft;
 use craft\events\RegisterCpNavItemsEvent;
 use craft\web\Application;
 use craft\web\twig\variables\Cp;
-use yii\base\BaseObject;
 use yii\base\Component;
 use yii\base\Event;
+use yii\base\Module;
 
 /**
  * Class RemoveDashboard
@@ -18,7 +18,7 @@ class RemoveDashboard extends Component
   /**
    * @var RemoveDashboard
    */
-  static private $_instance;
+  static private RemoveDashboard $_instance;
 
 
   /**
@@ -43,7 +43,7 @@ class RemoveDashboard extends Component
 
       Event::on(
         Application::class,
-        Application::EVENT_BEFORE_ACTION,
+        Module::EVENT_BEFORE_ACTION,
         function() {
           $request = Craft::$app->getRequest();
           if ($request->getSegment(1) == 'dashboard') {

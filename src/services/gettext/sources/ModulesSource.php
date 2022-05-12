@@ -22,7 +22,7 @@ class ModulesSource extends AbstractSource
    * @inheritDoc
    * @throws Exception
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     foreach (array_keys($this->getModules()) as $module) {
       $path = $this->getModulePath($module);
       if (is_null($path)) {
@@ -42,7 +42,7 @@ class ModulesSource extends AbstractSource
    * @param string $path
    * @throws Exception
    */
-  private function extractFile(Translations $translations, string $path) {
+  private function extractFile(Translations $translations, string $path): void {
     Gettext::printSource('file', $path);
 
     $scanner = new PhpFunctionsScanner(file_get_contents($path));
@@ -60,7 +60,7 @@ class ModulesSource extends AbstractSource
    * @param string $basePath
    * @throws Exception
    */
-  private function extractModule(Translations $translations, string $basePath) {
+  private function extractModule(Translations $translations, string $basePath): void {
     $dirIterator = new RecursiveDirectoryIterator($basePath);
     $iterator    = new RecursiveIteratorIterator($dirIterator);
 
@@ -76,11 +76,11 @@ class ModulesSource extends AbstractSource
   /**
    * @return array
    */
-  private function getModules() {
+  private function getModules(): array {
     try {
       $config = Craft::$app->config->getConfigFromFile('app');
       return ArrayHelper::getValue($config, ['modules'], []);
-    } catch (Throwable $error) {
+    } catch (Throwable) {
       echo "\nError: Could not load module configuration.";
     }
 

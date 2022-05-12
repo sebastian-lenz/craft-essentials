@@ -6,11 +6,12 @@ use craft\db\ActiveRecord;
 
 /**
  * Class AbstractRecordDataTable
+ * @noinspection PhpUnused
  */
 abstract class AbstractRecordTable extends AbstractTable
 {
   /**
-   * @return string|ActiveRecord
+   * @return class-string<ActiveRecord>
    */
   abstract function getRecordClass(): string;
 
@@ -22,6 +23,7 @@ abstract class AbstractRecordTable extends AbstractTable
    * @param ActiveRecord $record
    * @param Row $row
    * @return bool
+   * @noinspection PhpUnusedParameterInspection
    */
   protected function isRecordEqual(ActiveRecord $record, Row $row): bool {
     return false;

@@ -10,6 +10,7 @@ use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\foreignField\listeners\RegisterCpTemplates;
 use Throwable;
 use yii\base\Event;
+use yii\base\InvalidConfigException;
 
 /**
  * Class Plugin
@@ -33,16 +34,17 @@ class Plugin extends \craft\base\Plugin
   /**
    * @inheritDoc
    */
-  public $hasCpSettings = true;
+  public bool $hasCpSettings = true;
 
   /**
    * @inheritDoc
    */
-  public $schemaVersion = '1.2.0';
+  public string $schemaVersion = '1.2.0';
 
 
   /**
    * @inheritDoc
+   * @throws InvalidConfigException
    */
   public function init() {
     parent::init();

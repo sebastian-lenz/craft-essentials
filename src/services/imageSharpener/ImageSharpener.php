@@ -2,9 +2,9 @@
 
 namespace lenz\craft\essentials\services\imageSharpener;
 
-use craft\events\GenerateTransformEvent;
+use craft\events\ImageTransformerOperationEvent;
 use craft\image\Raster;
-use craft\services\AssetTransforms;
+use craft\imagetransforms\ImageTransformer;
 use Imagine\Imagick\Image;
 use lenz\craft\essentials\Plugin;
 use yii\base\Component;
@@ -18,7 +18,7 @@ class ImageSharpener extends Component
   /**
    * @var ImageSharpener
    */
-  static private $_instance;
+  static private ImageSharpener $_instance;
 
 
   /**
@@ -30,9 +30,9 @@ class ImageSharpener extends Component
     }
 
     Event::on(
-      AssetTransforms::class,
-      AssetTransforms::EVENT_GENERATE_TRANSFORM,
-      function(GenerateTransformEvent $event) {
+      ImageTransformer::class,
+      ImageTransformer::EVENT_TRANSFORM_IMAGE,
+      function(ImageTransformerOperationEvent $event) {
         if ($event->image instanceof Raster) {
           $image = $event->image->getImagineImage();
           if ($image instanceof Image) {

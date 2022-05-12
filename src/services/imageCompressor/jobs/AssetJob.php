@@ -4,7 +4,8 @@ namespace lenz\craft\essentials\services\imageCompressor\jobs;
 
 use Craft;
 use craft\elements\Asset;
-use craft\errors\AssetLogicException;
+use craft\errors\AssetOperationException;
+use craft\helpers\ImageTransforms;
 use Throwable;
 
 /**
@@ -15,17 +16,17 @@ class AssetJob extends AbstractJob
   /**
    * @var int|null
    */
-  public $assetId = null;
+  public ?int $assetId = null;
 
   /**
    * @var Asset|null
    */
-  private $_asset;
+  private ?Asset $_asset;
 
   /**
    * @var string|null
    */
-  private $_format;
+  private ?string $_format;
 
 
   // Protected methods
@@ -34,7 +35,7 @@ class AssetJob extends AbstractJob
   /**
    * @return void
    */
-  protected function afterExecution() {
+  protected function afterExecution(): void {
     $asset = $this->getAsset();
     $fileName = $this->getFileName();
     if (is_null($asset) || is_null($fileName)) {
@@ -49,7 +50,7 @@ class AssetJob extends AbstractJob
     try {
       $asset->size = $size;
       Craft::$app->elements->saveElement($asset);
-    } catch (Throwable $e) {
+    } catch (Throwable) {
       // Ignore this
     }
   }
@@ -66,7 +67,7 @@ class AssetJob extends AbstractJob
 
   /**
    * @inheritDoc
-   * @throws AssetLogicException
+   * @throws AssetOperationException
    */
   protected function getFormat(): ?string {
     if (isset($this->_format)) {
@@ -78,9 +79,7 @@ class AssetJob extends AbstractJob
       return $this->_format = null;
     }
 
-    return $this->_format = Craft::$app
-      ->assetTransforms
-      ->detectAutoTransformFormat($asset);
+    return $this->_format = ImageTransforms::detectTransformFormat($asset);
   }
 
 

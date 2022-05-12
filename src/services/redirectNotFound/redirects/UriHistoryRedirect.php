@@ -23,8 +23,8 @@ class UriHistoryRedirect extends AbstractRedirect
       'uri' => $request->getPathInfo(),
     ]);
 
-    $element = $history ? $history->getElement() : null;
-    $url = $element ? $element->getUrl() : null;
+    $element = $history?->getElement();
+    $url = $element?->getUrl();
     if (is_null($url)) {
       return false;
     }

@@ -3,10 +3,12 @@
 namespace lenz\craft\essentials\services\imageCompressor\jobs;
 
 use Craft;
+use craft\base\LocalFsInterface;
 use craft\elements\Asset;
-use craft\errors\AssetLogicException;
-use craft\models\AssetTransformIndex;
-use craft\volumes\Local;
+use craft\errors\AssetOperationException;
+use craft\helpers\ImageTransforms;
+use craft\models\ImageTransformIndex;
+use lenz\craft\essentials\services\imageCompressor\ImageTransformer;
 use yii\base\InvalidConfigException;
 
 /**
@@ -17,27 +19,27 @@ class TransformIndexJob extends AbstractJob
   /**
    * @var int|null
    */
-  public $transformIndexId;
+  public ?int $transformIndexId;
 
   /**
    * @var Asset|null
    */
-  private $_asset;
+  private ?Asset $_asset;
 
   /**
    * @var string|null
    */
-  private $_fileName;
+  private ?string $_fileName;
 
   /**
    * @var string|null
    */
-  private $_format;
+  private ?string $_format;
 
   /**
-   * @var AssetTransformIndex|null
+   * @var ImageTransformIndex|null
    */
-  private $_transformIndex;
+  private ?ImageTransformIndex $_transformIndex;
 
 
   // Protected methods
@@ -58,7 +60,8 @@ class TransformIndexJob extends AbstractJob
 
   /**
    * @inheritDoc
-   * @throws AssetLogicException
+   * @throws AssetOperationException
+   * @throws InvalidConfigException
    */
   protected function getFormat(): ?string {
     if (isset($this->_format)) {
@@ -70,13 +73,9 @@ class TransformIndexJob extends AbstractJob
       return $this->_format = null;
     }
 
-    if (!empty($index->format)) {
-      return $this->_format = $index->format;
-    }
-
-    return $this->_format = Craft::$app
-      ->assetTransforms
-      ->detectAutoTransformFormat($this->getAsset());
+    return $this->_format = (empty($index->format)
+      ? ImageTransforms::detectTransformFormat($this->getAsset())
+      : $index->format);
   }
 
 
@@ -85,6 +84,7 @@ class TransformIndexJob extends AbstractJob
 
   /**
    * @return Asset|null
+   * @throws InvalidConfigException
    */
   private function getAsset(): ?Asset {
     if (isset($this->_asset)) {
@@ -98,9 +98,10 @@ class TransformIndexJob extends AbstractJob
   }
 
   /**
-   * @return AssetTransformIndex|null
+   * @return ImageTransformIndex|null
+   * @throws InvalidConfigException
    */
-  private function getTransformIndex(): ?AssetTransformIndex {
+  private function getTransformIndex(): ?ImageTransformIndex {
     if (isset($this->_transformIndex)) {
       return $this->_transformIndex;
     }
@@ -109,9 +110,10 @@ class TransformIndexJob extends AbstractJob
       return $this->_transformIndex = null;
     }
 
-    return $this->_transformIndex = Craft::$app
-      ->assetTransforms
+    $this->_transformIndex = ImageTransformer::getInstance()
       ->getTransformIndexModelById($this->transformIndexId);
+
+    return $this->_transformIndex;
   }
 
 
@@ -119,27 +121,25 @@ class TransformIndexJob extends AbstractJob
   // --------------
 
   /**
-   * @param AssetTransformIndex|null $index
+   * @param ImageTransformIndex|null $index
    * @param Asset|null $asset
    * @return string|null
    * @throws InvalidConfigException
    */
-  static public function resolveTransformFileName(?AssetTransformIndex $index, ?Asset $asset = null): ?string {
+  static public function resolveTransformFileName(?ImageTransformIndex $index, ?Asset $asset = null): ?string {
     if (is_null($index)) {
       return null;
     }
 
-    $transforms = Craft::$app->getAssetTransforms();
     $asset = $asset ?? Craft::$app->getAssets()->getAssetById($index->assetId);
-    $volume = $asset->getVolume();
-    if (!($volume instanceof Local)) {
+    $fileSystem = $asset->getVolume()->getFs();
+    if (!($fileSystem instanceof LocalFsInterface)) {
       return null;
     }
 
-    return implode('', [
-      $volume->getRootPath(), DIRECTORY_SEPARATOR,
-      $asset->folderPath,
-      $transforms->getTransformSubpath($asset, $index)
+    return implode(DIRECTORY_SEPARATOR, [
+      $fileSystem->getRootPath(),
+      ImageTransformer::getInstance()->getTransformPath($asset, $index)
     ]);
   }
 }

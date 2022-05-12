@@ -15,7 +15,7 @@ class EventLoader extends AbstractLoader
   /**
    * @inheritDoc
    */
-  public function load(ElementInterface $element) {
+  public function load(ElementInterface $element): array|false {
     if (!($element instanceof Event)) {
       return false;
     }

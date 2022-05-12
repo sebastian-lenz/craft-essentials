@@ -2,8 +2,6 @@
 
 namespace lenz\craft\essentials\twig;
 
-use craft\helpers\App;
-use craft\helpers\StringHelper;
 use Exception;
 use lenz\craft\essentials\helpers\ElementHelper;
 use lenz\craft\essentials\helpers\HtmlHelper;
@@ -12,7 +10,6 @@ use lenz\craft\essentials\services\MailEncoder;
 use lenz\craft\essentials\services\translations\Translations;
 use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\models\Attributes;
-use Symfony\Component\Yaml\Yaml;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -68,7 +65,7 @@ class Extension extends AbstractExtension
       $this->_commitHash = ElementCache::with(self::CACHE_COMMIT, function() {
         try {
           return substr(shell_exec('git rev-parse HEAD'), 0, 7);
-        } catch (Exception $e) {
+        } catch (Exception) {
           return '0000000';
         }
       });
@@ -87,7 +84,7 @@ class Extension extends AbstractExtension
   /**
    * @return void
    */
-  public function interceptCache() {
+  public function interceptCache(): void {
     Plugin::getInstance()->frontendCache->intercept();
   }
 }

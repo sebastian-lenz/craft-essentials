@@ -2,7 +2,10 @@
 
 namespace lenz\craft\essentials\services\siteMap;
 
+use Craft;
 use craft\helpers\Html;
+use DateTime;
+use DateTimeInterface;
 use lenz\craft\essentials\assets\SitemapAsset;
 
 /**
@@ -13,15 +16,15 @@ class SiteMap
   /**
    * @var string[]
    */
-  private $_buffer = [];
+  private array $_buffer = [];
 
 
   /**
    * @param string $loc
-   * @param \DateTime|null $lastMod
+   * @param DateTime|null $lastMod
    * @param string|null $content
    */
-  public function addUrl(string $loc, \DateTime $lastMod = null, string $content = null) {
+  public function addUrl(string $loc, DateTime $lastMod = null, string $content = null): void {
     $chunks = [
       '<url><loc>',
       $this->xmlEncode($loc),
@@ -30,13 +33,13 @@ class SiteMap
 
     if (!is_null($lastMod)) {
       $chunks[] = '<lastmod>';
-      $chunks[] = $lastMod->format(\DateTime::ATOM);
+      $chunks[] = $lastMod->format(DateTimeInterface::ATOM);
       $chunks[] = '</lastmod>';
-    };
+    }
 
     if (!is_null($content)) {
       $chunks[] = $content;
-    };
+    }
 
     $chunks[] = '</url>';
     $this->append(implode('', $chunks));
@@ -44,9 +47,11 @@ class SiteMap
 
   /**
    * @return string
+   * @noinspection HttpUrlsUsage
+   * @noinspection XmlUnusedNamespaceDeclaration
    */
   public function getXml(): string {
-    $bundle = SitemapAsset::register(\Craft::$app->view);
+    $bundle = SitemapAsset::register(Craft::$app->view);
 
     return implode("\n", [
       '<?xml version="1.0" encoding="UTF-8"?>',
@@ -64,7 +69,7 @@ class SiteMap
   /**
    * @param string $value
    */
-  private function append(string $value) {
+  private function append(string $value): void {
     $this->_buffer[] = $value;
   }
 
@@ -74,9 +79,9 @@ class SiteMap
 
   /**
    * @param string $value
-   * @return string|string[]
+   * @return string
    */
-  static public function xmlEncode(string $value) {
+  static public function xmlEncode(string $value): string {
     return str_replace(
       ['&', "'", '"', '>', '<'],
       ['&amp;', '&apos;', '&quot;', '&gt', '&lt'],
@@ -88,7 +93,7 @@ class SiteMap
    * @param array $attributes
    * @return string
    */
-  static public function xmlLink(array $attributes) {
+  static public function xmlLink(array $attributes): string {
     return '<xhtml:link' . Html::renderTagAttributes($attributes) . '/>';
   }
 }

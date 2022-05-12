@@ -13,7 +13,7 @@ abstract class AbstractLoader
    * @param ElementInterface $element
    * @return ElementInterface[]|false
    */
-  abstract public function load(ElementInterface $element);
+  abstract public function load(ElementInterface $element): array|false;
 
 
   // Static methods
@@ -22,7 +22,7 @@ abstract class AbstractLoader
   /**
    * @return AbstractLoader[]
    */
-  static public function getLoaders() {
+  static public function getLoaders(): array {
     return [
       new EntryLoader(),
       new EventLoader(),

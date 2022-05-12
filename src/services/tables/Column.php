@@ -13,37 +13,37 @@ class Column extends BaseObject
   /**
    * @var array
    */
-  public $classNames = [];
+  public array $classNames = [];
 
   /**
    * @var array|null
    */
-  public $config = null;
+  public ?array $config = null;
 
   /**
    * @var array|null
    */
-  public $source = null;
+  public ?array $source = null;
 
   /**
    * @var bool
    */
-  public $readOnly = false;
+  public bool $readOnly = false;
 
   /**
    * @var string
    */
-  public $title = '';
+  public string $title = '';
 
   /**
    * @var string
    */
-  public $type;
+  public string $type;
 
   /**
    * @var int
    */
-  public $width = 100;
+  public int $width = 100;
 
 
   /**
@@ -73,7 +73,7 @@ class Column extends BaseObject
    * @param mixed $value
    * @return mixed
    */
-  public function filter($value) {
+  public function filter(mixed $value): mixed {
     if ($this->type == 'checkbox') {
       return !!$value;
     }

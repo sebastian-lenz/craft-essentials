@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 namespace lenz\craft\essentials\services\redirectNotFound\utils;
 
 use Craft;
@@ -67,9 +69,13 @@ class CsvRedirectTable extends AbstractCsvTable
       : parent::createRow($attributes);
   }
 
+  /**
+   * @param Row[] $rows
+   * @return Row[]
+   */
   protected function filterRows(array $rows): array {
     usort($rows, function(Row $lft, Row $rgt) {
-      return strcmp($lft->source, $rgt->source);
+      return strcmp($lft['source'], $rgt['source']);
     });
 
     return $rows;

@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\twig\queries\filters;
 
 use craft\helpers\ArrayHelper;
 use craft\helpers\Html;
+use Exception;
 use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\options\Option;
 use lenz\craft\essentials\twig\queries\options\OptionInterface;
@@ -11,28 +12,29 @@ use lenz\craft\utils\models\UrlParameter;
 
 /**
  * Class AbstractOptionsFilter
+ * @noinspection PhpUnused
  */
 abstract class AbstractOptionsFilter extends AbstractValueFilter implements DisplayInterface
 {
   /**
    * @var string
    */
-  public $displayFormat = '"%s"';
+  public string $displayFormat = '"%s"';
 
   /**
    * @var string[]|int[]|null
    */
-  protected $_customValues = null;
+  protected ?array $_customValues = null;
 
   /**
    * @var string[]|int[]|null
    */
-  protected $_fixedValues = null;
+  protected ?array $_fixedValues = null;
 
   /**
    * @var OptionInterface[]
    */
-  protected $_options;
+  protected array $_options;
 
   /**
    * @var string
@@ -43,28 +45,29 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @inheritDoc
    */
-  public function allowCustomFilter() {
+  public function allowCustomFilter(): bool {
     return is_null($this->_fixedValues);
   }
 
   /**
    * @param array $variables
+   * @throws Exception
    */
-  public function display(array $variables = []) {
+  public function display(array $variables = []): void {
     echo $this->renderSelect($variables);
   }
 
   /**
    * @return string|null
    */
-  public function getAllOption() {
+  public function getAllOption(): ?string {
     return null;
   }
 
   /**
    * @return string|null
    */
-  public function getDescription() {
+  public function getDescription(): ?string {
     $selectedIds = $this->_customValues;
     if (is_null($this->_customValues) || !is_array($selectedIds)) {
       return null;
@@ -81,9 +84,9 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   }
 
   /**
-   * @return string[]|int[]
+   * @return array
    */
-  public function getOptionValues() {
+  public function getOptionValues(): array {
     return array_map(function(OptionInterface $option) {
       return $option->getOptionValue();
     }, $this->getOptions());
@@ -92,14 +95,14 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @return OptionInterface[]
    */
-  public function getOptions() {
+  public function getOptions(): array {
     return $this->_options;
   }
 
   /**
-   * @return string|null
+   * @return UrlParameter|null
    */
-  public function getValue() : ?UrlParameter {
+  public function getValue(): ?UrlParameter {
     if (is_null($this->_customValues)) {
       return null;
     }
@@ -113,7 +116,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @return string[]|int[]
    */
-  public function getSelectedValues() {
+  public function getSelectedValues(): ?array {
     if (!is_null($this->_fixedValues)) {
       return $this->_fixedValues;
     }
@@ -128,6 +131,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @param OptionInterface $option
    * @return bool
+   * @noinspection PhpUnused
    */
   public function isSelected(OptionInterface $option): bool {
     $value = $option->getOptionValue();
@@ -139,9 +143,9 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @param array $variables
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
-  public function renderSelect(array $variables = []) {
+  public function renderSelect(array $variables = []): string {
     $options = $this->renderOptions();
     $attributes = ArrayHelper::getValue($variables, 'attributes', []) + [
         'id'   => $this->getName(),
@@ -156,7 +160,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
    * @param array $selected
    * @return string
    */
-  public function renderOption(OptionInterface $option, array $selected) {
+  public function renderOption(OptionInterface $option, array $selected): string {
     $value = $option->getOptionValue();
 
     return Html::tag('option', $option->getOptionTitle(), [
@@ -168,7 +172,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @return array[]
    */
-  public function renderOptions() {
+  public function renderOptions(): array {
     $selected = $this->getSelectedValues();
     $options = array_map(function(OptionInterface $option) use ($selected) {
       return $this->renderOption($option, $selected);
@@ -187,8 +191,9 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
 
   /**
    * @param string[]|int[]|null $value
+   * @noinspection PhpUnused
    */
-  public function setFixedValues(array $value = null) {
+  public function setFixedValues(array $value = null): void {
     $this->_fixedValues = is_array($value) && count($value) > 0
       ? $value
       : null;
@@ -197,7 +202,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @param array $values
    */
-  public function setOptions(array $values) {
+  public function setOptions(array $values): void {
     $options = [];
     foreach ($values as $key => $value) {
       if ($value instanceof OptionInterface) {
@@ -216,7 +221,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   /**
    * @inheritDoc
    */
-  public function setValue(string $value) {
+  public function setValue(string $value): void {
     $result = [];
     $options = $this->getOptionValues();
 

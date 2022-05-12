@@ -20,18 +20,18 @@ class TablesController extends Controller
   /**
    * @var AbstractTable|null
    */
-  public $current;
+  public ?AbstractTable $current;
 
   /**
    * @var AbstractTable[]
    */
-  public $tables;
+  public array $tables;
 
 
   /**
    * @inheritDoc
    */
-  public function init() {
+  public function init(): void {
     parent::init();
 
     $tables = Plugin::getInstance()->tables->getAllTables();
@@ -119,7 +119,9 @@ class TablesController extends Controller
     try {
       $data = Json::decode($postData);
       return is_array($data) ? $data : null;
-    } catch (Throwable $error) { }
+    } catch (Throwable) {
+      // Ignore this
+    }
 
     return null;
   }

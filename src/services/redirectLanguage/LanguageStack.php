@@ -13,66 +13,49 @@ class LanguageStack implements Countable
   /**
    * @var LanguageGroup[]
    */
-  private $groups = array();
+  private array $_groups = [];
 
   /**
    * The regular expression used to parse the language list.
    */
-  const LANGUAGE_REGEXP = '/(\*|[a-zA-Z0-9]{1,8}(?:-[a-zA-Z0-9]{1,8})*)(?:\s*;\s*q\s*=\s*(0(?:\.\d{0,3})|1(?:\.0{0,3})))?/';
+  const LANGUAGE_REGEXP = '/(\*|[a-zA-Z\d]{1,8}(?:-[a-zA-Z\d]{1,8})*)(?:\s*;\s*q\s*=\s*(0\.\d{0,3}|1\.0{0,3}))?/';
 
-
-  /**
-   * @param string $language
-   * @param float $quality
-   */
-  public function addLanguage($language, $quality = 1.0) {
-    $this->addGroup($quality)->addLanguage($language);
-  }
 
   /**
    * @param float $quality
    * @return LanguageGroup
    */
-  public function addGroup($quality) {
+  public function addGroup(float $quality): LanguageGroup {
     $group = $this->getGroup($quality);
     if (!is_null($group)) {
       return $group;
     }
 
-    $group = $this->groups[] = new LanguageGroup($quality);
+    $group = $this->_groups[] = new LanguageGroup($quality);
     $this->sortGroups();
     return $group;
   }
 
   /**
-   * @param LanguageStack $otherStack
-   * @return LanguageStack
+   * @param string $language
+   * @param float $quality
    */
-  private function combine($otherStack) {
-    $result = new LanguageStack();
-
-    foreach ($otherStack->groups as $otherGroup) {
-      if ($otherGroup->getQuality() <= 0.0) {
-        continue;
-      }
-
-      foreach ($this->groups as $group) {
-        if ($group->getQuality() <= 0.0) {
-          continue;
-        }
-
-        $group->combine($result, $otherGroup);
-      }
-    }
-
-    return $result;
+  public function addLanguage(string $language, float $quality = 1.0): void {
+    $this->addGroup($quality)->addLanguage($language);
   }
 
   /**
    * @inheritdoc
    */
-  public function count() {
-    return count($this->groups);
+  public function count(): int {
+    return count($this->_groups);
+  }
+
+  /**
+   * @return LanguageGroup
+   */
+  public function getBestGroup(): LanguageGroup {
+    return reset($this->_groups);
   }
 
   /**
@@ -80,7 +63,7 @@ class LanguageStack implements Countable
    * @return string
    * @throws Exception
    */
-  public function getBestLanguage($acceptedStack) {
+  public function getBestLanguage(LanguageStack $acceptedStack): string {
     $combined = $this->combine($acceptedStack);
     if (count($combined) === 0) {
       $combined = $this;
@@ -94,18 +77,11 @@ class LanguageStack implements Countable
   }
 
   /**
-   * @return LanguageGroup
-   */
-  public function getBestGroup() {
-    return reset($this->groups);
-  }
-
-  /**
    * @param float $quality
-   * @return LanguageGroup
+   * @return LanguageGroup|null
    */
-  public function getGroup($quality) {
-    foreach ($this->groups as $group) {
+  public function getGroup(float $quality): ?LanguageGroup {
+    foreach ($this->_groups as $group) {
       if ($group->getQuality() == $quality) {
         return $group;
       }
@@ -114,23 +90,53 @@ class LanguageStack implements Countable
     return null;
   }
 
-  /**
-   * @return $this
-   */
-  private function sortGroups() {
-    usort($this->groups, function(LanguageGroup $left, LanguageGroup $right) {
-      return $left->getQuality() - $right->getQuality();
-    });
 
-    return $this;
+  // Private methods
+  // ---------------
+
+  /**
+   * @param LanguageStack $otherStack
+   * @return LanguageStack
+   */
+  private function combine(LanguageStack $otherStack): LanguageStack {
+    $result = new LanguageStack();
+
+    foreach ($otherStack->_groups as $otherGroup) {
+      if ($otherGroup->getQuality() <= 0.0) {
+        continue;
+      }
+
+      foreach ($this->_groups as $group) {
+        if ($group->getQuality() <= 0.0) {
+          continue;
+        }
+
+        $group->combine($result, $otherGroup);
+      }
+    }
+
+    return $result;
   }
+
+  /**
+   * @return void
+   */
+  private function sortGroups(): void {
+    usort($this->_groups, function(LanguageGroup $lft, LanguageGroup $rgt) {
+      return $lft->getQuality() - $rgt->getQuality();
+    });
+  }
+
+
+  // Static methods
+  // --------------
 
   /**
    * Parse the given language list string.
    * @param string $value
    * @return LanguageStack
    */
-  public static function fromString($value) {
+  public static function fromString(string $value): LanguageStack {
     $stack = new LanguageStack();
     $ranges = explode(',', trim($value));
 

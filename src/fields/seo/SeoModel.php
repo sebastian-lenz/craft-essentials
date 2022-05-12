@@ -10,7 +10,6 @@ use lenz\craft\essentials\Plugin;
 use lenz\craft\utils\foreignField\ForeignFieldModel;
 use Twig\Markup;
 use yii\base\InvalidConfigException;
-use yii\behaviors\AttributeTypecastBehavior;
 
 /**
  * Class SeoModel
@@ -20,30 +19,29 @@ class SeoModel extends ForeignFieldModel
   /**
    * @var string
    */
-  public $enabled;
+  public string $enabled;
 
   /**
    * @var string|null
    */
-  public $description;
+  public ?string $description;
 
   /**
    * @var string|null
    */
-  public $keywords;
+  public ?string $keywords;
 
 
   /**
    * @inheritDoc
    */
   public function getAttributeLabel($attribute): string {
-    switch ($attribute) {
-      case 'enabled': return Craft::t('lenz-craft-essentials', 'List this page in the search engine sitemap');
-      case 'description': return Craft::t('lenz-craft-essentials', 'Description');
-      case 'keywords': return Craft::t('lenz-craft-essentials', 'Keywords');
-    }
-
-    return parent::getAttributeLabel($attribute);
+    return match ($attribute) {
+      'enabled' => Craft::t('lenz-craft-essentials', 'List this page in the search engine sitemap'),
+      'description' => Craft::t('lenz-craft-essentials', 'Description'),
+      'keywords' => Craft::t('lenz-craft-essentials', 'Keywords'),
+      default => parent::getAttributeLabel($attribute),
+    };
   }
 
   /**
@@ -66,14 +64,14 @@ class SeoModel extends ForeignFieldModel
 
       if ($translation['isCurrent']) {
         $tags['link:canonical'] = Html::tag('link', '', [
-          'rel'  => 'canonical',
+          'rel' => 'canonical',
           'href' => $translation['url'],
         ]);
       } else {
         $site = $translation['site'];
         $tags['link:alternate:' . $site->language] = Html::tag('link', '', [
-          'rel'      => 'alternate',
-          'href'     => $translation['url'],
+          'rel' => 'alternate',
+          'href' => $translation['url'],
           'hreflang' => $site->language,
         ]);
       }
@@ -88,19 +86,19 @@ class SeoModel extends ForeignFieldModel
   public function getMetaData(): array {
     return [
       'description' => $this->getMetaDescription(),
-      'keywords'    => $this->getMetaKeywords(),
+      'keywords' => $this->getMetaKeywords(),
     ];
   }
 
   /**
-   * @return string
+   * @return string|null
    */
   public function getMetaDescription(): ?string {
     return $this->description;
   }
 
   /**
-   * @return string
+   * @return string|null
    */
   public function getMetaKeywords(): ?string {
     return $this->keywords;
@@ -114,7 +112,7 @@ class SeoModel extends ForeignFieldModel
     foreach ($this->getMetaData() as $name => $content) {
       if (!empty($content)) {
         $tags['meta:' . $name] = Html::tag('meta', '', [
-          'name'    => $name,
+          'name' => $name,
           'content' => $content,
         ]);
       }

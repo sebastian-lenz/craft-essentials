@@ -10,42 +10,43 @@ use Yii;
 
 /**
  * Class AbstractStructureItem
+ * @template T of AbstractStructure
  */
 abstract class AbstractStructureItem implements IteratorAggregate
 {
   /**
    * @var int
    */
-  public $id;
+  public int $id;
 
   /**
    * @var int|null
    */
-  public $nestedLevel = null;
+  public ?int $nestedLevel = null;
 
   /**
    * @var int|null
    */
-  public $nestedLft = null;
+  public ?int $nestedLft = null;
 
   /**
    * @var int|null
    */
-  public $nestedRgt = null;
+  public ?int $nestedRgt = null;
 
   /**
-   * @var AbstractStructure
+   * @var T
    */
-  protected $_collection;
+  protected AbstractStructure $_collection;
 
 
   /**
    * AbstractStructureItem constructor.
    *
-   * @param AbstractStructure $collection
+   * @param T $collection
    * @param ElementInterface|array $config
    */
-  public function __construct(AbstractStructure $collection, $config) {
+  public function __construct(AbstractStructure $collection, mixed $config) {
     $this->_collection = $collection;
 
     if ($config instanceof ElementInterface) {
@@ -57,7 +58,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
 
   /**
    * @param bool $includeSelf
-   * @return AbstractStructureItem[]
+   * @return static[]
    */
   public function getAncestors(bool $includeSelf = false): array {
     $ancestors = $this->_collection->getAncestors($this);
@@ -69,21 +70,21 @@ abstract class AbstractStructureItem implements IteratorAggregate
   }
 
   /**
-   * @return AbstractStructureItem[]
+   * @return static[]
    */
   public function getChildren(): array {
     return $this->_collection->getChildren($this);
   }
 
   /**
-   * @return AbstractStructure
+   * @return T
    */
   public function getCollection(): AbstractStructure {
     return $this->_collection;
   }
 
   /**
-   * @return AbstractStructureItem[]
+   * @return static[]
    * @noinspection PhpUnused (Public API)
    */
   public function getDescendants(): array {
@@ -93,14 +94,14 @@ abstract class AbstractStructureItem implements IteratorAggregate
   /**
    * @inheritDoc
    */
-  public function getIterator() {
+  public function getIterator(): ArrayIterator {
     return new ArrayIterator($this->getChildren());
   }
 
   /**
-   * @return AbstractStructureItem|null
+   * @return static|null
    */
-  public function getParent(): ?AbstractStructureItem {
+  public function getParent(): ?static {
     return $this->_collection->getParent($this);
   }
 
@@ -114,6 +115,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
 
   /**
    * @return bool
+   * @noinspection PhpUnused (Public API)
    */
   public function hasParent(): bool {
     return !is_null($this->getParent());
@@ -141,7 +143,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
   // --------------
 
   /**
-   * @param AbstractStructure $collection
+   * @param T $collection
    * @param ElementInterface[] $elements
    * @return static[]
    */

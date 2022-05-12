@@ -25,12 +25,12 @@ class RedirectLanguage extends Component
   /**
    * @var LanguageStack
    */
-  private $_languageStack;
+  private LanguageStack $_languageStack;
 
   /**
    * @var RedirectLanguage
    */
-  static private $_instance;
+  static private RedirectLanguage $_instance;
 
 
   /**
@@ -49,7 +49,7 @@ class RedirectLanguage extends Component
   /**
    * @return void
    */
-  public function onApplicationInit() {
+  public function onApplicationInit(): void {
     $request = Craft::$app->getRequest();
     $settings = Plugin::getInstance()->getSettings();
     $enabled = $settings->enableLanguageRedirect;

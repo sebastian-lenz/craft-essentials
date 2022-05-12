@@ -4,11 +4,11 @@
   "type": "craft-plugin",
   "license": "MIT",
   "require": {
-    "php": "^7.4.0",
+    "php": "^8.0.2",
     "ext-json": "*",
-    "craftcms/cms": "^3.7.0",
-    "sebastianlenz/craft-utils": "^2.1.0",
-    "gettext/gettext": "^4.7"
+    "craftcms/cms": "^4.0.2",
+    "sebastianlenz/craft-utils": "^3.0.2",
+    "gettext/gettext": "^v4.8.6"
   },
   "require-dev": {
     "sebastianlenz/contentfield": "dev-release",
@@ -28,10 +28,11 @@
   "config": {
     "allow-plugins": {
       "yiisoft/yii2-composer": true,
-      "craftcms/plugin-installer": true
+      "craftcms/plugin-installer": true,
+      "kylekatarnls/update-helper": false
     },
     "platform": {
-      "php": "7.4.14"
+      "php": "8.0.2"
     }
   }
 }

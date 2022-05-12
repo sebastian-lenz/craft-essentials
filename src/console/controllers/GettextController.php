@@ -13,18 +13,18 @@ class GettextController extends Controller
   /**
    * @var string[]
    */
-  public $excludeFiles = [];
+  public array $excludeFiles = [];
 
   /**
    * @var string[]
    */
-  public $excludeLanguages = [];
+  public array $excludeLanguages = [];
 
 
   /**
    * Compile all gettext files.
    */
-  public function actionCompile() {
+  public function actionCompile(): void {
     Plugin::getInstance()->gettext->compile();
   }
 
@@ -33,7 +33,7 @@ class GettextController extends Controller
    *
    * @param string $ignore
    */
-  public function actionExtract(string $ignore = '') {
+  public function actionExtract(string $ignore = ''): void {
     $excludeLanguages = empty($ignore)
       ? $this->excludeLanguages
       : explode(',', $ignore);

@@ -16,7 +16,7 @@ class MailEncoder extends Component
   /**
    * @var MailEncoder
    */
-  static private $_instance;
+  static private MailEncoder $_instance;
 
 
   /**
@@ -48,7 +48,7 @@ class MailEncoder extends Component
   /**
    * @return MailEncoder
    */
-  public static function getInstance() {
+  public static function getInstance(): MailEncoder {
     if (!isset(self::$_instance)) {
       self::$_instance = new MailEncoder();
     }
@@ -60,7 +60,7 @@ class MailEncoder extends Component
    * @param string $value
    * @return string
    */
-  public static function encode($value) {
+  public static function encode(string $value): string {
     $id = uniqid();
     $encoded = str_replace(
       array("\n", "\r"),
@@ -70,7 +70,7 @@ class MailEncoder extends Component
 
     return implode('', array(
       '<span id="', $id, '"></span>',
-      '<script type="text/javascript">',
+      '<script>',
         'document.getElementById("', $id, '").innerHTML = "', $encoded, '".replace(/[a-zA-Z]/g, function(c) {',
         'return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);',
         '});',
@@ -82,7 +82,7 @@ class MailEncoder extends Component
    * @param string $value
    * @return string
    */
-  public static function encodeAll($value) {
+  public static function encodeAll(string $value): string {
     return preg_replace_callback('/<a[^>]*href="mailto:([^"]*)"[^>]*>.*?<\/a>/s', function($matches) {
       $mail = trim($matches[1]);
       if (empty($mail)) {

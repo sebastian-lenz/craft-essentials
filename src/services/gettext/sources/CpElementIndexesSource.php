@@ -6,6 +6,7 @@ use Craft;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
+use craft\services\ElementSources;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
@@ -25,12 +26,15 @@ class CpElementIndexesSource extends AbstractSource
   /**
    * @inheritDoc
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     foreach (self::ELEMENT_TYPES as $name => $elementType) {
-      $settings = Craft::$app->getElementIndexes()->getSettings($elementType);
+      $hint = 'craft:element-sources/' . $name;
+      $sources = Craft::$app->getElementSources()->getSources($elementType);
 
-      if (is_array($settings) && array_key_exists('sourceOrder', $settings)) {
-        $this->extractSourceOrder($translations, $name, $settings['sourceOrder']);
+      foreach ($sources as $source) {
+        if ($source['type'] === ElementSources::TYPE_HEADING && !empty($source['heading'])) {
+          $this->insert($translations, $hint, $source['heading']);
+        }
       }
     }
   }
@@ -41,25 +45,10 @@ class CpElementIndexesSource extends AbstractSource
 
   /**
    * @param Translations $translations
-   * @param string $name
-   * @param array $sourceOrder
-   */
-  private function extractSourceOrder(Translations $translations, string $name, array $sourceOrder) {
-    $hint = 'craft:element-index/' . $name;
-
-    foreach ($sourceOrder as $row) {
-      if ($row[0] == 'heading') {
-        $this->insert($translations, $hint, $row[1]);
-      }
-    }
-  }
-
-  /**
-   * @param Translations $translations
    * @param string $hint
    * @param string $original
    */
-  private function insert(Translations $translations, string $hint, string $original) {
+  private function insert(Translations $translations, string $hint, string $original): void {
     $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $result->addReference($hint);

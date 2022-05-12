@@ -17,8 +17,9 @@ abstract class AbstractElementSource extends AbstractSource
    * @param SiteMap $siteMap
    * @throws InvalidConfigException
    */
-  public function collect(SiteMap $siteMap) {
+  public function collect(SiteMap $siteMap): void {
     $groups = $this->toGroups($this->getElements());
+
     foreach ($groups as $group) {
       $this->addGroup($siteMap, $group);
     }
@@ -41,7 +42,7 @@ abstract class AbstractElementSource extends AbstractSource
    * @param SiteMap $siteMap
    * @param array $group
    */
-  protected function addGroup(SiteMap $siteMap, array $group) {
+  protected function addGroup(SiteMap $siteMap, array $group): void {
     $links = [];
     foreach ($group as $language => $item) {
       $links[] = SiteMap::xmlLink([

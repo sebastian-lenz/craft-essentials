@@ -24,14 +24,14 @@ class TemplatesSource extends AbstractSource
   /**
    * @var Environment|null
    */
-  private $_twig = null;
+  private ?Environment $_twig = null;
 
 
   /**
    * @inheritDoc
-   * @throws Exception
+   * @throws \Exception
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     self::withSiteView(function(View $view) use ($translations) {
       $this->_twig = $this->resolveTwig($view);
       $this->extractTemplates($translations, $view->getTemplatesPath());
@@ -49,7 +49,7 @@ class TemplatesSource extends AbstractSource
    * @param string $name
    * @throws \Exception
    */
-  private function extractTemplate(Translations $translations, string $path, string $name) {
+  private function extractTemplate(Translations $translations, string $path, string $name): void {
     Gettext::printSource('template', $path);
 
     try {
@@ -63,9 +63,7 @@ class TemplatesSource extends AbstractSource
         ]
       ]);
 
-    } catch (SyntaxError $error) {
-      $this->reportError($name, $error);
-    } catch (LoaderError $error) {
+    } catch (SyntaxError|LoaderError $error) {
       $this->reportError($name, $error);
     }
   }
@@ -94,7 +92,7 @@ class TemplatesSource extends AbstractSource
    * @return \craft\web\twig\Environment
    * @throws Exception
    */
-  private function resolveTwig(View $view) {
+  private function resolveTwig(View $view): \craft\web\twig\Environment {
     $twig = class_exists(YamlAwareTemplateLoader::class)
       ? YamlAwareTemplateLoader::getSiteTwig($view)
       : $view->getTwig();

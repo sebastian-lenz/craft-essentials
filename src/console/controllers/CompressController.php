@@ -3,6 +3,8 @@
 namespace lenz\craft\essentials\console\controllers;
 
 use Craft;
+use craft\db\Query;
+use craft\db\Table;
 use craft\elements\Asset;
 use lenz\craft\essentials\services\imageCompressor\jobs\AssetJob;
 use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
@@ -18,7 +20,6 @@ class CompressController extends Controller
    */
   public function actionAll() {
     $queue = Craft::$app->queue;
-    $transforms = Craft::$app->getAssetTransforms();
 
     foreach (Asset::find()->all() as $asset) {
       if ($asset->kind != Asset::KIND_IMAGE) {
@@ -27,8 +28,14 @@ class CompressController extends Controller
 
       $queue->push(new AssetJob(['assetId' => $asset->id]));
 
-      foreach ($transforms->getAllCreatedTransformsForAsset($asset) as $index) {
-        $queue->push(new TransformIndexJob(['transformIndexId' => $index->id]));
+      $transformIds = (new Query())
+        ->select(['id'])
+        ->from([Table::IMAGETRANSFORMINDEX])
+        ->where(['assetId' => $asset->id])
+        ->column();
+
+      foreach ($transformIds as $transformId) {
+        $queue->push(new TransformIndexJob(['transformIndexId' => $transformId]));
       }
     }
   }

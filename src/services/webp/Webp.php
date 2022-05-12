@@ -2,20 +2,14 @@
 
 namespace lenz\craft\essentials\services\webp;
 
-use Craft;
 use craft\elements\Asset;
+use craft\errors\FsException;
 use craft\errors\ImageException;
-use craft\errors\VolumeException;
-use craft\errors\VolumeObjectExistsException;
-use craft\events\AssetTransformImageEvent;
-use craft\events\GenerateTransformEvent;
-use craft\helpers\FileHelper;
-use craft\models\AssetTransformIndex;
-use craft\services\AssetTransforms;
-use craft\volumes\Local;
+use craft\events\ImageTransformerOperationEvent;
+use craft\imagetransforms\ImageTransformer as NativeImageTransformer;
+use craft\models\ImageTransformIndex;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
-use lenz\craft\essentials\services\siteMap\SiteMapService;
 use yii\base\Component;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -28,7 +22,7 @@ class Webp extends Component
   /**
    * @var Webp
    */
-  static private $_INSTANCE;
+  static private Webp $_INSTANCE;
 
 
   /**
@@ -40,23 +34,23 @@ class Webp extends Component
     }
 
     Event::on(
-      AssetTransforms::class, AssetTransforms::EVENT_AFTER_DELETE_TRANSFORMS,
+      NativeImageTransformer::class, NativeImageTransformer::EVENT_DELETE_TRANSFORMED_IMAGE,
       [$this, 'onAfterDeleteTransforms']
     );
 
     Event::on(
-      AssetTransforms::class, AssetTransforms::EVENT_GENERATE_TRANSFORM,
+      NativeImageTransformer::class, NativeImageTransformer::EVENT_TRANSFORM_IMAGE,
       [$this, 'onGenerateTransform']
     );
   }
 
   /**
    * @param Asset $asset
-   * @param AssetTransformIndex $index
+   * @param ImageTransformIndex $index
    * @return string|null
    * @throws InvalidConfigException
    */
-  public function getWebpPath(Asset $asset, AssetTransformIndex $index): ?string {
+  public function getWebpPath(Asset $asset, ImageTransformIndex $index): ?string {
     $fileName = TransformIndexJob::resolveTransformFileName($index, $asset);
     if (is_null($fileName)) {
       return null;
@@ -66,27 +60,28 @@ class Webp extends Component
   }
 
   /**
-   * @throws VolumeException
+   * @param ImageTransformerOperationEvent $event
    * @throws InvalidConfigException
+   * @throws FsException
    */
-  public function onAfterDeleteTransforms(AssetTransformImageEvent $event) {
+  public function onAfterDeleteTransforms(ImageTransformerOperationEvent $event) {
     $asset = $event->asset;
-    $volume = $asset->getVolume();
-    $fileName = $this->getWebpPath($asset, $event->transformIndex);
+    $fileName = $this->getWebpPath($asset, $event->imageTransformIndex);
+    $fs = $asset->getVolume()->getFs();
 
-    if ($volume->fileExists($fileName)) {
-      $volume->deleteFile($fileName);
+    if ($fs->fileExists($fileName)) {
+      $fs->deleteFile($fileName);
     }
   }
 
   /**
-   * @param GenerateTransformEvent $event
+   * @param ImageTransformerOperationEvent $event
    * @throws InvalidConfigException
    * @throws ImageException
    */
-  public function onGenerateTransform(GenerateTransformEvent $event) {
+  public function onGenerateTransform(ImageTransformerOperationEvent $event) {
     $asset = $event->asset;
-    $index = $event->transformIndex;
+    $index = $event->imageTransformIndex;
     $transformPath = $this->getWebpPath($asset, $index);
     if (is_null($transformPath)) {
       return;

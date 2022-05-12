@@ -12,5 +12,5 @@ abstract class AbstractSource
   /**
    * @param SiteMap $siteMap
    */
-  abstract public function collect(SiteMap $siteMap);
+  abstract public function collect(SiteMap $siteMap): void;
 }

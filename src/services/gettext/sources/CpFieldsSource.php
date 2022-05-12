@@ -3,7 +3,6 @@
 namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
-use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Category;
@@ -24,7 +23,7 @@ class CpFieldsSource extends AbstractSource
   /**
    * @inheritDoc
    */
-  public function extract(Translations $translations) {
+  public function extract(Translations $translations): void {
     foreach (FieldLayoutTabRecord::find()->all() as $tab) {
       $this->extractFieldLayoutTab($translations, $tab);
     }
@@ -41,7 +40,7 @@ class CpFieldsSource extends AbstractSource
    * @param Translations $translations
    * @param BaseOptionsField $field
    */
-  private function extractBaseOptionsField(Translations $translations, BaseOptionsField $field) {
+  private function extractBaseOptionsField(Translations $translations, BaseOptionsField $field): void {
     foreach ($field->options as $option) {
       $this->insert($translations, $field, $option['label']);
     }
@@ -51,7 +50,7 @@ class CpFieldsSource extends AbstractSource
    * @param Translations $translations
    * @param FieldInterface $field
    */
-  private function extractField(Translations $translations, FieldInterface $field) {
+  private function extractField(Translations $translations, FieldInterface $field): void {
     $this->insert($translations, $field, $field->name);
     $this->insert($translations, $field, $field->instructions);
 
@@ -67,7 +66,7 @@ class CpFieldsSource extends AbstractSource
    * @param FieldLayoutTabRecord $record
    * @return void
    */
-  private function extractFieldLayoutTab(Translations $translations, FieldLayoutTabRecord $record) {
+  private function extractFieldLayoutTab(Translations $translations, FieldLayoutTabRecord $record): void {
     $hint = $this->getTabHint($record);
     $this->insert($translations, $hint, $record->name);
 
@@ -88,11 +87,11 @@ class CpFieldsSource extends AbstractSource
    * @param Translations $translations
    * @param Matrix $field
    */
-  private function extractMatrixField(Translations $translations, Matrix $field) {
+  private function extractMatrixField(Translations $translations, Matrix $field): void {
     foreach ($field->getBlockTypes() as $blockType) {
       $this->insert($translations, $field, $field->name);
 
-      foreach ($blockType->getFields() as $field) {
+      foreach ($blockType->getCustomFields() as $field) {
         $this->extractField($translations, $field);
       }
     }
@@ -148,24 +147,20 @@ class CpFieldsSource extends AbstractSource
   private function getTabHint(FieldLayoutTabRecord $record): string {
     $layout = $record->layout;
 
-    switch ($layout ? $layout->type : null) {
-      case Asset::class:
-        return $this->getAssetTabHint($record);
-      case Category::class:
-        return $this->getCategoryTabHint($record);
-      case Entry::class:
-        return $this->getEntryTabHint($record);
-    }
-
-    return 'tab';
+    return match ($layout?->type) {
+      Asset::class => $this->getAssetTabHint($record),
+      Category::class => $this->getCategoryTabHint($record),
+      Entry::class => $this->getEntryTabHint($record),
+      default => 'tab',
+    };
   }
 
   /**
    * @param Translations $translations
-   * @param Field|FieldInterface|string $fieldOrHint
+   * @param string|FieldInterface $fieldOrHint
    * @param string|null|mixed $original
    */
-  private function insert(Translations $translations, $fieldOrHint, $original) {
+  private function insert(Translations $translations, string|FieldInterface $fieldOrHint, mixed $original) {
     $result = $translations->insertCp($original);
 
     if (!is_null($result)) {
@@ -173,7 +168,7 @@ class CpFieldsSource extends AbstractSource
 
       if ($fieldOrHint instanceof FieldInterface) {
         $reference .= '/' . $fieldOrHint->handle;
-      } elseif (is_string($fieldOrHint)) {
+      } else {
         $reference .= '/' . $fieldOrHint;
       }
 

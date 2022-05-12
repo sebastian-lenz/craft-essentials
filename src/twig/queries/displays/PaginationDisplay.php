@@ -16,17 +16,17 @@ class PaginationDisplay extends Paginate implements DisplayInterface
   /**
    * @var string
    */
-  public $template = '_includes/query-pagination.twig';
+  public string $template = '_includes/query-pagination.twig';
 
   /**
    * @var array
    */
-  public $variables = [];
+  public array $variables = [];
 
   /**
    * @var AbstractQuery|null
    */
-  private $_query = null;
+  private ?AbstractQuery $_query;
 
 
   /**
@@ -69,7 +69,7 @@ class PaginationDisplay extends Paginate implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function getPageUrl(int $page) {
+  public function getPageUrl(int $page): ?string {
     if ($page >= 1 && $page <= $this->totalPages) {
       $params = [];
       if ($page != 1) {
@@ -86,7 +86,7 @@ class PaginationDisplay extends Paginate implements DisplayInterface
    * @param array $variables
    * @return array
    */
-  public function getVariables(array $variables = []) {
+  public function getVariables(array $variables = []): array {
     return array_merge([
       'paginate' => $this,
       'query' => $this->_query,
@@ -98,7 +98,7 @@ class PaginationDisplay extends Paginate implements DisplayInterface
    * @return string
    * @throws Throwable
    */
-  public function render(array $variables = []) {
+  public function render(array $variables = []): string {
     if (!$this->_query->hasPagination()) {
       return '';
     }

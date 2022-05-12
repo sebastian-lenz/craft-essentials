@@ -20,7 +20,7 @@ class Tables extends AbstractService
   /**
    * @var AbstractTable[]
    */
-  private $_tables = [];
+  private array $_tables = [];
 
 
   /**

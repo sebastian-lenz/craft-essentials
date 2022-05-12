@@ -4,23 +4,22 @@ namespace lenz\craft\essentials\structs\menu;
 
 use Craft;
 use lenz\craft\essentials\structs\structure\AbstractStructure;
-use lenz\craft\essentials\structs\structure\AbstractStructureItem;
 use lenz\craft\utils\elementCache\ElementCache;
 
 /**
- * Class Menu
- *
- * @property AbstractMenuItem[] $_items
+ * Class AbstractMenu
+ * @template T of AbstractMenuItem
+ * @extends AbstractStructure<T>
  */
 abstract class AbstractMenu extends AbstractStructure
 {
   /**
-   * @var AbstractMenuItem[]
+   * @var T[]
    */
   protected array $_breadcrumbs;
 
   /**
-   * @var AbstractMenuItem|null
+   * @var T|null
    */
   protected ?AbstractMenuItem $_current;
 
@@ -37,10 +36,10 @@ abstract class AbstractMenu extends AbstractStructure
 
   /**
    * @param int|string $type
-   * @return AbstractMenuItem[]|AbstractStructureItem[]
+   * @return T[]
    * @noinspection PhpUnused (Public API)
    */
-  public function getAllByType($type): array {
+  public function getAllByType(int|string $type): array {
     $isTypeId = is_numeric($type);
 
     return $this->filter(function(AbstractMenuItem $item) use ($isTypeId, $type) {
@@ -54,10 +53,10 @@ abstract class AbstractMenu extends AbstractStructure
 
   /**
    * @param int|string $type
-   * @return AbstractMenuItem|null
+   * @return T|null
    * @noinspection PhpUnused (Public API)
    */
-  public function getByType($type): ?AbstractMenuItem {
+  public function getByType(int|string $type): ?AbstractMenuItem {
     $isTypeId = is_numeric($type);
 
     foreach ($this->_items as $item) {
@@ -74,7 +73,7 @@ abstract class AbstractMenu extends AbstractStructure
   }
 
   /**
-   * @return AbstractMenuItem[]
+   * @return T[]
    * @noinspection PhpUnused (Public API)
    */
   public function getBreadcrumbs(): array {
@@ -82,7 +81,7 @@ abstract class AbstractMenu extends AbstractStructure
   }
 
   /**
-   * @return AbstractMenuItem|null
+   * @return T|null
    */
   public function getCurrent(): ?AbstractMenuItem {
     return $this->_current;
@@ -93,7 +92,7 @@ abstract class AbstractMenu extends AbstractStructure
   // -----------------
 
   /**
-   * @return AbstractMenuItem|null
+   * @return T|null
    */
   protected function findCurrent(): ?AbstractMenuItem {
     $element = Craft::$app->getUrlManager()
@@ -115,7 +114,7 @@ abstract class AbstractMenu extends AbstractStructure
   /**
    * Initializes the menu after loading.
    */
-  protected function init() {
+  protected function init(): void {
     $current = $this->findCurrent();
     $breadcrumbs = is_null($current)
       ? []

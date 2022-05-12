@@ -12,18 +12,18 @@ class Option extends BaseObject implements OptionInterface
   /**
    * @var string|int
    */
-  public $value;
+  public string|int $value;
 
   /**
    * @var string
    */
-  public $title;
+  public string $title;
 
 
   /**
    * @inheritDoc
    */
-  function getOptionValue() {
+  function getOptionValue(): int|string {
     return $this->value;
   }
 
