@@ -7,7 +7,7 @@
     "php": "^8.0.2",
     "ext-json": "*",
     "craftcms/cms": "^4.0.2",
-    "sebastianlenz/craft-utils": "^3.0.2",
+    "sebastianlenz/craft-utils": "^3.1.0",
     "gettext/gettext": "^v4.8.6"
   },
   "require-dev": {

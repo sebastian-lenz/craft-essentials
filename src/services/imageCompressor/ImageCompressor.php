@@ -8,6 +8,7 @@ use craft\elements\Asset;
 use craft\events\GenerateTransformEvent;
 use craft\events\ModelEvent;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\utils\helpers\ImageTransforms;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -50,7 +51,7 @@ class ImageCompressor extends Component
       Asset::EVENT_AFTER_GENERATE_TRANSFORM,
       function(GenerateTransformEvent $event) {
         if ($event->asset->kind == Asset::KIND_IMAGE) {
-          $transformIndex = ImageTransformer::getInstance()
+          $transformIndex = ImageTransforms::getTransformer()
             ->getTransformIndex($event->asset, $event->transform);
 
           Craft::$app->getQueue()->push(new jobs\TransformIndexJob([

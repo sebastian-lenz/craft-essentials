@@ -6,9 +6,8 @@ use Craft;
 use craft\base\LocalFsInterface;
 use craft\elements\Asset;
 use craft\errors\AssetOperationException;
-use craft\helpers\ImageTransforms;
 use craft\models\ImageTransformIndex;
-use lenz\craft\essentials\services\imageCompressor\ImageTransformer;
+use lenz\craft\utils\helpers\ImageTransforms;
 use yii\base\InvalidConfigException;
 
 /**
@@ -110,7 +109,7 @@ class TransformIndexJob extends AbstractJob
       return $this->_transformIndex = null;
     }
 
-    $this->_transformIndex = ImageTransformer::getInstance()
+    $this->_transformIndex = ImageTransforms::getTransformer()
       ->getTransformIndexModelById($this->transformIndexId);
 
     return $this->_transformIndex;
@@ -139,7 +138,7 @@ class TransformIndexJob extends AbstractJob
 
     return implode(DIRECTORY_SEPARATOR, [
       $fileSystem->getRootPath(),
-      ImageTransformer::getInstance()->getTransformPath($asset, $index)
+      ImageTransforms::getTransformPath($asset, $index)
     ]);
   }
 }
