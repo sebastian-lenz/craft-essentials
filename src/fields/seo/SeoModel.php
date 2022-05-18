@@ -19,17 +19,17 @@ class SeoModel extends ForeignFieldModel
   /**
    * @var string
    */
-  public string $enabled;
+  public string $enabled = '';
 
   /**
    * @var string|null
    */
-  public ?string $description;
+  public ?string $description = null;
 
   /**
    * @var string|null
    */
-  public ?string $keywords;
+  public ?string $keywords = null;
 
 
   /**
