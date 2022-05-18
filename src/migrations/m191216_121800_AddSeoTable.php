@@ -24,7 +24,7 @@ class m191216_121800_AddSeoTable extends Migration
    * @inheritdoc
    */
   public function safeDown(): bool {
-    $this->dropTable(SeoRecord::tableName());
+    $this->dropTableIfExists(SeoRecord::tableName());
     return true;
   }
 }

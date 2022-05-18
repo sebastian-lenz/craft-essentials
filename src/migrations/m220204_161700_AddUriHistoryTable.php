@@ -13,6 +13,7 @@ class m220204_161700_AddUriHistoryTable extends Migration
 {
   /**
    * @inheritdoc
+   * @noinspection DuplicatedCode
    */
   public function safeUp() {
     $table = UriHistoryRecord::tableName();
@@ -40,7 +41,7 @@ class m220204_161700_AddUriHistoryTable extends Migration
    * @inheritDoc
    */
   public function safeDown(): bool {
-    $this->dropTable(UriHistoryRecord::tableName());
+    $this->dropTableIfExists(UriHistoryRecord::tableName());
     return true;
   }
 }
