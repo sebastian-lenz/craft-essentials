@@ -55,7 +55,7 @@ class Extension extends AbstractExtension
       new TwigFunction('encodeMail', [MailEncoder::class, 'encode']),
       new TwigFunction('fixture', [Fixture::class, 'get']),
       new TwigFunction('interceptCache', [$this, 'interceptCache']),
-      new TwigFunction('toAttributes', [Attributes::class, 'create']),
+      new TwigFunction('toAttributes', [$this, 'toAttributes']),
       new TwigFunction('translations', [Translations::class, 'forElement']),
     ];
   }
@@ -89,5 +89,19 @@ class Extension extends AbstractExtension
    */
   public function interceptCache() {
     Plugin::getInstance()->frontendCache->intercept();
+  }
+
+  /**
+   * @param array|Attributes $value
+   * @return Attributes
+   */
+  public function toAttributes($value = []): Attributes {
+    if ($value instanceof Attributes) {
+      return $value;
+    } elseif (is_array($value)) {
+      return new Attributes($value);
+    }
+
+    return new Attributes();
   }
 }
