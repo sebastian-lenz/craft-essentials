@@ -16,27 +16,27 @@ abstract class AbstractStructureItem implements IteratorAggregate
   /**
    * @var int
    */
-  public $id;
+  public int $id = 0;
 
   /**
    * @var int|null
    */
-  public $nestedLevel = null;
+  public ?int $nestedLevel = null;
 
   /**
    * @var int|null
    */
-  public $nestedLft = null;
+  public ?int $nestedLft = null;
 
   /**
    * @var int|null
    */
-  public $nestedRgt = null;
+  public ?int $nestedRgt = null;
 
   /**
    * @var AbstractStructure
    */
-  protected $_collection;
+  protected AbstractStructure $_collection;
 
 
   /**
