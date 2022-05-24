@@ -17,7 +17,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
   /**
    * @var int
    */
-  public int $id;
+  public int $id = 0;
 
   /**
    * @var int|null

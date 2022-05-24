@@ -16,9 +16,9 @@ use yii\base\InvalidConfigException;
 abstract class AbstractMenuItem extends AbstractStructureItem
 {
   /**
-   * @var array
+   * @var array|null
    */
-  public array $customLinkAttributes;
+  public ?array $customLinkAttributes = null;
 
   /**
    * @var bool
@@ -26,34 +26,34 @@ abstract class AbstractMenuItem extends AbstractStructureItem
   public bool $isActive = false;
 
   /**
-   * @var string
+   * @var string|null
    */
-  public string $sectionHandle;
+  public ?string $sectionHandle = null;
 
   /**
    * @var int
    */
-  public int $sectionId;
+  public int $sectionId = 0;
 
   /**
    * @var string
    */
-  public string $title;
+  public string $title = '';
 
   /**
-   * @var string
+   * @var string|null
    */
-  public string $typeHandle;
+  public ?string $typeHandle = null;
 
   /**
    * @var int
    */
-  public int $typeId;
+  public int $typeId = 0;
 
   /**
-   * @var string
+   * @var string|null
    */
-  public string $url;
+  public ?string $url = null;
 
 
   /**

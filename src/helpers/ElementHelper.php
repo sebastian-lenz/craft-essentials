@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\helpers;
 
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
+use craft\errors\InvalidFieldException;
 
 /**
  * Class ElementHelper
@@ -16,7 +17,12 @@ class ElementHelper extends \craft\helpers\ElementHelper
    * @return ElementInterface[]
    */
   static public function eagerLoad(ElementInterface $element, string $attribute): array {
-    $result = $element->$attribute;
+    try {
+      $result = $element->getFieldValue($attribute);
+    } catch (InvalidFieldException) {
+      return [];
+    }
+
     if (!is_array($result)) {
       if ($result instanceof ElementQuery) {
         $result = $result->all();
