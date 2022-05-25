@@ -24,7 +24,7 @@ class TemplatesSource extends AbstractSource
   /**
    * @var array{name: string, path: string}
    */
-  public $roots;
+  public array $roots;
 
   /**
    * @var Environment|null
@@ -42,7 +42,7 @@ class TemplatesSource extends AbstractSource
 
   /**
    * @inheritDoc
-   * @throws \Exception
+   * @throws Exception
    */
   public function extract(Translations $translations): void {
     self::withSiteView(function(View $view) use ($translations) {
