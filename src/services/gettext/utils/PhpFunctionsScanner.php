@@ -103,6 +103,9 @@ class PhpFunctionsScanner extends PhpFunctionsScannerBase
 
     Gettext::printSource('model', $className);
     $reflector = new ReflectionClass($className);
+    if ($reflector->isAbstract() || $reflector->getConstructor()->getNumberOfRequiredParameters() > 0) {
+      return;
+    }
 
     /** @var Model $model */
     $model = new $className();
