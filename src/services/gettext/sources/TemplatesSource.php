@@ -3,18 +3,18 @@
 namespace lenz\craft\essentials\services\gettext\sources;
 
 use Craft;
+use craft\web\twig\Environment;
 use craft\web\View;
+use Exception;
 use Gettext\Extractors\PhpCode;
 use lenz\contentfield\twig\YamlAwareTemplateLoader;
 use lenz\craft\essentials\services\gettext\Gettext;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
 use Twig\TwigFilter;
-use yii\base\Exception;
 
 /**
  * Class TemplatesSource
@@ -22,10 +22,23 @@ use yii\base\Exception;
 class TemplatesSource extends AbstractSource
 {
   /**
+   * @var array{name: string, path: string}
+   */
+  public $roots;
+
+  /**
    * @var Environment|null
    */
   private $_twig = null;
 
+
+  /**
+   * @param Gettext $gettext
+   */
+  public function __construct(Gettext $gettext) {
+    parent::__construct($gettext);
+    $this->roots = $this->parseSiteRoots();
+  }
 
   /**
    * @inheritDoc
@@ -34,7 +47,9 @@ class TemplatesSource extends AbstractSource
   public function extract(Translations $translations) {
     self::withSiteView(function(View $view) use ($translations) {
       $this->_twig = $this->resolveTwig($view);
-      $this->extractTemplates($translations, $view->getTemplatesPath());
+      foreach ($this->roots as $root) {
+        $this->extractTemplates($translations, $root['path']);
+      }
       $this->_twig = null;
     });
   }
@@ -47,7 +62,7 @@ class TemplatesSource extends AbstractSource
    * @param Translations $translations
    * @param string $path
    * @param string $name
-   * @throws \Exception
+   * @throws Exception
    */
   private function extractTemplate(Translations $translations, string $path, string $name) {
     Gettext::printSource('template', $path);
@@ -73,7 +88,7 @@ class TemplatesSource extends AbstractSource
   /**
    * @param Translations $translations
    * @param string $basePath
-   * @throws \Exception
+   * @throws Exception
    */
   private function extractTemplates(Translations $translations, string $basePath) {
     $dirIterator = new RecursiveDirectoryIterator($basePath);
@@ -90,11 +105,29 @@ class TemplatesSource extends AbstractSource
   }
 
   /**
+   * @return array
+   */
+  private function parseSiteRoots(): array {
+    $roots = [];
+
+    foreach (Craft::$app->view->getSiteTemplateRoots() as $name => $paths) {
+      foreach ((is_array($paths) ? $paths : [$paths]) as $path) {
+        $roots[] = [
+          'name' => $name,
+          'path' => $path,
+        ];
+      }
+    }
+
+    return $roots;
+  }
+
+  /**
    * @param View $view
-   * @return \craft\web\twig\Environment
+   * @return Environment
    * @throws Exception
    */
-  private function resolveTwig(View $view) {
+  private function resolveTwig(View $view): Environment {
     $twig = class_exists(YamlAwareTemplateLoader::class)
       ? YamlAwareTemplateLoader::getSiteTwig($view)
       : $view->getTwig();
@@ -105,9 +138,9 @@ class TemplatesSource extends AbstractSource
 
   /**
    * @param string $name
-   * @param \Exception $error
+   * @param Exception $error
    */
-  private function reportError(string $name, \Exception $error) {
+  private function reportError(string $name, Exception $error) {
     echo implode("\n", [
       '',
       'Syntax error in `' . $name . '`:',
