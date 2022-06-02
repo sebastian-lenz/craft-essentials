@@ -10,6 +10,7 @@ use Gettext\Extractors\PhpCode;
 use lenz\contentfield\twig\YamlAwareTemplateLoader;
 use lenz\craft\essentials\services\gettext\Gettext;
 use lenz\craft\essentials\services\gettext\utils\Translations;
+use lenz\craft\utils\helpers\ArrayHelper;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Twig\Error\LoaderError;
@@ -104,12 +105,20 @@ class TemplatesSource extends AbstractSource
 
   /**
    * @return array
+   * @throws \yii\base\Exception
    */
   private function parseSiteRoots(): array {
-    $roots = [];
+    $roots = self::withSiteView(fn() => [[
+      'name' => '',
+      'path' => Craft::$app->view->getTemplatesPath(),
+    ]]);
 
     foreach (Craft::$app->view->getSiteTemplateRoots() as $name => $paths) {
       foreach ((is_array($paths) ? $paths : [$paths]) as $path) {
+        if (ArrayHelper::contains($roots, fn(array $root) => $root['path'] == $path)) {
+          continue;
+        }
+
         $roots[] = [
           'name' => $name,
           'path' => $path,
@@ -152,15 +161,17 @@ class TemplatesSource extends AbstractSource
 
   /**
    * @param callable $callback
-   * @throws Exception
+   * @return mixed
+   * @throws \yii\base\Exception
    */
-  static public function withSiteView(callable $callback) {
+  static public function withSiteView(callable $callback): mixed {
     $view = Craft::$app->getView();
     $templateMode = $view->getTemplateMode();
     $view->setTemplateMode(View::TEMPLATE_MODE_SITE);
 
-    $callback($view);
+    $result = $callback($view);
 
     $view->setTemplateMode($templateMode);
+    return $result;
   }
 }

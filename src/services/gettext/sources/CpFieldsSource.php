@@ -161,8 +161,11 @@ class CpFieldsSource extends AbstractSource
    * @param string|null|mixed $original
    */
   private function insert(Translations $translations, string|FieldInterface $fieldOrHint, mixed $original) {
-    $result = $translations->insertCp($original);
+    if (!is_string($original) || empty($original)) {
+      return;
+    }
 
+    $result = $translations->insertCp($original);
     if (!is_null($result)) {
       $reference = 'craft:fields';
 
