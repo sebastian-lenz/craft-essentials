@@ -17,6 +17,11 @@ class ElementHelper extends \craft\helpers\ElementHelper
    * @return ElementInterface[]
    */
   static public function eagerLoad(ElementInterface $element, string $attribute): array {
+    $result = $element->getEagerLoadedElements($attribute);
+    if (!is_null($result)) {
+      return $result->all();
+    }
+
     try {
       $result = $element->getFieldValue($attribute);
     } catch (InvalidFieldException) {
