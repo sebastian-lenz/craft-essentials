@@ -50,7 +50,7 @@ class SiteMap
 
     return implode("\n", [
       '<?xml version="1.0" encoding="UTF-8"?>',
-      '<?xml-stylesheet type="text/xsl" href="', $bundle->baseUrl, '/sitemap.xsl"?>',
+      '<?xml-stylesheet type="text/xsl" href="' . $bundle->baseUrl . '/sitemap.xsl"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
         implode("\n", $this->_buffer),
       '</urlset>'
