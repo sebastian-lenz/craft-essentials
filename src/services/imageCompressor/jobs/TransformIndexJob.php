@@ -11,7 +11,7 @@ use lenz\craft\utils\helpers\ImageTransforms;
 use yii\base\InvalidConfigException;
 
 /**
- * Class AssetJob
+ * Class TransformIndexJob
  */
 class TransformIndexJob extends AbstractJob
 {
@@ -72,9 +72,14 @@ class TransformIndexJob extends AbstractJob
       return $this->_format = null;
     }
 
-    return $this->_format = (empty($index->format)
-      ? ImageTransforms::detectTransformFormat($this->getAsset())
-      : $index->format);
+    if (!empty($index->format)) {
+      $this->_format = empty($index->format);
+    } else {
+      $asset = $this->getAsset();
+      $this->_format = $asset ? ImageTransforms::detectTransformFormat($asset) : null;
+    }
+
+    return $this->_format;
   }
 
 
