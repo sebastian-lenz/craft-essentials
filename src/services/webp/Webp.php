@@ -4,18 +4,14 @@ namespace lenz\craft\essentials\services\webp;
 
 use Craft;
 use craft\elements\Asset;
-use craft\errors\ImageException;
 use craft\errors\VolumeException;
-use craft\errors\VolumeObjectExistsException;
 use craft\events\AssetTransformImageEvent;
 use craft\events\GenerateTransformEvent;
-use craft\helpers\FileHelper;
+use craft\image\Raster;
 use craft\models\AssetTransformIndex;
 use craft\services\AssetTransforms;
-use craft\volumes\Local;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
-use lenz\craft\essentials\services\siteMap\SiteMapService;
 use yii\base\Component;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -28,7 +24,7 @@ class Webp extends Component
   /**
    * @var Webp
    */
-  static private $_INSTANCE;
+  static private Webp $_INSTANCE;
 
 
   /**
@@ -82,9 +78,13 @@ class Webp extends Component
   /**
    * @param GenerateTransformEvent $event
    * @throws InvalidConfigException
-   * @throws ImageException
    */
   public function onGenerateTransform(GenerateTransformEvent $event) {
+    $image = $event->image;
+    if (!$image instanceof Raster) {
+      return;
+    }
+
     $asset = $event->asset;
     $index = $event->transformIndex;
     $transformPath = $this->getWebpPath($asset, $index);
@@ -97,7 +97,16 @@ class Webp extends Component
       mkdir($dir, 0777, true);
     }
 
-    $event->image->saveAs($transformPath);
+    $imagine = $image->getImagineImage();
+    if ($imagine) {
+      $transform = $index->transform;
+      $quality = $transform->quality ?: Craft::$app->getConfig()->getGeneral()->defaultImageQuality;
+      $imagine->save($transformPath, [
+        'format' => 'webp',
+        'optimize' => true,
+        'webp_quality' => round(40 * ($quality / 100)),
+      ]);
+    }
   }
 
 
