@@ -2,10 +2,11 @@
 
 namespace lenz\craft\essentials\services\webp;
 
+use Craft;
 use craft\elements\Asset;
 use craft\errors\FsException;
-use craft\errors\ImageException;
 use craft\events\ImageTransformerOperationEvent;
+use craft\image\Raster;
 use craft\imagetransforms\ImageTransformer as NativeImageTransformer;
 use craft\models\ImageTransformIndex;
 use lenz\craft\essentials\Plugin;
@@ -77,9 +78,13 @@ class Webp extends Component
   /**
    * @param ImageTransformerOperationEvent $event
    * @throws InvalidConfigException
-   * @throws ImageException
    */
   public function onGenerateTransform(ImageTransformerOperationEvent $event) {
+    $image = $event->image;
+    if (!$image instanceof Raster) {
+      return;
+    }
+
     $asset = $event->asset;
     $index = $event->imageTransformIndex;
     $transformPath = $this->getWebpPath($asset, $index);
@@ -92,7 +97,14 @@ class Webp extends Component
       mkdir($dir, 0777, true);
     }
 
-    $event->image->saveAs($transformPath);
+    $imagine = $image->getImagineImage();
+    if ($imagine) {
+      $transform = $index->transform;
+      $quality = $transform->quality ?: Craft::$app->getConfig()->getGeneral()->defaultImageQuality;
+      $imagine->save($transformPath, [
+        'webp_quality' => $quality,
+      ]);
+    }
   }
 
 

@@ -13,6 +13,7 @@ use lenz\craft\utils\models\Attributes;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Extension
@@ -59,6 +60,7 @@ class Extension extends AbstractExtension
 
   /**
    * @return string
+   * @throws BadRequestHttpException
    */
   public function getCommitHash(): string {
     if (!isset($this->_commitHash)) {
@@ -92,7 +94,7 @@ class Extension extends AbstractExtension
    * @param array|Attributes $value
    * @return Attributes
    */
-  public function toAttributes($value = []): Attributes {
+  public function toAttributes(mixed $value = []): Attributes {
     if ($value instanceof Attributes) {
       return $value;
     } elseif (is_array($value)) {
