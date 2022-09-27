@@ -102,7 +102,9 @@ class Webp extends Component
       $transform = $index->transform;
       $quality = $transform->quality ?: Craft::$app->getConfig()->getGeneral()->defaultImageQuality;
       $imagine->save($transformPath, [
-        'webp_quality' => $quality,
+        'format' => 'webp',
+        'optimize' => true,
+        'webp_quality' => round(40 * ($quality / 100)),
       ]);
     }
   }
