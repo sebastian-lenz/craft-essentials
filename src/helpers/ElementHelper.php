@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\helpers;
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
 use craft\errors\InvalidFieldException;
+use Illuminate\Support\Collection;
 
 /**
  * Class ElementHelper
@@ -23,18 +24,21 @@ class ElementHelper extends \craft\helpers\ElementHelper
     }
 
     try {
-      $result = $element->getFieldValue($attribute);
+      $result = match($attribute) {
+        'children' => $element->getChildren(),
+        default => $element->getFieldValue($attribute),
+      };
     } catch (InvalidFieldException) {
       return [];
     }
 
-    if (!is_array($result)) {
-      if ($result instanceof ElementQuery) {
-        $result = $result->all();
-        $element->setEagerLoadedElements($attribute, $result);
-      } else {
-        $result = [];
-      }
+    if ($result instanceof Collection) {
+      $result = $result->toArray();
+    } elseif ($result instanceof ElementQuery) {
+      $result = $result->all();
+      $element->setEagerLoadedElements($attribute, $result);
+    } else {
+      $result = [];
     }
 
     return $result;
