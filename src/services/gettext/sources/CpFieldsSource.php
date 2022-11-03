@@ -7,6 +7,7 @@ use craft\base\FieldInterface;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
+use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\Heading;
 use craft\fieldlayoutelements\Tip;
 use craft\fields\BaseOptionsField;
@@ -75,7 +76,12 @@ class CpFieldsSource extends AbstractSource
     ]));
 
     foreach ($model->elements as $element) {
-      if ($element instanceof Heading) {
+      if ($element instanceof BaseField) {
+        $this->insert($translations, $hint, $element->label);
+        $this->insert($translations, $hint, $element->instructions);
+        $this->insert($translations, $hint, $element->tip);
+        $this->insert($translations, $hint, $element->warning);
+      } elseif ($element instanceof Heading) {
         $this->insert($translations, $hint, $element->heading);
       } elseif ($element instanceof Tip) {
         $this->insert($translations, $hint, $element->tip);
