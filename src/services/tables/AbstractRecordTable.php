@@ -58,9 +58,11 @@ abstract class AbstractRecordTable extends AbstractTable
     $records = $recordClass::find()->all();
 
     foreach ($rows as $row) {
+      $data = $this->getSaveRowData($row, $row->attributes);
+
       foreach ($records as $index => $record) {
         if ($this->isRecordEqual($record, $row)) {
-          $record->setAttributes($row->attributes);
+          $record->setAttributes($data);
           $record->save();
 
           array_splice($records, $index, 1);
@@ -68,7 +70,7 @@ abstract class AbstractRecordTable extends AbstractTable
         }
       }
 
-      $record = new $recordClass($row->attributes);
+      $record = new $recordClass($data);
       $record->save();
     }
 

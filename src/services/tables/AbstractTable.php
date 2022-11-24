@@ -175,6 +175,15 @@ abstract class AbstractTable
   }
 
   /**
+   * @param Row $row
+   * @param array $attributes
+   * @return array
+   */
+  protected function getSaveRowData(Row $row, array $attributes): array {
+    return $attributes;
+  }
+
+  /**
    * @param Row $lft
    * @param Row $rgt
    * @return bool

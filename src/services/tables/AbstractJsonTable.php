@@ -43,7 +43,7 @@ abstract class AbstractJsonTable extends AbstractTable
     $fileName = App::parseEnv($this->getFileName());
 
     file_put_contents($fileName, Json::encode(array_map(function($row) {
-      return $row->attributes;
+      return $this->getSaveRowData($row, $row->attributes);
     }, $rows), JSON_PRETTY_PRINT));
   }
 }

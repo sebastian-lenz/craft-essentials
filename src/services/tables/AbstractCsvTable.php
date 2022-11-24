@@ -95,6 +95,7 @@ abstract class AbstractCsvTable extends AbstractTable
         $data[] = $row->$name ?? '';
       }
 
+      $data = $this->getSaveRowData($row, $data);
       fputcsv($handle, $data, $this->delimiter, $this->enclosure, $this->escape);
     }
 
