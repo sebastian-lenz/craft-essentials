@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\services\gettext\sources;
 
+use Exception;
 use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
@@ -17,6 +18,7 @@ class ContentFieldSource extends AbstractSource
 {
   /**
    * @inheritDoc
+   * @throws Exception
    */
   public function extract(Translations $translations): void {
     $schemas = Plugin::getInstance()->schemas->getAllSchemas();

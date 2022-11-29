@@ -60,7 +60,6 @@ class Extension extends AbstractExtension
 
   /**
    * @return string
-   * @throws BadRequestHttpException
    */
   public function getCommitHash(): string {
     if (!isset($this->_commitHash)) {

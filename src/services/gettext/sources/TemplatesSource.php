@@ -35,6 +35,7 @@ class TemplatesSource extends AbstractSource
 
   /**
    * @param Gettext $gettext
+   * @throws \yii\base\Exception
    */
   public function __construct(Gettext $gettext) {
     parent::__construct($gettext);

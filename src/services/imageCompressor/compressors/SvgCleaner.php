@@ -10,7 +10,7 @@ class SvgCleaner extends AbstractCompressor
   /**
    * @var string|null
    */
-  private $_command;
+  private mixed $_command;
 
 
   /**

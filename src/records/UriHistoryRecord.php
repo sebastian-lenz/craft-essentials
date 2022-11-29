@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\records;
 
+use Craft;
 use craft\base\ElementInterface;
 use craft\db\ActiveRecord;
 
@@ -26,6 +27,6 @@ class UriHistoryRecord extends ActiveRecord
    * @return ElementInterface|null
    */
   public function getElement(): ?ElementInterface {
-    return \Craft::$app->elements->getElementById($this->elementId, null, $this->siteId);
+    return Craft::$app->elements->getElementById($this->elementId, null, $this->siteId);
   }
 }

@@ -33,7 +33,7 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function getDescription() {
+  public function getDescription(): ?string {
     $search = $this->_search;
     if (empty($search)) {
       return null;
@@ -59,7 +59,7 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function prepareQuery(AbstractQuery $owner, ElementQuery $query) {
+  public function prepareQuery(AbstractQuery $owner, ElementQuery $query): void {
     $search = $this->_search;
 
     if (!empty($search)) {

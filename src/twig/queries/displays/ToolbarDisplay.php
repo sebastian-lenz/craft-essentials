@@ -7,6 +7,7 @@ use craft\helpers\UrlHelper;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\craft\essentials\twig\queries\filters\SearchFilter;
 use lenz\contentfield\twig\DisplayInterface;
+use Throwable;
 use yii\base\BaseObject;
 
 /**
@@ -43,8 +44,9 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
 
   /**
    * @inheritDoc
+   * @throws Throwable
    */
-  public function display(array $variables = []) {
+  public function display(array $variables = []): void {
     $variables = array_merge([
       'display' => $this,
       'filters' => $this->_query->getFilters(),

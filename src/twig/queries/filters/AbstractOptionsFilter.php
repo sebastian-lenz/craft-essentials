@@ -114,7 +114,7 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   }
 
   /**
-   * @return string[]|int[]
+   * @return array|null
    */
   public function getSelectedValues(): ?array {
     if (!is_null($this->_fixedValues)) {

@@ -34,7 +34,7 @@ class m220204_161700_AddUriHistoryTable extends Migration
     $this->createIndex(null, $table, ['elementId']);
     $this->createIndex(null, $table, ['uri']);
 
-    $this->addForeignKey(null, $table, ['elementId'], Table::ELEMENTS, ['id'], 'CASCADE', null);
+    $this->addForeignKey(null, $table, ['elementId'], Table::ELEMENTS, ['id'], 'CASCADE');
   }
 
   /**

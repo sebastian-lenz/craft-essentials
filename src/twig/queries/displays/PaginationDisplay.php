@@ -53,8 +53,9 @@ class PaginationDisplay extends Paginate implements DisplayInterface
 
   /**
    * @inheritDoc
+   * @throws Throwable
    */
-  public function display(array $variables = []) {
+  public function display(array $variables = []): void {
     if (!$this->_query->hasPagination()) {
       return;
     }
