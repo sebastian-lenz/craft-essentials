@@ -115,6 +115,13 @@ abstract class AbstractTable
   /**
    * @return Column
    */
+  public function html(): Column {
+    return (new Column(['config' => ['renderer' => 'html']]))->readOnly();
+  }
+
+  /**
+   * @return Column
+   */
   public function numeric(): Column {
     return new Column('numeric');
   }
