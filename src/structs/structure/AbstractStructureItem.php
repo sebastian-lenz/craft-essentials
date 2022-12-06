@@ -129,7 +129,7 @@ abstract class AbstractStructureItem implements IteratorAggregate
    * @param ElementInterface $element
    */
   protected function setElement(ElementInterface $element) {
-    $this->id = intval($element->getId());
+    $this->id = intval($element->getCanonicalId());
 
     if ($element instanceof Element) {
       $this->nestedLevel = intval($element->level);

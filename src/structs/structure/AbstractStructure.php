@@ -232,7 +232,7 @@ abstract class AbstractStructure implements IteratorAggregate
    */
   static function normalizeId(mixed $elementOrId): int {
     if ($elementOrId instanceof ElementInterface) {
-      return intval($elementOrId->getId());
+      return intval($elementOrId->getCanonicalId());
     } elseif ($elementOrId instanceof AbstractStructureItem) {
       return $elementOrId->id;
     } else {
