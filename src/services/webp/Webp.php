@@ -25,6 +25,11 @@ class Webp extends Component
    */
   static private Webp $_INSTANCE;
 
+  /**
+   * @var float
+   */
+  static float $QUALITY_FACTOR = 1;
+
 
   /**
    * @inheritDoc
@@ -104,7 +109,7 @@ class Webp extends Component
       $imagine->save($transformPath, [
         'format' => 'webp',
         'optimize' => true,
-        'webp_quality' => round(40 * ($quality / 100)),
+        'webp_quality' => round($quality * self::$QUALITY_FACTOR),
       ]);
     }
   }
