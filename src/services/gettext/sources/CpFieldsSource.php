@@ -71,9 +71,14 @@ class CpFieldsSource extends AbstractSource
     $hint = $this->getTabHint($record);
     $this->insert($translations, $hint, $record->name);
 
-    $model = FieldLayoutTab::createFromConfig($record->getAttributes([
-      'id', 'layoutId', 'name', 'elements', 'sortOrder', 'uid'
-    ]));
+    try {
+      $model = FieldLayoutTab::createFromConfig($record->getAttributes([
+        'id', 'layoutId', 'name', 'elements', 'sortOrder', 'uid'
+      ]));
+    } catch (\Throwable $error) {
+      echo "\n[Error] Could not load field layout tab #$record->id: " . $error->getMessage() . "\n\n";
+      return;
+    }
 
     foreach ($model->elements as $element) {
       if ($element instanceof BaseField) {
