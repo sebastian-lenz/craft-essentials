@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\structs\icon;
 
+use ArrayAccess;
 use craft\helpers\Html;
 use lenz\craft\essentials\twig\AbstractMarkup;
 use lenz\craft\utils\helpers\ArrayHelper;
@@ -9,7 +10,7 @@ use lenz\craft\utils\helpers\ArrayHelper;
 /**
  * Class IconMarkup
  */
-class Icon extends AbstractMarkup
+class Icon extends AbstractMarkup implements ArrayAccess
 {
   /**
    * @var array
@@ -106,6 +107,29 @@ class Icon extends AbstractMarkup
   }
 
   /**
+   * @param string $name
+   * @return mixed
+   */
+  public function getAttribute(string $name): mixed {
+    return array_key_exists($name, $this->_attributes) ? $this->_attributes[$name] : null;
+  }
+
+  /**
+   * @return array|null
+   */
+  public function getSize(): array|null {
+    foreach ($this->_elements as $element) {
+      $result = $element->getSize();
+
+      if (!is_null($result)) {
+        return $result;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * @param float $scale
    * @return $this
    */
@@ -129,6 +153,46 @@ class Icon extends AbstractMarkup
    */
   public function toElementHref(string $name): string {
     return '#' . $name;
+  }
+
+
+  // Array Access
+  // ------------
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetExists(mixed $offset): bool {
+    return array_key_exists($offset, is_string($offset) ? $this->_attributes : $this->_elements);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetGet(mixed $offset): mixed {
+    return is_string($offset) ? $this->_attributes[$offset] : $this->_elements[$offset];
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetSet(mixed $offset, mixed $value): void {
+    if (is_string($offset)) {
+      $this->_attributes[$offset] = $value;
+    } else {
+      $this->_elements[$offset] = $value;
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetUnset(mixed $offset): void {
+    if (is_string($offset)) {
+      unset($this->_attributes[$offset]);
+    } else {
+      unset($this->_elements[$offset]);
+    }
   }
 
 
@@ -190,21 +254,6 @@ class Icon extends AbstractMarkup
     array_unshift($content, Html::tag('title', $this->_title, ['id' => $id]));
   }
 
-  /**
-   * @return array|null
-   */
-  private function getSize(): array|null {
-    foreach ($this->_elements as $element) {
-      $result = $element->getSize();
-
-      if (!is_null($result)) {
-        return $result;
-      }
-    }
-
-    return null;
-  }
-
 
   // Static methods
   // --------------
@@ -216,5 +265,12 @@ class Icon extends AbstractMarkup
    */
   static public function create(string|array $content = '', array $attributes = []): static {
     return new static($content, $attributes);
+  }
+
+  /**
+   * @return string|null
+   */
+  static public function getSourceFile(): ?string {
+    return null;
   }
 }

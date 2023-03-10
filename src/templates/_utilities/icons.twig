@@ -1,0 +1,60 @@
+<h1>Icons</h1>
+<style>
+  .cesIcons {
+    display: flex;
+    flex-flow: row wrap;
+    list-style: none;
+    gap: 16px;
+  }
+
+  .cesIcons__icon {
+    display: flex;
+    flex-flow: column nowrap;
+    min-width: 160px;
+    min-height: 120px;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .cesIcons__iconDisplay {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+  }
+
+  .cesIcons__iconId {
+    padding: 8px 16px;
+    text-align: center;
+  }
+</style>
+
+{% macro group(name, icons) %}
+  <h2>{{ name }}</h2>
+  <ul class="cesIcons">
+    {% for icon in icons %}
+      <li class="cesIcons__item">
+        <dl class="cesIcons__icon">
+          <dd class="cesIcons__iconDisplay">{{ icon.display }}</dd>
+          <dt class="cesIcons__iconId">{{ icon.id }}</dt>
+        </dl>
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro source(source) %}
+  <h2>{{ source.class }}</h2>
+  {% if source.message %}
+    <p>{{ source.message }}</p>
+  {% endif %}
+  {% for name, icons in source.groups %}
+    {{ _self.group(name, icons) }}
+  {% endfor %}
+{% endmacro %}
+
+{% for source in sources %}
+  {{ _self.source(source) }}
+{% endfor %}

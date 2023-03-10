@@ -50,6 +50,11 @@ class Settings extends Model
    */
   public bool $ensureSiteSegment = true;
 
+  /**
+   * @var string[]
+   */
+  public array $iconClasses = [];
+
 
   /**
    * @inheritDoc
@@ -61,6 +66,7 @@ class Settings extends Model
     $this->enableWebp = !!$this->enableWebp;
     $this->ensureSiteSegment = !!$this->ensureSiteSegment;
     $this->dataTables = self::parseList($this->dataTables);
+    $this->iconClasses = self::parseList($this->iconClasses);
   }
 
   /**

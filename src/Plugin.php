@@ -15,6 +15,7 @@ use yii\base\InvalidConfigException;
 /**
  * Class Plugin
  *
+ * @property services\cp\CpHelpers $cpHelpers
  * @property services\disabledLanguages\DisabledLanguages $disabledLanguages
  * @property ElementCache $elementCache
  * @property services\frontendCache\FrontendCacheService $frontendCache
@@ -23,7 +24,6 @@ use yii\base\InvalidConfigException;
  * @property services\MailEncoder $mailEncoder
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
- * @property services\RemoveDashboard $removeDashboard
  * @property services\tables\Tables $tables
  * @property services\translations\Translations $translations
  * @property services\siteMap\SiteMapService $siteMap
@@ -50,6 +50,7 @@ class Plugin extends \craft\base\Plugin
     parent::init();
 
     $this->setComponents([
+      'cpHelpers'         => services\cp\CpHelpers::getInstance(),
       'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
       'elementCache'      => ElementCache::getInstance(),
       'frontendCache'     => services\frontendCache\FrontendCacheService::getInstance(),
@@ -59,7 +60,6 @@ class Plugin extends \craft\base\Plugin
       'mailEncoder'       => services\MailEncoder::getInstance(),
       'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),
       'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
-      'removeDashboard'   => services\RemoveDashboard::getInstance(),
       'removeStopWords'   => services\RemoveStopWords::getInstance(),
       'tables'            => services\tables\Tables::getInstance(),
       'translations'      => services\translations\Translations::class,
