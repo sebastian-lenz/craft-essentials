@@ -3,6 +3,8 @@
 namespace lenz\craft\essentials\services;
 
 use craft\elements\db\ElementQuery;
+use craft\search\SearchQuery;
+use Throwable;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -70,12 +72,12 @@ class RemoveStopWords extends Component
       return;
     }
 
-    $search = $this->filterStopWords($query->search);
-    if ($search == $query->search) {
+    $originalSearch = $query->search;
+    $search = $this->getFilteredSearch($originalSearch);
+    if (is_null($search)) {
       return;
     }
 
-    $originalSearch = $query->search;
     $query->search = $search;
     $query->on(
       ElementQuery::EVENT_AFTER_PREPARE,
@@ -83,6 +85,51 @@ class RemoveStopWords extends Component
         $query->search = $originalSearch;
       }
     );
+  }
+
+
+  // Private methods
+  // ---------------
+
+  /**
+   * @param mixed $search
+   * @return SearchQuery|string|null
+   */
+  private function getFilteredSearch(mixed $search): SearchQuery|string|null {
+    if ($search instanceof SearchQuery) {
+      $originalQuery = $search->getQuery();
+      $query = $this->filterStopWords($originalQuery);
+
+      return $query == $originalQuery
+        ? null
+        : new SearchQuery($query, $this->getTermOptions($search));
+    }
+    elseif (is_string($search)) {
+      $filtered = $this->filterStopWords($search);
+
+      return $filtered == $search
+        ? null
+        : $filtered;
+    }
+
+    return null;
+  }
+
+  /**
+   * @param SearchQuery $query
+   * @return array
+   */
+  private function getTermOptions(SearchQuery $query): array {
+    static $property;
+    try {
+      if (!isset($property)) {
+        $property = new \ReflectionProperty(SearchQuery::class, '_defaultTermOptions');
+      }
+
+      return $property->getValue($query);
+    } catch (Throwable) {
+      return [];
+    }
   }
 
 
