@@ -6,11 +6,13 @@ use Craft;
 use craft\elements\Asset;
 use craft\errors\FsException;
 use craft\events\ImageTransformerOperationEvent;
+use craft\helpers\FileHelper;
 use craft\image\Raster;
 use craft\imagetransforms\ImageTransformer as NativeImageTransformer;
 use craft\models\ImageTransformIndex;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
+use lenz\craft\utils\helpers\ImageTransforms;
 use yii\base\Component;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -57,7 +59,7 @@ class Webp extends Component
    * @throws InvalidConfigException
    */
   public function getWebpPath(Asset $asset, ImageTransformIndex $index): ?string {
-    $fileName = TransformIndexJob::resolveTransformFileName($index, $asset);
+    $fileName = ImageTransforms::getTransformPath($asset, $index);
     if (is_null($fileName)) {
       return null;
     }
@@ -73,7 +75,7 @@ class Webp extends Component
   public function onAfterDeleteTransforms(ImageTransformerOperationEvent $event) {
     $asset = $event->asset;
     $fileName = $this->getWebpPath($asset, $event->imageTransformIndex);
-    $fs = $asset->getVolume()->getFs();
+    $fs = $asset->getVolume()->getTransformFs();
 
     if ($fs->fileExists($fileName)) {
       $fs->deleteFile($fileName);
@@ -92,25 +94,35 @@ class Webp extends Component
 
     $asset = $event->asset;
     $index = $event->imageTransformIndex;
-    $transformPath = $this->getWebpPath($asset, $index);
-    if (is_null($transformPath)) {
+    $fileName = $this->getWebpPath($asset, $index);
+    if (is_null($fileName)) {
       return;
     }
 
-    $dir = dirname($transformPath);
-    if (!file_exists($dir)) {
-      mkdir($dir, 0777, true);
-    }
+    $fileSystem = $asset->getVolume()->getTransformFs();
+    $dirName = dirname($fileName);
+    $fileSystem->createDirectory($dirName);
 
     $imagine = $image->getImagineImage();
-    if ($imagine) {
-      $transform = $index->transform;
-      $quality = $transform->quality ?: Craft::$app->getConfig()->getGeneral()->defaultImageQuality;
-      $imagine->save($transformPath, [
-        'format' => 'webp',
-        'optimize' => true,
-        'webp_quality' => round($quality * self::$QUALITY_FACTOR),
-      ]);
+    if (is_null($imagine)) {
+      return;
+    }
+
+    $transform = $index->transform;
+    $quality = $transform->quality ?: Craft::$app->getConfig()->getGeneral()->defaultImageQuality;
+
+    $tempFilename = uniqid(pathinfo($index->filename, PATHINFO_FILENAME), true) . '.webp';
+    $tempPath = Craft::$app->getPath()->getTempPath() . DIRECTORY_SEPARATOR . $tempFilename;
+    $imagine->save($tempPath, [
+      'format' => 'webp',
+      'optimize' => true,
+      'webp_quality' => round($quality * self::$QUALITY_FACTOR),
+    ]);
+
+    $stream = fopen($tempPath, 'rb');
+    $fileSystem->writeFileFromStream($fileName, $stream, []);
+    if (file_exists($tempPath)) {
+      FileHelper::unlink($tempPath);
     }
   }
 
