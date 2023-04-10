@@ -173,7 +173,7 @@ class RedirectLanguage extends Component
       return (
         $request instanceof Request &&
         $request->isSiteRequest &&
-        empty(trim($request->getPathInfo(), '/'))
+        empty(trim($request->getPathInfo(true), '/'))
       );
     } catch (Throwable) {
       return false;
