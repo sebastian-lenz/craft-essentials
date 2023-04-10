@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\services\redirectLanguage;
 use Craft;
 use craft\controllers\TemplatesController;
 use craft\web\Application;
+use craft\web\Request;
 use craft\web\Response;
 use Exception;
 use lenz\craft\essentials\Plugin;
@@ -54,11 +55,7 @@ class RedirectLanguage extends Component
     $settings = Plugin::getInstance()->getSettings();
     $enabled = $settings->enableLanguageRedirect;
 
-    if (
-      $enabled &&
-      $request->isSiteRequest &&
-      count($request->queryParams) == 0
-    ) {
+    if ($enabled && self::isIndexRequest($request)) {
       $url = $this->getBestSiteUrl();
       if (!is_null($url)) {
         Craft::$app->getResponse()
@@ -165,5 +162,21 @@ class RedirectLanguage extends Component
     }
 
     return self::$_instance;
+  }
+
+  /**
+   * @param \yii\base\Request $request
+   * @return bool
+   */
+  private static function isIndexRequest(\yii\base\Request $request): bool {
+    try {
+      return (
+        $request instanceof Request &&
+        $request->isSiteRequest &&
+        empty(trim($request->getPathInfo(), '/'))
+      );
+    } catch (Throwable) {
+      return false;
+    }
   }
 }
