@@ -3,6 +3,9 @@
 namespace lenz\craft\essentials\services;
 
 use craft\elements\db\ElementQuery;
+use craft\search\SearchQuery;
+use ReflectionProperty;
+use Throwable;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -14,12 +17,12 @@ class RemoveStopWords extends Component
   /**
    * @var string[]
    */
-  public $stopWords;
+  public array $stopWords;
 
   /**
    * @var RemoveStopWords
    */
-  static private $_instance;
+  static private RemoveStopWords $_instance;
 
 
   /**
@@ -38,7 +41,7 @@ class RemoveStopWords extends Component
   /**
    * @return string[]
    */
-  public function getStopWords() {
+  public function getStopWords(): array {
     if (!isset($this->stopWords)) {
       $this->stopWords = require(__DIR__ . '/../../data/stopwords.php');
     }
@@ -70,12 +73,12 @@ class RemoveStopWords extends Component
       return;
     }
 
-    $search = $this->filterStopWords($query->search);
-    if ($search == $query->search) {
+    $originalSearch = $query->search;
+    $search = $this->getFilteredSearch($originalSearch);
+    if (is_null($search)) {
       return;
     }
 
-    $originalSearch = $query->search;
     $query->search = $search;
     $query->on(
       ElementQuery::EVENT_AFTER_PREPARE,
@@ -86,6 +89,50 @@ class RemoveStopWords extends Component
   }
 
 
+  // Private methods
+  // ---------------
+
+  /**
+   * @param mixed $search
+   * @return SearchQuery|string|null
+   */
+  private function getFilteredSearch($search) {
+    if ($search instanceof SearchQuery) {
+      $originalQuery = $search->getQuery();
+      $query = $this->filterStopWords($originalQuery);
+
+      return $query == $originalQuery
+        ? null
+        : new SearchQuery($query, $this->getTermOptions($search));
+    }
+    elseif (is_string($search)) {
+      $filtered = $this->filterStopWords($search);
+
+      return $filtered == $search
+        ? null
+        : $filtered;
+    }
+
+    return null;
+  }
+
+  /**
+   * @param SearchQuery $query
+   * @return array
+   */
+  private function getTermOptions(SearchQuery $query): array {
+    static $property;
+    try {
+      if (!isset($property)) {
+        $property = new ReflectionProperty(SearchQuery::class, '_defaultTermOptions');
+      }
+
+      return $property->getValue($query);
+    } catch (Throwable $error) {
+      return [];
+    }
+  }
+
 
   // Static methods
   // --------------
@@ -93,7 +140,7 @@ class RemoveStopWords extends Component
   /**
    * @return RemoveStopWords
    */
-  public static function getInstance() {
+  public static function getInstance(): RemoveStopWords {
     if (!isset(self::$_instance)) {
       self::$_instance = new RemoveStopWords();
     }
