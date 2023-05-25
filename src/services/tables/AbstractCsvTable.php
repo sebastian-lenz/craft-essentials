@@ -80,7 +80,7 @@ abstract class AbstractCsvTable extends AbstractTable
   /**
    * @inheritDoc
    */
-  protected function saveRows(array $rows) {
+  protected function saveRows(array $rows): void {
     $fileName = App::parseEnv($this->getFileName());
     $handle = fopen($fileName, 'w');
     $header = array_keys($this->getColumns());

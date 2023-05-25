@@ -2,23 +2,25 @@
 
 namespace lenz\craft\essentials\services\tables;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+use Traversable;
 use yii\helpers\Inflector;
 
 /**
  * Class AbstractDataTable
  */
-abstract class AbstractTable
+abstract class AbstractTable implements ArrayAccess, Countable, IteratorAggregate
 {
+  use HandsontableTrait;
+
   /**
    * @var Row[]
    */
-  private array $_rows;
+  protected array $_rows;
 
-
-  /**
-   * @return Column[]
-   */
-  abstract public function getColumns(): array;
 
   /**
    * @return Row[]
@@ -30,33 +32,29 @@ abstract class AbstractTable
    */
   abstract protected function saveRows(array $rows);
 
-
-  // Public methods
-  // --------------
-
   /**
-   * @return Column
+   * @param array $attributes
+   * @return Row
    */
-  public function checkbox(): Column {
-    return new Column('checkbox');
+  public function append(array $attributes): Row {
+    $this->load();
+    $row = $this->createRow($attributes);
+
+    $this->_rows[] = $row;
+    return $row;
   }
 
   /**
-   * @return Column
+   * @param callable $callback
+   * @return Row|null
    */
-  public function date(): Column {
-    return new Column('date');
-  }
+  public function find(callable $callback): ?Row {
+    $this->load();
+    foreach ($this->_rows as $row) {
+      if ($callback($row)) return $row;
+    }
 
-  /**
-   * @param array $options
-   * @return Column
-   */
-  public function dropdown(array $options): Column {
-    return new Column([
-      'type' => 'dropdown',
-      'source' => array_values($options),
-    ]);
+    return null;
   }
 
   /**
@@ -64,28 +62,6 @@ abstract class AbstractTable
    */
   public function getId(): string {
     return md5(get_called_class());
-  }
-
-  /**
-   * @return array
-   * @noinspection PhpUnused (Template method)
-   */
-  public function getJsOptions(): array {
-    $columns = [];
-    $colHeaders = [];
-    $colWidths = [];
-
-    foreach ($this->getColumns() as $name => $column) {
-      $columns[] = $column->getJsConfig($name);
-      $colHeaders[] = $column->getJsHeader($name);
-      $colWidths[] = $column->getJsWidth();
-    }
-
-    return [
-      'columns' => $columns,
-      'colHeaders' => $colHeaders,
-      'colWidths' => $colWidths,
-    ];
   }
 
   /**
@@ -113,17 +89,21 @@ abstract class AbstractTable
   }
 
   /**
-   * @return Column
+   * @return void
    */
-  public function html(): Column {
-    return (new Column(['config' => ['renderer' => 'html']]))->readOnly();
+  public function load(): void {
+    if (!isset($this->_rows)) {
+      $this->_rows = $this->loadRows();
+    }
   }
 
   /**
-   * @return Column
+   * @return void
    */
-  public function numeric(): Column {
-    return new Column('numeric');
+  public function save(): void {
+    if (isset($this->_rows)) {
+      $this->saveRows($this->_rows);
+    }
   }
 
   /**
@@ -156,18 +136,56 @@ abstract class AbstractTable
     $this->saveRows($result);
   }
 
+
+  // Interfaces
+  // ----------
+
   /**
-   * @return Column
+   * @inheritDoc
    */
-  public function text(): Column {
-    return new Column('text');
+  public function count(): int {
+    $this->load();
+    return count($this->_rows);
   }
 
   /**
-   * @return Column
+   * @return Traversable
    */
-  public function time(): Column {
-    return new Column('time');
+  public function getIterator(): Traversable {
+    $this->load();
+    return new ArrayIterator($this->_rows);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetExists(mixed $offset): bool {
+    $this->load();
+    return array_key_exists($offset, $this->_rows);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetGet(mixed $offset): Row {
+    $this->load();
+    return $this->_rows[$offset];
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetSet(mixed $offset, mixed $value): void {
+    $this->load();
+    $this->_rows[$offset] = $value;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function offsetUnset(mixed $offset): void {
+    $this->load();
+    unset($this->_rows[$offset]);
   }
 
 

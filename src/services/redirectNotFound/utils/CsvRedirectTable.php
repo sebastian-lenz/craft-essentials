@@ -54,7 +54,7 @@ class CsvRedirectTable extends AbstractCsvTable
     $isEmpty = true;
     foreach ($attributes as $key => $value) {
       $value = trim(trim($value), '/');
-      if (!UrlHelper::isFullUrl($value)) {
+      if (!str_starts_with($value, '@entry') && !UrlHelper::isFullUrl($value)) {
         $value = '/' . $value;
       }
 

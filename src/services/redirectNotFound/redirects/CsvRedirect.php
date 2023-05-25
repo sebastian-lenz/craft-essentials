@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\services\redirectNotFound\redirects;
 
+use craft\elements\Entry;
 use craft\web\Request;
 
 /**
@@ -41,11 +42,28 @@ class CsvRedirect extends AbstractRedirect
     }
 
     fclose($handle);
-    if (!is_null($result)) {
+    if ($this->resolveTarget($result)) {
       $this->sendRedirect($result);
       return true;
     }
 
     return false;
+  }
+
+  /**
+   * @param string|null $result
+   * @return bool
+   */
+  private function resolveTarget(?string &$result): bool {
+    if (is_string($result) && str_starts_with($result, '@entry:')) {
+      $entry = Entry::findOne(substr($result, 7));
+      $result = $entry?->url;
+    }
+
+    if (empty($result)) {
+      return false;
+    }
+
+    return true;
   }
 }

@@ -55,19 +55,11 @@ class Settings extends Model
    */
   public array $iconClasses = [];
 
-
   /**
-   * @inheritDoc
+   * @var array
    */
-  public function afterValidate() {
-    $this->enableLanguageRedirect = !!$this->enableLanguageRedirect;
-    $this->enableImageCompressor = !!$this->enableImageCompressor;
-    $this->enableImageSharpening = !!$this->enableImageSharpening;
-    $this->enableWebp = !!$this->enableWebp;
-    $this->ensureSiteSegment = !!$this->ensureSiteSegment;
-    $this->dataTables = self::parseList($this->dataTables);
-    $this->iconClasses = self::parseList($this->iconClasses);
-  }
+  const LISTS = ['dataTables', 'iconClasses'];
+
 
   /**
    * @return array
@@ -96,6 +88,19 @@ class Settings extends Model
     return $languages;
   }
 
+  /**
+   * @inheritDoc
+   */
+  public function setAttributes($values, $safeOnly = true): void {
+    foreach (self::LISTS as $name) {
+      if (array_key_exists($name, $values)) {
+        $values[$name] = self::parseList($values[$name]);
+      }
+    }
+
+    parent::setAttributes($values, $safeOnly);
+  }
+
 
   // Static methods
   // --------------
@@ -107,8 +112,9 @@ class Settings extends Model
   static function parseList(mixed $value): array {
     $list = is_array($value) ? $value : explode("\n", $value);
 
-    return array_filter(array_map(function($value) {
-      return trim($value);
-    }, $list));
+    return array_filter(array_map(
+      fn($value) => trim($value),
+      $list
+    ));
   }
 }

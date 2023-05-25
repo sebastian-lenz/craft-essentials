@@ -12,9 +12,10 @@ use craft\events\ExceptionEvent;
 use craft\services\Elements;
 use craft\services\Plugins;
 use craft\web\ErrorHandler;
+use lenz\craft\essentials\events\RegisterRedirectsEvent;
 use lenz\craft\essentials\records\UriHistoryRecord;
+use lenz\craft\essentials\services\AbstractService;
 use lenz\craft\essentials\services\redirectNotFound\redirects\AbstractRedirect;
-use yii\base\Component;
 use yii\base\Event;
 use yii\base\ModelEvent;
 use yii\web\HttpException;
@@ -22,12 +23,18 @@ use yii\web\HttpException;
 /**
  * Class RedirectNotFound
  */
-class RedirectNotFound extends Component
+class RedirectNotFound extends AbstractService
 {
+
   /**
-   * @var RedirectNotFound
+   * @var AbstractRedirect[]
    */
-  static private RedirectNotFound $_instance;
+  private array $_redirects;
+
+  /**
+   * @var string
+   */
+  const EVENT_REGISTER_REDIRECTS = 'registerRedirects';
 
 
   /**
@@ -60,7 +67,7 @@ class RedirectNotFound extends Component
   /**
    * @param ExceptionEvent $event
    */
-  public function onBeforeHandleException(ExceptionEvent $event) {
+  public function onBeforeHandleException(ExceptionEvent $event): void {
     $exception = $event->exception;
     while ($exception) {
       if (
@@ -78,7 +85,7 @@ class RedirectNotFound extends Component
   /**
    * @param ModelEvent $event
    */
-  public function onBeforeElementSave(ModelEvent $event) {
+  public function onBeforeElementSave(ModelEvent $event): void {
     $element = $event->sender;
     if (!($element instanceof Element) || empty($event->sender->id)) {
       return;
@@ -99,7 +106,7 @@ class RedirectNotFound extends Component
   /**
    * @param ElementEvent $event
    */
-  public function onBeforeUpdateSlug(ElementEvent $event) {
+  public function onBeforeUpdateSlug(ElementEvent $event): void {
     $element = $event->element;
     if (empty($element->uri)) {
       return;
@@ -130,12 +137,25 @@ class RedirectNotFound extends Component
   }
 
   /**
+   * @return AbstractRedirect[]
+   */
+  private function getRedirects(): array {
+    if (!isset($this->_redirects)) {
+      $event = RegisterRedirectsEvent::create();
+      $this->trigger(self::EVENT_REGISTER_REDIRECTS, $event);
+      $this->_redirects = $event->redirects;
+    }
+
+    return $this->_redirects;
+  }
+
+  /**
    * @return bool
    */
   private function handleError(): bool {
     $request = Craft::$app->getRequest();
 
-    foreach (AbstractRedirect::getRedirects() as $redirect) {
+    foreach ($this->getRedirects() as $redirect) {
       if ($redirect->redirect($request)) {
         return true;
       }
@@ -149,7 +169,7 @@ class RedirectNotFound extends Component
    * @param string|null $oldUri
    * @param string|null $newUri
    */
-  private function storeUriHistory(ElementInterface $element, ?string $oldUri, ?string $newUri) {
+  private function storeUriHistory(ElementInterface $element, ?string $oldUri, ?string $newUri): void {
     UriHistoryRecord::deleteAll([
       'siteId' => $element->siteId,
       'uri' => array_filter([$oldUri, $newUri]),
@@ -162,20 +182,5 @@ class RedirectNotFound extends Component
         'uri' => $oldUri,
       ]))->save();
     }
-  }
-
-
-  // Static methods
-  // --------------
-
-  /**
-   * @return RedirectNotFound
-   */
-  public static function getInstance(): RedirectNotFound {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new RedirectNotFound();
-    }
-
-    return self::$_instance;
   }
 }
