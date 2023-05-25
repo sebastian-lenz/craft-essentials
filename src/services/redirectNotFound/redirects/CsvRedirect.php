@@ -15,6 +15,13 @@ class CsvRedirect extends AbstractRedirect
    */
   private string $_fileName;
 
+  /**
+   * @var array
+   */
+  const HANDLERS = [
+    '#entry:' => 'resolveEntryHandler',
+  ];
+
 
   /**
    * CsvRedirect constructor.
@@ -30,9 +37,27 @@ class CsvRedirect extends AbstractRedirect
    * @return bool
    */
   public function redirect(Request $request): bool {
-    $result = null;
-    $url    = trim($request->url, '/');
+    $target = self::resolveHandler($this->findTarget($request->url));
+    if (!empty($target)) {
+      $this->sendRedirect($target);
+      return true;
+    }
+
+    return false;
+  }
+
+
+  // Protected methods
+  // -----------------
+
+  /**
+   * @param string $url
+   * @return string|null
+   */
+  protected function findTarget(string $url): ?string {
+    $url = trim($url, '/');
     $handle = fopen($this->_fileName, 'r');
+    $result = null;
 
     while (($data = fgetcsv($handle, 1000)) !== false) {
       if (count($data) >= 2 && trim($data[0], '/') == $url) {
@@ -42,28 +67,57 @@ class CsvRedirect extends AbstractRedirect
     }
 
     fclose($handle);
-    if ($this->resolveTarget($result)) {
-      $this->sendRedirect($result);
-      return true;
+    return $result;
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param string $value
+   * @return bool
+   */
+  public static function isHandler(string $value): bool {
+    foreach (array_keys(self::HANDLERS) as $prefix) {
+      if (str_starts_with($value, $prefix)) {
+        return true;
+      }
     }
 
     return false;
   }
 
   /**
-   * @param string|null $result
-   * @return bool
+   * @param string $value
+   * @return string|null
    */
-  private function resolveTarget(?string &$result): bool {
-    if (is_string($result) && str_starts_with($result, '@entry:')) {
-      $entry = Entry::findOne(substr($result, 7));
-      $result = $entry?->url;
+  static public function resolveEntryHandler(string $value): ?string {
+    list($id, $siteId) = array_pad(explode('@', $value, 2), 2, null);
+    $criteria = ['id' => $id];
+    if (!empty($siteId)) {
+      $criteria['siteId'] = $siteId;
     }
 
-    if (empty($result)) {
-      return false;
+    $entry = Entry::findOne($criteria);
+    return $entry?->url;
+  }
+
+  /**
+   * @param mixed $value
+   * @return string
+   */
+  static public function resolveHandler(mixed $value): string {
+    if (!is_string($value) || empty($value)) {
+      return '';
     }
 
-    return true;
+    foreach (self::HANDLERS as $prefix => $callback) {
+      if (str_starts_with($value, $prefix)) {
+        return call_user_func([__CLASS__, $callback], substr($value, strlen($prefix)));
+      }
+    }
+
+    return $value;
   }
 }
