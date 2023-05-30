@@ -1,0 +1,139 @@
+{% import '_includes/forms' as forms %}
+
+{% macro table(element, routes, canAppend) %}
+  <table{{ attr({
+    'class': 'editable fullwidth',
+    'data-element-id': element.id,
+    'data-site-id': element.siteId,
+    'data-url-append': actionUrl('lenz-craft-essentials/element-routes/append'),
+    'data-url-delete': actionUrl('lenz-craft-essentials/element-routes/delete'),
+    'id': 'editor',
+  }) }}>
+    <colgroup>
+      <col width="40px" />
+      <col />
+      <col />
+      <col width="75px" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>{{ 'Index'|t('lenz-craft-essentials') }}</th>
+        <th>{{ 'URL'|t('lenz-craft-essentials') }}</th>
+        <th>{{ 'Origin'|t('lenz-craft-essentials') }}</th>
+        <th style="text-align:center;">{{ 'Action'|t('lenz-craft-essentials') }}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+    {% for route in routes %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td style="text-align:left;">{{ route.url }}</td>
+        <td style="text-align:left;">{{ route.origin }}</td>
+        <td>
+          <span class="delete icon" data-element-routes-delete="{{ route.uid }}"></span>
+        </td>
+      </tr>
+    {% endfor %}
+
+    {% if canAppend %}
+      <tr>
+        <td></td>
+        <td class="textual" colspan="2">
+          {{ forms.text({
+            id: 'origin',
+            label: 'Origin',
+            placeholder: 'e.g. /old/path'|t('lenz-craft-essentials'),
+            isRequired: true,
+          }) }}
+        </td>
+        <td>
+          <span data-element-routes-append style="padding:7px 10px;color:var(--link-color);cursor:pointer;text-decoration:underline;">{{ 'Create'|t('lenz-craft-essentials') }}</span>
+        </td>
+      </tr>
+    {% endif %}
+    </tbody>
+  </table>
+
+  <script>
+    (function(editorId, originId) {
+      var isSubmitting = false;
+      var editor = document.getElementById(editorId);
+
+      function createBody(data) {
+        var body = new FormData();
+        body.append('elementId', editor.getAttribute('data-element-id'));
+        body.append('siteId', editor.getAttribute('data-site-id'));
+        body.append('{{ craft.app.config.general.csrfTokenName }}', '{{ craft.app.request.csrfToken }}');
+
+        for (var key in data) {
+          body.append(key, data[key]);
+        }
+
+        return body;
+      }
+
+      function submit(action, body) {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        fetch(editor.getAttribute(`data-url-${action}`), {
+          body: body,
+          method: 'post',
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          var parser = new DOMParser();
+          var nextEditor = parser.parseFromString(data.html, 'text/html').getElementById(editorId);
+          editor.innerHTML = nextEditor.innerHTML;
+        }).catch(function(error) {
+          console.error(error);
+        }).finally(function() {
+          isSubmitting = false;
+        });
+      }
+
+      function tryAppend() {
+        var origin = document.getElementById(originId);
+        origin.setAttribute('required', 'required');
+
+        if (origin.reportValidity()) {
+          submit('append', createBody({
+            origin: origin.value,
+          }));
+        }
+      }
+
+      editor.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          tryAppend();
+        }
+      });
+
+      editor.addEventListener('click', function(e) {
+        var target = e.target;
+        e.preventDefault();
+
+        while (target && target.hasAttribute) {
+          if (target.hasAttribute('data-element-routes-delete')) {
+            return submit('delete', createBody({
+              uid: target.getAttribute('data-element-routes-delete'),
+            }));
+          } else if (target.hasAttribute('data-element-routes-append')) {
+            return tryAppend();
+          }
+
+          target = target.parentNode;
+        }
+      });
+    })('{{ 'editor'|namespaceInputId }}', '{{ 'origin'|namespaceInputId }}');
+  </script>
+{% endmacro %}
+
+{% namespace "elementRoutes" %}
+  {{ forms.field(
+    { label: 'Redirects to this entry'|t('lenz-craft-essentials') },
+    _self.table(element, routes, canAppend)
+  ) }}
+{% endnamespace %}

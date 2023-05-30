@@ -21,7 +21,7 @@ abstract class AbstractService extends Component
    * @return self
    * @throws InvalidConfigException
    */
-  public static function getInstance(): AbstractService {
+  public static function getInstance(): self {
     $name = get_called_class();
     if (!array_key_exists($name, self::$_INSTANCES)) {
       self::$_INSTANCES[$name] = Yii::createObject($name);

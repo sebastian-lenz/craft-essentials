@@ -7,8 +7,11 @@ use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\db\Query;
 use craft\db\Table;
+use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\ElementEvent;
 use craft\events\ExceptionEvent;
+use craft\models\FieldLayout;
+use craft\models\Site;
 use craft\services\Elements;
 use craft\services\Plugins;
 use craft\web\ErrorHandler;
@@ -16,6 +19,7 @@ use lenz\craft\essentials\events\RegisterRedirectsEvent;
 use lenz\craft\essentials\records\UriHistoryRecord;
 use lenz\craft\essentials\services\AbstractService;
 use lenz\craft\essentials\services\redirectNotFound\redirects\AbstractRedirect;
+use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoutesUiElement;
 use yii\base\Event;
 use yii\base\ModelEvent;
 use yii\web\HttpException;
@@ -46,6 +50,26 @@ class RedirectNotFound extends AbstractService
     Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, [$this, 'onAfterLoadPlugins']);
     Event::on(Element::class, Element::EVENT_BEFORE_SAVE, [$this, 'onBeforeElementSave']);
     Event::on(Elements::class, Elements::EVENT_BEFORE_UPDATE_SLUG_AND_URI, [$this, 'onBeforeUpdateSlug']);
+    Event::on(FieldLayout::class, FieldLayout::EVENT_DEFINE_UI_ELEMENTS, [$this, 'onDefineUiElements']);
+  }
+
+  /**
+   * @param Site|null $site
+   * @return AbstractRedirect[]
+   */
+  public function getRedirects(?Site $site = null): array {
+    if (!isset($this->_redirects)) {
+      $event = RegisterRedirectsEvent::create($site);
+      $this->trigger(self::EVENT_REGISTER_REDIRECTS, $event);
+
+      if ($site) {
+        return $event->redirects;
+      } else {
+        $this->_redirects = $event->redirects;
+      }
+    }
+
+    return $this->_redirects;
   }
 
   /**
@@ -118,6 +142,14 @@ class RedirectNotFound extends AbstractService
     }
   }
 
+  /**
+   * @param DefineFieldLayoutElementsEvent $event
+   * @return void
+   */
+  public function onDefineUiElements(DefineFieldLayoutElementsEvent $event): void {
+    $event->elements[] = ElementRoutesUiElement::class;
+  }
+
 
   // Private methods
   // ---------------
@@ -134,19 +166,6 @@ class RedirectNotFound extends AbstractService
         'elementId' => $element->id,
         'siteId' => $element->siteId,
       ])->scalar();
-  }
-
-  /**
-   * @return AbstractRedirect[]
-   */
-  private function getRedirects(): array {
-    if (!isset($this->_redirects)) {
-      $event = RegisterRedirectsEvent::create();
-      $this->trigger(self::EVENT_REGISTER_REDIRECTS, $event);
-      $this->_redirects = $event->redirects;
-    }
-
-    return $this->_redirects;
   }
 
   /**
@@ -170,6 +189,15 @@ class RedirectNotFound extends AbstractService
    * @param string|null $newUri
    */
   private function storeUriHistory(ElementInterface $element, ?string $oldUri, ?string $newUri): void {
+    if (
+      str_contains($oldUri, '__temp_') ||
+      $element->isProvisionalDraft ||
+      $element->getIsRevision() ||
+      $element->getIsDraft()
+    ) {
+      return;
+    }
+
     UriHistoryRecord::deleteAll([
       'siteId' => $element->siteId,
       'uri' => array_filter([$oldUri, $newUri]),

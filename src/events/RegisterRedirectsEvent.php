@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\events;
 
 use craft\helpers\App;
+use craft\models\Site;
 use lenz\craft\essentials\services\redirectNotFound\redirects\AbstractRedirect;
 use lenz\craft\essentials\services\redirectNotFound\redirects\CsvRedirect;
 use lenz\craft\essentials\services\redirectNotFound\redirects\SiteMapRedirect;
@@ -20,6 +21,11 @@ class RegisterRedirectsEvent extends Event
   public array $redirects;
 
   /**
+   * @var Site|null
+   */
+  public ?Site $site = null;
+
+  /**
    * @var array
    */
   const KNOWN_CSV_PATHS = [
@@ -32,11 +38,13 @@ class RegisterRedirectsEvent extends Event
   // --------------
 
   /**
+   * @param Site|null $site
    * @return RegisterRedirectsEvent
    */
-  static public function create(): RegisterRedirectsEvent {
+  static public function create(?Site $site = null): RegisterRedirectsEvent {
     return new RegisterRedirectsEvent([
       'redirects' => self::createDefaultRedirects(),
+      'site' => $site,
     ]);
   }
 
