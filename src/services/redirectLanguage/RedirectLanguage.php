@@ -4,10 +4,12 @@ namespace lenz\craft\essentials\services\redirectLanguage;
 
 use Craft;
 use craft\controllers\TemplatesController;
+use craft\models\Site;
 use craft\web\Application;
 use craft\web\Request;
 use craft\web\Response;
 use Exception;
+use lenz\craft\essentials\events\SitesEvent;
 use lenz\craft\essentials\Plugin;
 use Throwable;
 use yii\base\ActionEvent;
@@ -32,6 +34,11 @@ class RedirectLanguage extends Component
    * @var RedirectLanguage
    */
   static private RedirectLanguage $_instance;
+
+  /**
+   * @var string
+   */
+  const EVENT_AVAILABLE_SITES = 'availableSites';
 
 
   /**
@@ -125,7 +132,7 @@ class RedirectLanguage extends Component
       return null;
     }
 
-    $site = Plugin::getInstance()->translations->getEnabledSite($language);
+    $site = $this->getSiteByLanguage($language);
     return is_null($site)
       ? null
       : $site->getBaseUrl();
@@ -137,9 +144,7 @@ class RedirectLanguage extends Component
   public function getLanguageStack(): LanguageStack {
     if (!isset($this->_languageStack)) {
       $stack = new LanguageStack();
-      $sites = Plugin::getInstance()->translations->getEnabledSites();
-
-      foreach ($sites as $site) {
+      foreach ($this->getSites() as $site) {
         $stack->addLanguage($site->language);
       }
 
@@ -147,6 +152,31 @@ class RedirectLanguage extends Component
     }
 
     return $this->_languageStack;
+  }
+
+
+  // Private methods
+  // ---------------
+
+  /**
+   * @param string $language
+   * @return Site|null
+   */
+  private function getSiteByLanguage(string $language): ?Site {
+    foreach ($this->getSites() as $site) {
+      if ($site->language == $language) {
+        return $site;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @return Site[]
+   */
+  private function getSites(): array {
+    return SitesEvent::findSites($this, self::EVENT_AVAILABLE_SITES);
   }
 
 

@@ -28,41 +28,11 @@ class Translations extends Component
 
 
   /**
-   * @param string $language
-   * @return Site|null
-   */
-  public function getEnabledSite(string $language): ?Site {
-    foreach ($this->getEnabledSites() as $site) {
-      if ($site->language == $language) {
-        return $site;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * @return Site[]
    */
   public function getEnabledSites(): array {
     if (!isset($this->_enabledSites)) {
-      $settings = Plugin::getInstance()->getSettings();
-      $disabledLanguages = $settings->disabledLanguages;
-
-      $sites = array_filter(
-        Craft::$app->getSites()->getAllSites(),
-        function(Site $site) use ($disabledLanguages) {
-          return $site->enabled && !in_array($site->language, $disabledLanguages);
-        }
-      );
-
-      if ($this->hasEventHandlers(self::EVENT_AVAILABLE_SITES)) {
-        $event = new SitesEvent(['sites' => $sites]);
-        $this->trigger(self::EVENT_AVAILABLE_SITES, $event);
-        $sites = $event->sites;
-      }
-
-      $this->_enabledSites = $sites;
+      $this->_enabledSites = SitesEvent::findSites($this, self::EVENT_AVAILABLE_SITES);
     }
 
     return $this->_enabledSites;

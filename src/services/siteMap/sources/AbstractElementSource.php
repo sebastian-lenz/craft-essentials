@@ -4,8 +4,11 @@ namespace lenz\craft\essentials\services\siteMap\sources;
 
 use Craft;
 use craft\base\Element;
+use craft\models\Site;
+use lenz\craft\essentials\events\SitesEvent;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\siteMap\SiteMap;
+use yii\base\Event;
 use yii\base\InvalidConfigException;
 
 /**
@@ -13,6 +16,12 @@ use yii\base\InvalidConfigException;
  */
 abstract class AbstractElementSource extends AbstractSource
 {
+  /**
+   * @var string
+   */
+  const EVENT_SOURCE_SITES = 'findSourceSites';
+
+
   /**
    * @param SiteMap $siteMap
    * @throws InvalidConfigException
@@ -62,17 +71,10 @@ abstract class AbstractElementSource extends AbstractSource
    * @return string[]
    */
   protected function getQuerySites(): array {
-    $allSites = Craft::$app->getSites()->getAllSites();
-    $sites = [];
-    $disabled = Plugin::getInstance()->disabledLanguages;
-
-    foreach ($allSites as $site) {
-      if (!$disabled->isLanguageDisabled($site->language)) {
-        $sites[] = $site->handle;
-      }
-    }
-
-    return $sites;
+    return array_map(
+      fn(Site $site) => $site->handle,
+      SitesEvent::findSites($this, self::EVENT_SOURCE_SITES)
+    );
   }
 
   /**
