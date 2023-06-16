@@ -84,16 +84,10 @@ class RedirectLanguage extends Component
           return;
         }
 
-        $uri = Craft::$app->request->getFullUri();
-        $baseUrl = Craft::$app->sites->currentSite->getBaseUrl();
-        $baseSegment = trim($baseUrl, '/');
-        if (str_starts_with($baseSegment, 'http')) {
-          $baseSegment = substr($baseSegment, strpos($baseSegment, '/', 8) + 1);
-        }
-
-        if (!str_starts_with($uri, $baseSegment)) {
+        $fullUrl = self::ensureSiteBaseUrl();
+        if (!is_null($fullUrl)) {
           $response = new Response();
-          $response->redirect($baseUrl . $uri, 301)->send();
+          $response->redirect($fullUrl, 301)->send();
           die();
         }
       });
@@ -122,9 +116,9 @@ class RedirectLanguage extends Component
   }
 
   /**
-   * @return string|null
+   * @return Site|null
    */
-  public function getBestSiteUrl(): ?string {
+  public function getBestSite(): ?Site {
     try {
       $language = $this->getBestLanguage();
     } catch (Throwable $error) {
@@ -132,10 +126,14 @@ class RedirectLanguage extends Component
       return null;
     }
 
-    $site = $this->getSiteByLanguage($language);
-    return is_null($site)
-      ? null
-      : $site->getBaseUrl();
+    return $this->getSiteByLanguage($language);
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getBestSiteUrl(): ?string {
+    return $this->getBestSite()?->getBaseUrl();
   }
 
   /**
@@ -195,10 +193,30 @@ class RedirectLanguage extends Component
   }
 
   /**
+   * @param string|null $uri
+   * @return string|null
+   */
+  public static function ensureSiteBaseUrl(?string $uri = null): ?string {
+    if (is_null($uri)) {
+      $uri = Craft::$app->request->getFullUri();
+    }
+
+    $baseUrl = Craft::$app->sites->currentSite->getBaseUrl();
+    $baseSegment = trim($baseUrl, '/');
+    if (str_starts_with($baseSegment, 'http')) {
+      $baseSegment = substr($baseSegment, strpos($baseSegment, '/', 8) + 1);
+    }
+
+    return !str_starts_with($uri, $baseSegment)
+      ? $baseUrl . $uri
+      : null;
+  }
+
+  /**
    * @param \yii\base\Request $request
    * @return bool
    */
-  private static function isIndexRequest(\yii\base\Request $request): bool {
+  public static function isIndexRequest(\yii\base\Request $request): bool {
     try {
       return (
         $request instanceof Request &&
