@@ -88,7 +88,13 @@ class CacheKeyEvent extends Event
    */
   static public function getUrlCacheKey(): ?string {
     try {
-      return 'url:' . Craft::$app->request->getUrl();
+      $result = 'url:' . Craft::$app->request->getUrl();
+      try {
+        $site = Craft::$app->getSites()->getCurrentSite();
+        return 'site:' . $site->handle . ';' . $result;
+      } catch (Throwable) {
+        return $result;
+      }
     } catch (Throwable) {
       return null;
     }
