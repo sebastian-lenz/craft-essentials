@@ -4,9 +4,9 @@ namespace lenz\craft\essentials\services\redirectNotFound\redirects;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\elements\Entry;
 use craft\web\Request;
 use Generator;
+use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoute;
 
 /**
@@ -18,13 +18,6 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    * @var string
    */
   private string $_fileName;
-
-  /**
-   * @var array
-   */
-  const HANDLERS = [
-    '#entry:' => 'resolveEntryHandler',
-  ];
 
 
   /**
@@ -114,7 +107,7 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    * @return bool
    */
   public function redirect(Request $request): bool {
-    $target = self::resolveHandler($this->findTarget($request->url));
+    $target = UrlFormat::decodeUrl($this->findTarget($request->url));
     if (!empty($target)) {
       $this->sendRedirect($target);
       return true;
@@ -157,56 +150,5 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
     }
 
     return null;
-  }
-
-
-  // Static methods
-  // --------------
-
-  /**
-   * @param string $value
-   * @return bool
-   */
-  public static function isHandler(string $value): bool {
-    foreach (array_keys(self::HANDLERS) as $prefix) {
-      if (str_starts_with($value, $prefix)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * @param string $value
-   * @return string|null
-   */
-  static public function resolveEntryHandler(string $value): ?string {
-    list($id, $siteId) = array_pad(explode('@', $value, 2), 2, null);
-    $criteria = ['id' => $id];
-    if (!empty($siteId)) {
-      $criteria['siteId'] = $siteId;
-    }
-
-    $entry = Entry::findOne($criteria);
-    return $entry?->url;
-  }
-
-  /**
-   * @param mixed $value
-   * @return string
-   */
-  static public function resolveHandler(mixed $value): string {
-    if (!is_string($value) || empty($value)) {
-      return '';
-    }
-
-    foreach (self::HANDLERS as $prefix => $callback) {
-      if (str_starts_with($value, $prefix)) {
-        return call_user_func([__CLASS__, $callback], substr($value, strlen($prefix)));
-      }
-    }
-
-    return $value;
   }
 }

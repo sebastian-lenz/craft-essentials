@@ -21,6 +21,11 @@ class Column extends BaseObject
   public ?array $config = null;
 
   /**
+   * @var callable[]|null
+   */
+  public ?array $filters = null;
+
+  /**
    * @var array|null
    */
   public ?array $source = null;
@@ -76,6 +81,12 @@ class Column extends BaseObject
   public function filter(mixed $value): mixed {
     if ($this->type == 'checkbox') {
       return !!$value;
+    }
+
+    if (!empty($this->filters)) {
+      foreach ($this->filters as $filter) {
+        $value = $filter($value);
+      }
     }
 
     return $value;
