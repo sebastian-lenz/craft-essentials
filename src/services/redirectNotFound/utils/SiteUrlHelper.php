@@ -13,13 +13,14 @@ class SiteUrlHelper
 {
   /**
    * @param string $url
+   * @param bool $useFallback
    * @return Site
    * @throws SiteNotFoundException
    */
-  static public function getSiteByUri(string $url): Site {
+  static public function getSiteByUri(string $url, bool $useFallback = false): Site {
     $sites = Craft::$app->getSites();
     $bestScore = 0;
-    $bestSite = $sites->getPrimarySite();
+    $bestSite = $useFallback ? $sites->getPrimarySite() : null;
 
     $urlInfo = parse_url($url);
     if ($urlInfo === false) {
@@ -85,7 +86,7 @@ class SiteUrlHelper
     }
 
     $sitePath = empty($siteInfo['path']) ? '' : self::normalizePath($siteInfo['path']);
-    $urlPath = empty($urlInfo['path']) ? '' : self::normalizePath($urlInfo['path']);
+    $urlPath = empty($urlInfo['path']) ? '' : self::normalizePath($urlInfo['path']) . '/';
     if ($sitePath && !str_starts_with($urlPath, $sitePath . '/')) {
       return 0;
     }
