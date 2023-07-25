@@ -13,6 +13,7 @@ use yii\base\Component;
 use yii\base\Event;
 use yii\base\Module;
 use yii\base\Response;
+use yii\web\Response as WebResponse;
 
 /**
  * Class FrontendCacheService
@@ -33,6 +34,17 @@ class FrontendCacheService extends Component
    * @var FrontendCacheService
    */
   static private FrontendCacheService $_instance;
+
+  /**
+   * @var array
+   */
+  const ALLOWED_FORMATS = [
+    WebResponse::FORMAT_HTML,
+    WebResponse::FORMAT_JSON,
+    WebResponse::FORMAT_JSONP,
+    WebResponse::FORMAT_RAW,
+    WebResponse::FORMAT_XML,
+  ];
 
   /**
    * Placeholder used to represent CSRF tokens when caching pages.
@@ -87,6 +99,8 @@ class FrontendCacheService extends Component
     $response = Craft::$app->response;
     if (
       $response->statusCode != 200 ||
+      !($response instanceof WebResponse) ||
+      !(in_array($response->format, self::ALLOWED_FORMATS)) ||
       str_contains($response->data, 'actions/assets/generate-transform')
     ) {
       return;
@@ -121,7 +135,7 @@ class FrontendCacheService extends Component
   /**
    * @param ActionEvent $event
    */
-  public function onBeforeAction(ActionEvent $event) {
+  public function onBeforeAction(ActionEvent $event): void {
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
     if ($cacheKeyEvent->handled || is_null($cacheKeyEvent->cacheKey)) {
@@ -224,10 +238,11 @@ class FrontendCacheService extends Component
 
   /**
    * @param string $key
-   * @param Response $response
+   * @param WebResponse $response
    * @param int $duration
+   * @return void
    */
-  protected function setCacheData(string $key, Response $response, int $duration) {
+  protected function setCacheData(string $key, WebResponse $response, int $duration): void {
     $data = $response->data;
     $dataFormat = 'raw';
 
