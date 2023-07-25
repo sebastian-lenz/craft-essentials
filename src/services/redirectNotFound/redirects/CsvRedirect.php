@@ -8,6 +8,7 @@ use craft\web\Request;
 use Generator;
 use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoute;
+use lenz\craft\utils\models\Url;
 
 /**
  * Class CsvRedirect
@@ -107,13 +108,17 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    * @return bool
    */
   public function redirect(Request $request): bool {
-    $target = UrlFormat::decodeUrl($this->findTarget($request->url));
-    if (!empty($target)) {
-      $this->sendRedirect($target);
-      return true;
+    $original = new Url($request->url);
+    $target = UrlFormat::decodeUrl(
+      $this->findTarget($original)
+    );
+
+    if (empty($target)) {
+      return false;
     }
 
-    return false;
+    $this->sendRedirect(Url::compose($target, $original->getQuery()));
+    return true;
   }
 
 
@@ -138,13 +143,21 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
   }
 
   /**
-   * @param string $url
+   * @param Url $url
    * @return string|null
    */
-  protected function findTarget(string $url): ?string {
-    $url = trim($url, '/');
+  protected function findTarget(Url $url): ?string {
+    $variants = [trim((string)$url, '/')];
+
+    if (!empty($url->query)) {
+      $url = clone $url;
+      $url->query = null;
+      $variants[] = trim((string)$url, '/');
+    }
+
     foreach ($this->eachRow() as $data) {
-      if (trim($data[0], '/') == $url) {
+      $pattern = trim($data[0], '/');
+      if (in_array($pattern, $variants)) {
         return trim($data[1]);
       }
     }

@@ -51,11 +51,11 @@ abstract class UrlFormat
 
     $formats = self::getUrlFormats();
     foreach ($formats as $format) {
-      $result = $format->canDecode($url) ? $format->decode($url) : null;
-      if (!is_null($result)) {
-        $url = $result;
-        break;
+      if (!$format->canDecode($url)) {
+        continue;
       }
+
+      $url = $format->decode($url) ?? '';
     }
 
     return $absolute ? self::toAbsoluteUrl($url) : $url;
