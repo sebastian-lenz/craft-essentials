@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\services\redirectNotFound\formats;
 
 use Craft;
 use craft\errors\SiteNotFoundException;
+use lenz\craft\essentials\events\RegisterUrlFormatsEvent;
 use yii\base\Event;
 
 /**
@@ -82,9 +83,9 @@ abstract class UrlFormat
   static public function getUrlFormats(): array {
     static $formats;
     if (!isset($formats)) {
-      $event = new Event([ 'data' => [new EntryUrlFormat()] ]);
+      $event = new RegisterUrlFormatsEvent();
       Event::trigger(UrlFormat::class, UrlFormat::CREATE_FORMATS, $event);
-      $formats = $event->data;
+      $formats = $event->formats;
     }
 
     return $formats;
