@@ -17,6 +17,11 @@ use yii\base\Component;
 class Translations extends Component
 {
   /**
+   * @var Translation[][]
+   */
+  private array $_translations = [];
+
+  /**
    * @var Site[]
    */
   private array $_enabledSites;
@@ -43,9 +48,41 @@ class Translations extends Component
    * @return Translation[]
    */
   public function getTranslations(ElementInterface $element = null): array {
+    $key = $element ? $element->id : '*';
+    if (!array_key_exists($key, $this->_translations)) {
+      $this->_translations[$key] = $this->loadTranslations($element);
+    }
+
+    return $this->_translations[$key];
+  }
+
+  /**
+   * @param ElementInterface $element
+   * @return array
+   */
+  public function loadTranslatedElements(ElementInterface $element): array {
+    foreach (AbstractLoader::getLoaders() as $loader) {
+      $result = $loader->load($element);
+      if ($result !== false) {
+        return $result;
+      }
+    }
+
+    return [];
+  }
+
+
+  // Private methods
+  // ---------------
+
+  /**
+   * @param ElementInterface|null $element
+   * @return Translation[]
+   */
+  private function loadTranslations(ElementInterface $element = null): array {
     $sites = $this->getEnabledSites();
     $translations = $element instanceof ElementInterface
-      ? $this->loadTranslations($element)
+      ? $this->loadTranslatedElements($element)
       : [];
 
     try {
@@ -68,21 +105,6 @@ class Translations extends Component
         'target' => $target,
       ]);
     }, $sites);
-  }
-
-  /**
-   * @param ElementInterface $element
-   * @return ElementInterface[]
-   */
-  public function loadTranslations(ElementInterface $element): array {
-    foreach (AbstractLoader::getLoaders() as $loader) {
-      $result = $loader->load($element);
-      if ($result !== false) {
-        return $result;
-      }
-    }
-
-    return [];
   }
 
 
