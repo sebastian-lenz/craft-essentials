@@ -9,14 +9,17 @@ use craft\web\Application;
 use craft\web\Request;
 use craft\web\Response;
 use Exception;
+use lenz\craft\essentials\events\RedirectEvent;
 use lenz\craft\essentials\events\SitesEvent;
 use lenz\craft\essentials\Plugin;
 use Throwable;
+use yii\base\Action;
 use yii\base\ActionEvent;
 use yii\base\Component;
 use yii\base\Event;
 use yii\base\InlineAction;
 use yii\base\Module;
+use yii\base\Request as BaseRequest;
 
 /**
  * Class RedirectLanguage
@@ -40,18 +43,23 @@ class RedirectLanguage extends Component
    */
   const EVENT_AVAILABLE_SITES = 'availableSites';
 
+  /**
+   * @var string
+   */
+  const EVENT_LANGUAGE_REDIRECT = 'languageRedirect';
+
+  /**
+   * @var string
+   */
+  const EVENT_SITE_SEGMENT_REDIRECT = 'siteSegmentRedirect';
+
 
   /**
    * Languages constructor.
    */
   public function __construct() {
     parent::__construct();
-
-    Event::on(
-      Application::class,
-      Application::EVENT_INIT,
-      [$this, 'onApplicationInit']
-    );
+    Event::on(Application::class, Application::EVENT_INIT, $this->onApplicationInit(...));
   }
 
   /**
@@ -60,38 +68,24 @@ class RedirectLanguage extends Component
   public function onApplicationInit(): void {
     $request = Craft::$app->getRequest();
     $settings = Plugin::getInstance()->getSettings();
-    $enabled = $settings->enableLanguageRedirect;
 
-    if ($enabled && self::isIndexRequest($request)) {
-      $url = $this->getBestSiteUrl();
-      if (!is_null($url)) {
-        Craft::$app->getResponse()
-          ->redirect($url)
-          ->send();
-
-        exit;
-      }
+    if ($settings->enableLanguageRedirect && self::isIndexRequest($request)) {
+      $this->tryRedirect(self::EVENT_LANGUAGE_REDIRECT, $this->getBestSiteUrl());
+    } elseif ($settings->ensureSiteSegment && $request->isSiteRequest) {
+      Craft::$app->on(Module::EVENT_BEFORE_ACTION, $this->onBeforeAction(...));
     }
+  }
 
-    if ($settings->ensureSiteSegment && $request->isSiteRequest) {
-      Craft::$app->on(Module::EVENT_BEFORE_ACTION, function(ActionEvent $event) {
-        if (
-          !($event->action instanceof InlineAction) ||
-          !($event->action->controller instanceof TemplatesController) ||
-          $event->action->id !== 'render' ||
-          !Craft::$app->urlManager->getMatchedElement()
-        ) {
-          return;
-        }
-
-        $fullUrl = self::ensureSiteBaseUrl();
-        if (!is_null($fullUrl)) {
-          $response = new Response();
-          $response->redirect($fullUrl, 301)->send();
-          die();
-        }
-      });
-    }
+  /**
+   * @param ActionEvent $event
+   * @return void
+   */
+  public function onBeforeAction(ActionEvent $event): void {
+    $this->tryRedirect(
+      self::EVENT_SITE_SEGMENT_REDIRECT,
+      self::isPageAction($event->action) ? self::ensureSiteBaseUrl() : null,
+      301
+    );
   }
 
   /**
@@ -177,6 +171,29 @@ class RedirectLanguage extends Component
     return SitesEvent::findSites($this, self::EVENT_AVAILABLE_SITES);
   }
 
+  /**
+   * @param string $eventName
+   * @param string|null $url
+   * @param int $statusCode
+   * @return void
+   */
+  private function tryRedirect(string $eventName, ?string $url, int $statusCode = 302): void {
+    if (empty($url)) {
+      return;
+    }
+
+    $this->trigger($eventName, $event = new RedirectEvent([
+      'statusCode' => $statusCode,
+      'url' => $url,
+    ]));
+
+    if (!$event->handled) {
+      $response = new Response();
+      $response->redirect($event->url, $event->statusCode)->send();
+      die();
+    }
+  }
+
 
   // Static methods
   // --------------
@@ -198,25 +215,43 @@ class RedirectLanguage extends Component
    */
   public static function ensureSiteBaseUrl(?string $uri = null): ?string {
     if (is_null($uri)) {
-      $uri = Craft::$app->request->getFullUri();
+      $uri = Craft::$app->getRequest()->getFullUri();
     }
 
-    $baseUrl = Craft::$app->sites->currentSite->getBaseUrl();
-    $baseSegment = trim($baseUrl, '/');
-    if (str_starts_with($baseSegment, 'http')) {
-      $baseSegment = substr($baseSegment, strpos($baseSegment, '/', 8) + 1);
+    try {
+      $siteUrl = Craft::$app->getSites()->getCurrentSite()->getBaseUrl();
+    } catch (Throwable) {
+      return null;
     }
 
-    return !str_starts_with($uri, $baseSegment)
-      ? $baseUrl . $uri
-      : null;
+    return self::hasSiteBaseUrl($uri, $siteUrl)
+      ? null
+      : $siteUrl . self::trimProtocolAndDomain($uri);
   }
 
   /**
-   * @param \yii\base\Request $request
+   * @param string $uri
+   * @param string|null $siteUrl
    * @return bool
    */
-  public static function isIndexRequest(\yii\base\Request $request): bool {
+  public static function hasSiteBaseUrl(string $uri, ?string $siteUrl = null): bool {
+    try {
+      $siteUrl = $siteUrl ?? Craft::$app->getSites()->getCurrentSite()->getBaseUrl();
+    } catch (Throwable) {
+      return false;
+    }
+
+    return str_starts_with(
+      self::trimProtocolAndDomain($uri),
+      self::trimProtocolAndDomain($siteUrl)
+    );
+  }
+
+  /**
+   * @param BaseRequest $request
+   * @return bool
+   */
+  public static function isIndexRequest(BaseRequest $request): bool {
     try {
       return (
         $request instanceof Request &&
@@ -226,5 +261,31 @@ class RedirectLanguage extends Component
     } catch (Throwable) {
       return false;
     }
+  }
+
+  /**
+   * @param Action $action
+   * @return bool
+   */
+  public static function isPageAction(Action $action): bool {
+    return (
+      $action instanceof InlineAction &&
+      $action->controller instanceof TemplatesController &&
+      $action->id === 'render' &&
+      Craft::$app->urlManager->getMatchedElement()
+    );
+  }
+
+  /**
+   * @param string $uri
+   * @return string
+   */
+  public static function trimProtocolAndDomain(string $uri): string {
+    $path = trim($uri, '/');
+    if (str_starts_with($path, 'http')) {
+      $path = substr($path, strpos($path, '/', 8) + 1);
+    }
+
+    return $path;
   }
 }
