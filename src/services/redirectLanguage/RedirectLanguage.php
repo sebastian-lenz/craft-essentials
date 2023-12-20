@@ -213,9 +213,11 @@ class RedirectLanguage extends Component
    * @param string|null $uri
    * @return string|null
    */
-  public static function ensureSiteBaseUrl(?string $uri = null): ?string {
+  public static function ensureSiteBaseUrl(?string $uri = null, ?string $query = null): ?string {
     if (is_null($uri)) {
-      $uri = Craft::$app->getRequest()->getFullUri();
+      $request = Craft::$app->getRequest();
+      $uri = $request->getFullUri();
+      $query = empty($request->queryStringWithoutPath) ? '' : '?' . $request->queryStringWithoutPath;
     }
 
     try {
@@ -224,9 +226,13 @@ class RedirectLanguage extends Component
       return null;
     }
 
-    return self::hasSiteBaseUrl($uri, $siteUrl)
-      ? null
-      : $siteUrl . self::trimProtocolAndDomain($uri);
+    if (self::hasSiteBaseUrl($uri, $siteUrl)) {
+      return null;
+    }
+
+    $uri = self::trimProtocolAndDomain($uri);
+    if (!empty($query)) $uri .= $query;
+    return $siteUrl . $uri;
   }
 
   /**
