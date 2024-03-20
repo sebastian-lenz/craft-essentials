@@ -3,8 +3,10 @@
 namespace lenz\craft\essentials\services\cp;
 
 use Craft;
+use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterCpNavItemsEvent;
+use craft\models\FieldLayout;
 use craft\services\Utilities;
 use craft\web\Application;
 use craft\web\twig\variables\Cp;
@@ -56,6 +58,14 @@ class CpHelpers extends AbstractService
         if (count(Plugin::getInstance()->getSettings()->iconClasses) > 0) {
           $event->types[] = IconUtility::class;
         }
+      }
+    );
+
+    Event::on(
+      FieldLayout::class,
+      FieldLayout::EVENT_DEFINE_UI_ELEMENTS,
+      function(DefineFieldLayoutElementsEvent $event) {
+        $event->elements[] = elements\Column::class;
       }
     );
   }
