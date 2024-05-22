@@ -18,7 +18,7 @@ class SeoRecord extends ForeignFieldRecord
    * @param Migration $migration
    * @param array|null $columns
    */
-  public static function createTable(Migration $migration, array $columns = null) {
+  public static function createTable(Migration $migration, array $columns = null): void {
     if (is_null($columns)) {
       $columns = [
         'enabled'     => $migration->boolean()->defaultValue(1)->notNull(),

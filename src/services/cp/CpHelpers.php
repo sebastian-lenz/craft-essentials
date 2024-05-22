@@ -53,7 +53,7 @@ class CpHelpers extends AbstractService
 
     Event::on(
       Utilities::class,
-      Utilities::EVENT_REGISTER_UTILITY_TYPES,
+      Utilities::EVENT_REGISTER_UTILITIES,
       function(RegisterComponentTypesEvent $event) {
         if (count(Plugin::getInstance()->getSettings()->iconClasses) > 0) {
           $event->types[] = IconUtility::class;
