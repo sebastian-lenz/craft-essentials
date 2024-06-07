@@ -9,17 +9,18 @@ use IteratorAggregate;
 
 /**
  * Class AbstractStructure
- * @template T of AbstractStructureItem
+ *
+ * @phpstan-template T of AbstractStructureItem
  */
 abstract class AbstractStructure implements IteratorAggregate
 {
   /**
-   * @var T[]
+   * @phpstan-var T[]
    */
   protected array $_items = [];
 
   /**
-   * @var class-string<T>
+   * @phpstan-var class-string<T>
    */
   const ITEM_CLASS = AbstractStructureItem::class;
 
@@ -27,7 +28,7 @@ abstract class AbstractStructure implements IteratorAggregate
   /**
    * AbstractMenu constructor.
    *
-   * @param ElementQuery|null $query
+   * @phpstan-param ElementQuery|null $query
    */
   public function __construct(ElementQuery $query = null) {
     if (!is_null($query)) {
@@ -36,9 +37,9 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @param T $parent
-   * @param T $item
-   * @return T
+   * @phpstan-param T $parent
+   * @phpstan-param T $item
+   * @phpstan-return T
    * @noinspection PhpUnused (Public API)
    */
   public function attachTo(AbstractStructureItem $parent, AbstractStructureItem $item): AbstractStructureItem {
@@ -76,15 +77,15 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @return T[]
+   * @phpstan-return T[]
    */
   public function getAll(): array {
     return $this->_items;
   }
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return T[]
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return T[]
    */
   public function getAncestors(mixed $elementOrId): array {
     $child = $this->getById($elementOrId);
@@ -101,8 +102,8 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return T|null
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return T|null
    */
   public function getById(mixed $elementOrId): ?AbstractStructureItem {
     if ($elementOrId instanceof AbstractStructureItem) {
@@ -118,8 +119,8 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return T[]
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return T[]
    */
   public function getChildren(mixed $elementOrId): array {
     $parent = $this->getById($elementOrId);
@@ -137,8 +138,8 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return T[]
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return T[]
    */
   public function getDescendants(mixed $elementOrId): array {
     $parent = $this->getById($elementOrId);
@@ -162,8 +163,8 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return T|null
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return T|null
    */
   public function getParent(mixed $elementOrId): ?AbstractStructureItem {
     $child = $this->getById($elementOrId);
@@ -185,7 +186,7 @@ abstract class AbstractStructure implements IteratorAggregate
   }
 
   /**
-   * @return T[]
+   * @phpstan-return T[]
    */
   public function getRootItems(): array {
     return $this->filter(function(AbstractStructureItem $item) {
@@ -198,25 +199,34 @@ abstract class AbstractStructure implements IteratorAggregate
   // -----------------
 
   /**
-   * @param ElementQuery $query
-   * @return T[]
+   * @param ElementInterface $element
+   * @phpstan-return T|null
+   */
+  protected function createItemFromElement(ElementInterface $element): ?AbstractStructureItem {
+    return new (static::ITEM_CLASS)($this, $element);
+  }
+
+  /**
+   * @phpstan-param ElementQuery $query
+   * @phpstan-return T[]
    */
   protected function createItemsFromQuery(ElementQuery $query): array {
     $elements = $query->all();
-    $itemClass = static::ITEM_CLASS;
     $items = [];
 
     foreach ($elements as $element) {
-      $item = new $itemClass($this, $element);
-      $items[] = $item;
+      $item = $this->createItemFromElement($element);
+      if ($item) {
+        $items[] = $item;
+      }
     }
 
     return $items;
   }
 
   /**
-   * @param callable $callback
-   * @return T[]
+   * @phpstan-param callable $callback
+   * @phpstan-return T[]
    */
   protected function filter(callable $callback): array {
     return array_values(array_filter($this->_items, $callback));
@@ -227,8 +237,8 @@ abstract class AbstractStructure implements IteratorAggregate
   // --------------
 
   /**
-   * @param ElementInterface|T|int $elementOrId
-   * @return int
+   * @phpstan-param ElementInterface|T|int $elementOrId
+   * @phpstan-return int
    */
   static function normalizeId(mixed $elementOrId): int {
     if ($elementOrId instanceof ElementInterface) {

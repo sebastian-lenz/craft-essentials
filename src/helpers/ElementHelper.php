@@ -3,7 +3,9 @@
 namespace lenz\craft\essentials\helpers;
 
 use craft\base\ElementInterface;
+use craft\elements\db\EagerLoadPlan;
 use craft\elements\db\ElementQuery;
+use craft\elements\ElementCollection;
 use craft\errors\InvalidFieldException;
 use Illuminate\Support\Collection;
 
@@ -16,12 +18,12 @@ class ElementHelper extends \craft\helpers\ElementHelper
    * @param ElementInterface $element
    * @param string $attribute
    * @param callable|null $modify
-   * @return ElementInterface[]
+   * @return ElementCollection
    */
-  static public function eagerLoad(ElementInterface $element, string $attribute, callable $modify = null): array {
+  static public function eagerLoad(ElementInterface $element, string $attribute, callable $modify = null): ElementCollection {
     $result = $element->getEagerLoadedElements($attribute);
     if (!is_null($result)) {
-      return $result->all();
+      return $result;
     }
 
     try {
@@ -30,18 +32,21 @@ class ElementHelper extends \craft\helpers\ElementHelper
         default => $element->getFieldValue($attribute),
       };
     } catch (InvalidFieldException) {
-      return [];
+      return ElementCollection::make([]);
     }
 
-    if ($result instanceof Collection) {
-      $result = $result->toArray();
-    } elseif ($result instanceof ElementQuery) {
+    if ($result instanceof ElementQuery) {
       $result = ($modify ? $modify($result) : $result)->all();
-      $element->setEagerLoadedElements($attribute, $result);
+      $element->setEagerLoadedElements($attribute, $result, new EagerLoadPlan([
+        'handle' => $attribute,
+        'alias' => $attribute,
+      ]));
     } else {
       $result = [];
     }
 
-    return $result;
+    return $result instanceof ElementCollection
+      ? $result
+      : ElementCollection::make($result);
   }
 }

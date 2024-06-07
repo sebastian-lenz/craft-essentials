@@ -19,7 +19,7 @@ class CpElementsSource extends AbstractSource
       $this->insert($translations, 'craft:category/' . $group->handle, $group->name);
     }
 
-    foreach (Craft::$app->getSections()->getAllSections() as $section) {
+    foreach (Craft::$app->getEntries()->getAllSections() as $section) {
       $this->extractSection($translations, $section);
     }
 

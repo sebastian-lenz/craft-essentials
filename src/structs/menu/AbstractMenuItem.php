@@ -10,55 +10,56 @@ use yii\base\InvalidConfigException;
 
 /**
  * Class AbstractMenuItem
- * @template T of AbstractMenu
- * @extends AbstractStructureItem<T>
+ *
+ * @phpstan-template T of AbstractMenu
+ * @phpstan-extends AbstractStructureItem<T>
  */
 abstract class AbstractMenuItem extends AbstractStructureItem
 {
   /**
-   * @var array|null
+   * @phpstan-var array|null
    */
   public ?array $customLinkAttributes = null;
 
   /**
-   * @var bool
+   * @phpstan-var bool
    */
   public bool $isActive = false;
 
   /**
-   * @var string|null
+   * @phpstan-var string|null
    */
   public ?string $sectionHandle = null;
 
   /**
-   * @var int
+   * @phpstan-var int
    */
   public int $sectionId = 0;
 
   /**
-   * @var string
+   * @phpstan-var string
    */
   public string $title = '';
 
   /**
-   * @var string|null
+   * @phpstan-var string|null
    */
   public ?string $typeHandle = null;
 
   /**
-   * @var int
+   * @phpstan-var int
    */
   public int $typeId = 0;
 
   /**
-   * @var string|null
+   * @phpstan-var string|null
    */
   public ?string $url = null;
 
 
   /**
-   * @param array $extraAttribs
-   * @return Attributes
+   * @phpstan-param array $extraAttribs
+   * @phpstan-return Attributes
    * @noinspection PhpUnused (Public/Template API)
    */
   public function getLinkAttributes(array $extraAttribs = []): Attributes {
@@ -77,7 +78,7 @@ abstract class AbstractMenuItem extends AbstractStructureItem
   // -----------------
 
   /**
-   * @param ElementInterface $element
+   * @phpstan-param ElementInterface $element
    * @throws InvalidConfigException
    */
   protected function setElement(ElementInterface $element) {

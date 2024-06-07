@@ -8,35 +8,36 @@ use lenz\craft\utils\elementCache\ElementCache;
 
 /**
  * Class AbstractMenu
- * @template T of AbstractMenuItem
- * @extends AbstractStructure<T>
+ *
+ * @phpstan-template T of AbstractMenuItem
+ * @phpstan-extends AbstractStructure<T>
  */
 abstract class AbstractMenu extends AbstractStructure
 {
   /**
-   * @var T[]
+   * @phpstan-var T[]
    */
   protected array $_breadcrumbs;
 
   /**
-   * @var T|null
+   * @phpstan-var T|null
    */
   protected ?AbstractMenuItem $_current;
 
   /**
-   * @var AbstractMenu
+   * @phpstan-var static
    */
   static protected AbstractMenu $_instance;
 
   /**
-   * @var string
+   * @phpstan-var string
    */
   const ITEM_CLASS = AbstractMenuItem::class;
 
 
   /**
-   * @param int|string $type
-   * @return T[]
+   * @phpstan-param int|string $type
+   * @phpstan-return T[]
    * @noinspection PhpUnused (Public API)
    */
   public function getAllByType(int|string $type): array {
@@ -52,8 +53,8 @@ abstract class AbstractMenu extends AbstractStructure
   }
 
   /**
-   * @param int|string $type
-   * @return T|null
+   * @phpstan-param int|string $type
+   * @phpstan-return T|null
    * @noinspection PhpUnused (Public API)
    */
   public function getByType(int|string $type): ?AbstractMenuItem {
@@ -73,7 +74,7 @@ abstract class AbstractMenu extends AbstractStructure
   }
 
   /**
-   * @return T[]
+   * @phpstan-return T[]
    * @noinspection PhpUnused (Public API)
    */
   public function getBreadcrumbs(): array {
@@ -81,7 +82,7 @@ abstract class AbstractMenu extends AbstractStructure
   }
 
   /**
-   * @return T|null
+   * @phpstan-return T|null
    */
   public function getCurrent(): ?AbstractMenuItem {
     return $this->_current;
@@ -92,7 +93,7 @@ abstract class AbstractMenu extends AbstractStructure
   // -----------------
 
   /**
-   * @return T|null
+   * @phpstan-return T|null
    */
   protected function findCurrent(): ?AbstractMenuItem {
     $element = Craft::$app->getUrlManager()
@@ -133,7 +134,7 @@ abstract class AbstractMenu extends AbstractStructure
   // --------------
 
   /**
-   * @return static
+   * @phpstan-return static
    */
   static function getInstance(): AbstractMenu {
     if (!isset(static::$_instance)) {

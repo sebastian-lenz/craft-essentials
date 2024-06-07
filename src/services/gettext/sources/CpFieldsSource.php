@@ -13,7 +13,7 @@ use craft\fieldlayoutelements\Tip;
 use craft\fields\BaseOptionsField;
 use craft\fields\Matrix;
 use craft\models\FieldLayoutTab;
-use craft\records\FieldLayoutTab as FieldLayoutTabRecord;
+use craft\records\FieldLayout;
 use lenz\craft\essentials\services\gettext\utils\Translations;
 
 /**
@@ -25,11 +25,17 @@ class CpFieldsSource extends AbstractSource
    * @inheritDoc
    */
   public function extract(Translations $translations): void {
-    foreach (FieldLayoutTabRecord::find()->all() as $tab) {
-      $this->extractFieldLayoutTab($translations, $tab);
+    $layoutIds = FieldLayout::find()->select('id')->column();
+
+    foreach ($layoutIds as $layoutId) {
+      $layout = Craft::$app->getFields()->getLayoutById($layoutId);
+
+      foreach ($layout->getTabs() as $tab) {
+        $this->extractFieldLayoutTab($translations, $tab);
+      }
     }
 
-    foreach (Craft::$app->getFields()->getAllFields(false) as $field) {
+    foreach (Craft::$app->getFields()->getAllFields() as $field) {
       $this->extractField($translations, $field);
     }
   }
@@ -57,30 +63,19 @@ class CpFieldsSource extends AbstractSource
 
     if ($field instanceof BaseOptionsField) {
       $this->extractBaseOptionsField($translations, $field);
-    } elseif ($field instanceof Matrix) {
-      $this->extractMatrixField($translations, $field);
     }
   }
 
   /**
    * @param Translations $translations
-   * @param FieldLayoutTabRecord $record
+   * @param FieldLayoutTab $tab
    * @return void
    */
-  private function extractFieldLayoutTab(Translations $translations, FieldLayoutTabRecord $record): void {
-    $hint = $this->getTabHint($record);
-    $this->insert($translations, $hint, $record->name);
+  private function extractFieldLayoutTab(Translations $translations, FieldLayoutTab $tab): void {
+    $hint = $this->getTabHint($tab);
+    $this->insert($translations, $hint, $tab->name);
 
-    try {
-      $model = FieldLayoutTab::createFromConfig($record->getAttributes([
-        'id', 'layoutId', 'name', 'elements', 'sortOrder', 'uid'
-      ]));
-    } catch (\Throwable $error) {
-      echo "\n[Error] Could not load field layout tab #$record->id: " . $error->getMessage() . "\n\n";
-      return;
-    }
-
-    foreach ($model->elements as $element) {
+    foreach ($tab->elements as $element) {
       if ($element instanceof BaseField) {
         $this->insert($translations, $hint, $element->label);
         $this->insert($translations, $hint, $element->instructions);
@@ -95,26 +90,12 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param Translations $translations
-   * @param Matrix $field
-   */
-  private function extractMatrixField(Translations $translations, Matrix $field): void {
-    foreach ($field->getBlockTypes() as $blockType) {
-      $this->insert($translations, $field, $field->name);
-
-      foreach ($blockType->getCustomFields() as $field) {
-        $this->extractField($translations, $field);
-      }
-    }
-  }
-
-  /**
-   * @param FieldLayoutTabRecord $record
+   * @param FieldLayoutTab $tab
    * @return string
    */
-  private function getAssetTabHint(FieldLayoutTabRecord $record): string {
+  private function getAssetTabHint(FieldLayoutTab $tab): string {
     foreach (Craft::$app->getVolumes()->getAllVolumes() as $volume) {
-      if ($volume->fieldLayoutId == $record->layoutId) {
+      if ($volume->fieldLayoutId == $tab->layoutId) {
         return 'tab/volume/' . $volume->handle;
       }
     }
@@ -123,12 +104,12 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTabRecord $record
+   * @param FieldLayoutTab $tab
    * @return string
    */
-  private function getCategoryTabHint(FieldLayoutTabRecord $record): string {
+  private function getCategoryTabHint(FieldLayoutTab $tab): string {
     foreach (Craft::$app->getCategories()->getAllGroups() as $group) {
-      if ($group->fieldLayoutId == $record->layoutId) {
+      if ($group->fieldLayoutId == $tab->layoutId) {
         return 'tab/category/' . $group->handle;
       }
     }
@@ -137,14 +118,13 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTabRecord $record
+   * @param FieldLayoutTab $tab
    * @return string
    */
-  private function getEntryTabHint(FieldLayoutTabRecord $record): string {
-    foreach (Craft::$app->getSections()->getAllSections() as $section)
-    foreach ($section->entryTypes as $entryType) {
-      if ($entryType->fieldLayoutId == $record->layoutId) {
-        return 'tab/entry/' . $section->handle . '/' . $entryType->handle;
+  private function getEntryTabHint(FieldLayoutTab $tab): string {
+    foreach (Craft::$app->getEntries()->getAllEntryTypes() as $entryType) {
+      if ($entryType->fieldLayoutId == $tab->layoutId) {
+        return 'tab/entryType/' . $entryType->handle;
       }
     }
 
@@ -152,16 +132,14 @@ class CpFieldsSource extends AbstractSource
   }
 
   /**
-   * @param FieldLayoutTabRecord $record
+   * @param FieldLayoutTab $tab
    * @return string
    */
-  private function getTabHint(FieldLayoutTabRecord $record): string {
-    $layout = $record->layout;
-
-    return match ($layout?->type) {
-      Asset::class => $this->getAssetTabHint($record),
-      Category::class => $this->getCategoryTabHint($record),
-      Entry::class => $this->getEntryTabHint($record),
+  private function getTabHint(FieldLayoutTab $tab): string {
+    return match ($tab->elementType ?? null) {
+      Asset::class => $this->getAssetTabHint($tab),
+      Category::class => $this->getCategoryTabHint($tab),
+      Entry::class => $this->getEntryTabHint($tab),
       default => 'tab',
     };
   }
@@ -171,7 +149,7 @@ class CpFieldsSource extends AbstractSource
    * @param string|FieldInterface $fieldOrHint
    * @param string|null|mixed $original
    */
-  private function insert(Translations $translations, string|FieldInterface $fieldOrHint, mixed $original) {
+  private function insert(Translations $translations, string|FieldInterface $fieldOrHint, mixed $original): void {
     if (!is_string($original) || empty($original)) {
       return;
     }
