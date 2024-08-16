@@ -10,6 +10,7 @@ use lenz\craft\essentials\services\MailEncoder;
 use lenz\craft\essentials\services\translations\Translations;
 use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\models\Attributes;
+use lenz\craft\utils\models\Url;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -36,6 +37,7 @@ class Extension extends AbstractExtension
    */
   public function getFilters(): array {
     return [
+      new TwigFilter('compose', [Url::class, 'compose']),
       new TwigFilter('eagerLoad', [ElementHelper::class, 'eagerLoad']),
       new TwigFilter('encodeMail', [MailEncoder::class, 'encode']),
       new TwigFilter('translations', [Translations::class, 'forElement']),
@@ -54,6 +56,7 @@ class Extension extends AbstractExtension
       new TwigFunction('fixture', [Fixture::class, 'get']),
       new TwigFunction('interceptCache', [$this, 'interceptCache']),
       new TwigFunction('toAttributes', [$this, 'toAttributes']),
+      new TwigFunction('toUrl', [$this, 'toUrl']),
       new TwigFunction('translations', [Translations::class, 'forElement']),
     ];
   }
@@ -101,5 +104,13 @@ class Extension extends AbstractExtension
     }
 
     return new Attributes();
+  }
+
+  /**
+   * @param array|Attributes $value
+   * @return Attributes
+   */
+  public function toUrl(mixed $url = ''): Url {
+    return new Url($url);
   }
 }
