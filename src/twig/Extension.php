@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\twig;
 
+use craft\helpers\Template;
 use Exception;
 use lenz\craft\essentials\helpers\ElementHelper;
 use lenz\craft\essentials\helpers\HtmlHelper;
@@ -11,10 +12,13 @@ use lenz\craft\essentials\services\translations\Translations;
 use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\models\Attributes;
 use lenz\craft\utils\models\Url;
+use Twig\Environment;
+use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\EscaperExtension;
+use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use yii\web\BadRequestHttpException;
 
 /**
  * Class Extension
@@ -31,6 +35,17 @@ class Extension extends AbstractExtension
    */
   const CACHE_COMMIT = self::class . '::getCommitHash';
 
+
+  /**
+   * Constructor
+   */
+  public function __construct() {
+    \Craft::$app
+      ->getView()
+      ->getTwig()
+      ->getExtension(EscaperExtension::class)
+      ->setEscaper('html_entities', self::escapeHtmlEntities(...));
+  }
 
   /**
    * @inheritdoc
@@ -62,7 +77,7 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @return string
+   * @phpstan-return string
    */
   public function getCommitHash(): string {
     if (!isset($this->_commitHash)) {
@@ -79,22 +94,22 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @return string
+   * @phpstan-return string
    */
   public function getCurrentYear(): string {
     return date('Y');
   }
 
   /**
-   * @return void
+   * @phpstan-return void
    */
   public function interceptCache(): void {
     Plugin::getInstance()->frontendCache->intercept();
   }
 
   /**
-   * @param array|Attributes $value
-   * @return Attributes
+   * @phpstan-param array|Attributes $value
+   * @phpstan-return Attributes
    */
   public function toAttributes(mixed $value = []): Attributes {
     if ($value instanceof Attributes) {
@@ -107,10 +122,26 @@ class Extension extends AbstractExtension
   }
 
   /**
-   * @param array|Attributes $value
-   * @return Attributes
+   * @phpstan-param mixed $url
+   * @phpstan-return Url
    */
   public function toUrl(mixed $url = ''): Url {
     return new Url($url);
+  }
+
+  /**
+   * @phpstan-param Environment $env
+   * @phpstan-param string $value
+   * @phpstan-param string $charset
+   * @phpstan-return string
+   * @throws RuntimeError
+   */
+  static public function escapeHtmlEntities(Environment $env, string $value, string $charset = null): Markup {
+    $result = htmlspecialchars($value, \ENT_QUOTES | \ENT_SUBSTITUTE, $charset);
+
+    return new Markup(
+      preg_replace('/&amp;(\w{3,6});/', '&$1;', $result),
+      $charset
+    );
   }
 }
