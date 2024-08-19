@@ -134,7 +134,6 @@ class Extension extends AbstractExtension
    * @phpstan-param string $value
    * @phpstan-param string $charset
    * @phpstan-return string
-   * @throws RuntimeError
    */
   static public function escapeHtmlEntities(Environment $env, string $value, string $charset = null): Markup {
     $result = htmlspecialchars($value, \ENT_QUOTES | \ENT_SUBSTITUTE, $charset);
