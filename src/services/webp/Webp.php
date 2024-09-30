@@ -99,10 +99,10 @@ class Webp extends Component
     }
 
     if (Event::hasHandlers(__CLASS__, self::EVENT_CREATE_DERIVATE)) {
-      $event = new AssetEvent([ 'asset' => $event->asset ]);
-      Event::trigger(__CLASS__, self::EVENT_CREATE_DERIVATE, $event);
+      $createEvent = new AssetEvent([ 'asset' => $event->asset ]);
+      Event::trigger(__CLASS__, self::EVENT_CREATE_DERIVATE, $createEvent);
 
-      if ($event->handled || !$event->isValid) {
+      if ($createEvent->handled || !$createEvent->isValid) {
         return;
       }
     }
