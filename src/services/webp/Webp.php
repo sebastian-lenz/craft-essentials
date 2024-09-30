@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\services\webp;
 use Craft;
 use craft\elements\Asset;
 use craft\errors\FsException;
+use craft\events\AssetEvent;
 use craft\events\ImageTransformerOperationEvent;
 use craft\helpers\FileHelper;
 use craft\image\Raster;
@@ -31,6 +32,11 @@ class Webp extends Component
    * @var float
    */
   static float $QUALITY_FACTOR = 1;
+
+  /**
+   * @var string
+   */
+  const EVENT_CREATE_DERIVATE = 'createDerivate';
 
 
   /**
@@ -90,6 +96,15 @@ class Webp extends Component
     $image = $event->image;
     if (!$image instanceof Raster) {
       return;
+    }
+
+    if (Event::hasHandlers(__CLASS__, self::EVENT_CREATE_DERIVATE)) {
+      $event = new AssetEvent([ 'asset' => $image ]);
+      Event::trigger(__CLASS__, self::EVENT_CREATE_DERIVATE, $event);
+
+      if ($event->handled || !$event->isValid) {
+        return;
+      }
     }
 
     $asset = $event->asset;
