@@ -29,6 +29,14 @@ class AssetJob extends AbstractJob
   private ?string $_format;
 
 
+  /**
+   * @return string[]
+   */
+  public function __sleep(): array {
+    return ['assetId', '_format'];
+  }
+
+
   // Protected methods
   // -----------------
 

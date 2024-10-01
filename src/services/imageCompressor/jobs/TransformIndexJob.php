@@ -41,6 +41,14 @@ class TransformIndexJob extends AbstractJob
   private ?ImageTransformIndex $_transformIndex;
 
 
+  /**
+   * @return string[]
+   */
+  public function __sleep(): array {
+    return ['transformIndexId', '_fileName', '_format'];
+  }
+
+
   // Protected methods
   // -----------------
 
