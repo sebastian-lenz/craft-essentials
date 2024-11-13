@@ -28,7 +28,8 @@
     "allow-plugins": {
       "yiisoft/yii2-composer": true,
       "craftcms/plugin-installer": true,
-      "kylekatarnls/update-helper": false
+      "kylekatarnls/update-helper": false,
+      "php-http/discovery": true
     },
     "platform": {
       "php": "8.2.0"

@@ -6,14 +6,17 @@ use Craft;
 use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterCpNavItemsEvent;
+use craft\fields\Link;
 use craft\models\FieldLayout;
 use craft\services\Utilities;
 use craft\web\Application;
 use craft\web\twig\variables\Cp;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\AbstractService;
+use lenz\craft\essentials\services\cp\linktypes\Url;
 use yii\base\Event;
 use yii\base\Module;
+use yii\BaseYii;
 
 /**
  * Class CpHelpers
@@ -25,6 +28,10 @@ class CpHelpers extends AbstractService
    */
   public function __construct() {
     parent::__construct();
+
+    BaseYii::$container->set(\craft\fields\linktypes\Url::class, [
+      'class' => Url::class,
+    ]);
 
     Event::on(
       Cp::class,
