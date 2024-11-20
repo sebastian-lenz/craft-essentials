@@ -1,0 +1,52 @@
+.ceGrid__dummy {
+  display: none;
+}
+
+.ceGrid__row {
+  display: flex;
+  flex-flow: column;
+  gap: var(--ce-column-gap);
+
+  --ce-num-columns: 4;
+  --ce-column-gap: var(--row-gap);
+}
+
+
+@media only screen and (min-width: 96rem) {
+  .ceGrid__row {
+    flex-flow: row wrap;
+    --ce-column-gap: 48px;
+  }
+
+  .ceGrid__column {
+    position: relative;
+    flex: 0 0 auto;
+    width: calc(
+      ((100% - var(--ce-column-gap) * 3) / 4) * var(--ce-num-columns) +
+      var(--ce-column-gap) * (var(--ce-num-columns) - 1)
+    );
+  }
+
+  .ceGrid__column:not(:first-child)::before {
+    position: absolute;
+    content: '';
+    display: block;
+    top: 0;
+    left: -24px;
+    bottom: 0;
+
+    border-left: 1px solid var(--hairline-color);
+  }
+
+  .ceGrid__column.width-25 {
+    --ce-num-columns: 1;
+  }
+
+  .ceGrid__column.width-50 {
+    --ce-num-columns: 2;
+  }
+
+  .ceGrid__column.width-75 {
+    --ce-num-columns: 3;
+  }
+}

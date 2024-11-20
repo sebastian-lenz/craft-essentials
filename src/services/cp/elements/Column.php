@@ -8,6 +8,7 @@ use craft\fieldlayoutelements\BaseUiElement;
 use craft\helpers\Cp;
 use craft\helpers\Html;
 use craft\web\View;
+use lenz\craft\essentials\assets\CpAsset;
 use Throwable;
 
 /**
@@ -19,6 +20,11 @@ class Column extends BaseUiElement
    * @var bool
    */
   public bool $isCloser = false;
+
+  /**
+   * @var bool
+   */
+  static bool $IN_COLUMN = false;
 
   /**
    * @var string
@@ -55,7 +61,7 @@ class Column extends BaseUiElement
       'label' => Craft::t('app', 'Is closing element'),
       'id' => 'isCloser',
       'name' => 'isCloser',
-      'value' => $this->isCloser,
+      'on' => $this->isCloser,
     ]);
   }
 
@@ -63,14 +69,24 @@ class Column extends BaseUiElement
    * @inheritdoc
    */
   public function formHtml(?ElementInterface $element = null, bool $static = false): ?string {
+    CpAsset::autoRegister();
+
     $result = self::$STACK;
     self::$STACK = '';
 
-    if (!$this->isCloser)   {
-      $result .= '<div class="field width-' . ($this->width ?? 100) . '">';
+    if (!$this->isCloser) {
+      if (!self::$IN_COLUMN) {
+        self::$IN_COLUMN = true;
+        $result .= '<div class="ceGrid__row">';
+      }
+
+      $result .= '<div class="ceGrid__column width-' . ($this->width ?? 100) . '">';
       self::$STACK .= '</div>';
+    } else if (self::$IN_COLUMN) {
+      self::$IN_COLUMN = false;
+      $result .= '</div>';
     }
 
-    return '<div style="display:none;"></div>' . $result;
+    return '<span class="ceGrid__dummy"></span>' . $result;
   }
 }
