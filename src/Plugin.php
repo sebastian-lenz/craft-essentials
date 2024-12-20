@@ -12,6 +12,8 @@ use Throwable;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 
+require_once 'globals.php';
+
 /**
  * Class Plugin
  *
