@@ -29,8 +29,35 @@ class Column extends BaseUiElement
   /**
    * @var string
    */
-  static string $STACK = '';
+  static string $STACK_HTML = '';
 
+  /**
+   * @var array
+   */
+  static array $STACK_IDS = [];
+
+
+  /**
+   * @inheritdoc
+   */
+  public function hasCustomWidth(): bool {
+    return true;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function formHtml(?ElementInterface $element = null, bool $static = false): ?string {
+    CpAsset::autoRegister();
+
+    return $this->isAjaxForm()
+      ? $this->renderAjaxHtml()
+      : $this->renderStaticHtml();
+  }
+
+
+  // Protected methods
+  // -----------------
 
   /**
    * @inheritdoc
@@ -49,13 +76,6 @@ class Column extends BaseUiElement
   /**
    * @inheritdoc
    */
-  public function hasCustomWidth(): bool {
-    return true;
-  }
-
-  /**
-   * @inheritdoc
-   */
   protected function settingsHtml(): ?string {
     return Cp::lightswitchFieldHtml([
       'label' => Craft::t('app', 'Is closing element'),
@@ -65,14 +85,48 @@ class Column extends BaseUiElement
     ]);
   }
 
-  /**
-   * @inheritdoc
-   */
-  public function formHtml(?ElementInterface $element = null, bool $static = false): ?string {
-    CpAsset::autoRegister();
 
-    $result = self::$STACK;
-    self::$STACK = '';
+  // Private methods
+  // ---------------
+
+  /**
+   * @return bool
+   */
+  private function isAjaxForm(): bool {
+    return \Craft::$app->getRequest()->isAjax;
+  }
+
+  /**
+   * @return string
+   */
+  private function renderAjaxHtml(): string {
+    $id = uniqid('ceColumn');
+    if ($this->isCloser) {
+      Craft::$app->getView()->registerJs('craftEssentials.registerAjaxColumns(' . json_encode([
+        'columns' => self::$STACK_IDS,
+        'id' => $id,
+      ]) . ');');
+
+      self::$STACK_IDS[] = [];
+      return Html::tag('div', '', [
+        'class' => 'ceGrid__row',
+        'id' => $id,
+      ]);
+    }
+
+    self::$STACK_IDS[] = $id;
+    return Html::tag('div', '', [
+      'class' => 'ceGrid__column width-' . ($this->width ?? 100),
+      'id' => $id,
+    ]);
+  }
+
+  /**
+   * @return string
+   */
+  private function renderStaticHtml(): string {
+    $result = self::$STACK_HTML;
+    self::$STACK_HTML = '';
 
     if (!$this->isCloser) {
       if (!self::$IN_COLUMN) {
@@ -81,7 +135,7 @@ class Column extends BaseUiElement
       }
 
       $result .= '<div class="ceGrid__column width-' . ($this->width ?? 100) . '">';
-      self::$STACK .= '</div>';
+      self::$STACK_HTML .= '</div>';
     } else if (self::$IN_COLUMN) {
       self::$IN_COLUMN = false;
       $result .= '</div>';

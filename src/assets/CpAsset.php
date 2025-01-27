@@ -14,7 +14,8 @@ class CpAsset extends AssetBundle
    */
   public function init(): void {
     $this->sourcePath = __DIR__ . '/cp';
-    $this->css = [ 'styles.css' ];
+    $this->js = [ 'craft-essentials.js' ];
+    $this->css = [ 'craft-essentials.css' ];
 
     parent::init();
   }

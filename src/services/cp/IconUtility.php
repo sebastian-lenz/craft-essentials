@@ -23,7 +23,7 @@ class IconUtility extends Utility
    * @inheritDoc
    */
   static public function id(): string {
-    return 'staedel-icons';
+    return 'lenz-craft-essentials-icons';
   }
 
   /**
