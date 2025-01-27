@@ -49,4 +49,8 @@
   .ceGrid__column.width-75 {
     --ce-num-columns: 3;
   }
+
+  .ceGrid__column > .field > .status-badge {
+    inset-inline-start: -24px;
+  }
 }
