@@ -10,11 +10,11 @@
 {% block content %}
   <style>
     #global-footer { display: none; }
-    #main, #main-container, #main-content, #main-form, #content-container, #content { display: flex; flex-flow: column nowrap; align-items: stretch; flex-grow: 1; }
+    #main, #main-container, #main-content, #content, #content-container, #content-frame, .content-grid, .content-grid__main { display: flex; flex-flow: column nowrap; align-items: stretch; flex-grow: 1; }
     #main-content { padding-bottom: 24px; }
     #content { padding: 0; }
+    #content-container { width: unset; }
     #content-header { margin: 0; }
-    #content-frame { flex: 1; }
   </style>
 
   <iframe id="content-frame" src="{{ contentUrl }}"></iframe>
