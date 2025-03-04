@@ -15,7 +15,7 @@ class Icon extends AbstractMarkup implements ArrayAccess
   /**
    * @var array
    */
-  private array $_attributes;
+  private array $_attributes = [];
 
   /**
    * @var Element[]
