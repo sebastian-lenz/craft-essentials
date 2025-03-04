@@ -41,10 +41,12 @@ class Icon extends AbstractMarkup implements ArrayAccess
   public function __construct(string|array $content = '', $attributes = []) {
     parent::__construct();
 
+    $scale = ArrayHelper::remove($attributes, 'scale', 1);
+    $title = ArrayHelper::remove($attributes, 'title');
     $this
-      ->scale(ArrayHelper::remove($attributes, 'scale', 1))
-      ->title(ArrayHelper::remove($attributes, 'title'))
       ->attributes($attributes)
+      ->scale($scale)
+      ->title($title)
       ->content($content);
   }
 
