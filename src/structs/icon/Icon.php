@@ -144,6 +144,13 @@ class Icon extends AbstractMarkup implements ArrayAccess
    */
   public function title(string|null $title): static {
     $this->_title = $title;
+
+    // NVDA requires a role to announce the title
+    // See: https://a11y-101.com/development/svg
+    if (!empty($title) && !$this->offsetExists('role')) {
+      $this->offsetSet('role', 'img');
+    }
+
     return $this;
   }
 
