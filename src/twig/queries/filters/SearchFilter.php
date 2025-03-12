@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\twig\queries\filters;
 
 use craft\elements\db\ElementQuery;
 use craft\helpers\Html;
+use Generator;
 use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 
@@ -26,8 +27,8 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function display(array $variables = []): void {
-    echo Html::input('search', $this->getName(), $this->getValue());
+  public function display(array $variables = []): Generator {
+    yield Html::input('search', $this->getName(), $this->getValue());
   }
 
   /**
@@ -70,7 +71,7 @@ class SearchFilter extends AbstractValueFilter implements DisplayInterface
   /**
    * @inheritDoc
    */
-  public function setValue(string $value) {
+  public function setValue(string $value): void {
     $value = trim($value);
     $this->_search = empty($value)
       ? null

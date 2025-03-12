@@ -5,6 +5,7 @@ namespace lenz\craft\essentials\twig\queries\filters;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Html;
 use Exception;
+use Generator;
 use lenz\contentfield\twig\DisplayInterface;
 use lenz\craft\essentials\twig\queries\options\Option;
 use lenz\craft\essentials\twig\queries\options\OptionInterface;
@@ -50,11 +51,11 @@ abstract class AbstractOptionsFilter extends AbstractValueFilter implements Disp
   }
 
   /**
-   * @param array $variables
+   * @inheritDoc
    * @throws Exception
    */
-  public function display(array $variables = []): void {
-    echo $this->renderSelect($variables);
+  public function display(array $variables = []): Generator {
+    yield $this->renderSelect($variables);
   }
 
   /**
