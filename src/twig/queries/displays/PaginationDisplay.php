@@ -61,7 +61,7 @@ class PaginationDisplay extends Paginate implements DisplayInterface
       return;
     }
 
-    yield from Craft::$app
+    yield Craft::$app
       ->getView()
       ->getTwig()
       ->load($this->template)
