@@ -28,6 +28,11 @@ class Icon extends AbstractMarkup implements ArrayAccess
   private float $_scale = 1;
 
   /**
+   * @var bool
+   */
+  private bool $_useXLink = false;
+
+  /**
    * @var string|null
    */
   private string|null $_title = null;
@@ -41,12 +46,14 @@ class Icon extends AbstractMarkup implements ArrayAccess
   public function __construct(string|array $content = '', $attributes = []) {
     parent::__construct();
 
+    $useXLink = !!ArrayHelper::remove($attributes, 'useXLink', false);
     $scale = ArrayHelper::remove($attributes, 'scale', 1);
     $title = ArrayHelper::remove($attributes, 'title');
     $this
       ->attributes($attributes)
       ->scale($scale)
       ->title($title)
+      ->useXLink($useXLink)
       ->content($content);
   }
 
@@ -132,6 +139,13 @@ class Icon extends AbstractMarkup implements ArrayAccess
   }
 
   /**
+   * @return bool
+   */
+  public function getUseXLink(): bool {
+    return $this->_useXLink;
+  }
+
+  /**
    * @param float $scale
    * @return $this
    */
@@ -162,6 +176,11 @@ class Icon extends AbstractMarkup implements ArrayAccess
    */
   public function toElementHref(string $name): string {
     return '#' . $name;
+  }
+
+  public function useXLink(bool $value): self {
+    $this->_useXLink = $value;
+    return $this;
   }
 
 

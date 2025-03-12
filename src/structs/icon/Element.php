@@ -48,7 +48,7 @@ class Element
    */
   public function getTag(Icon $icon): string {
     $attributes = $this->attributes;
-    $attributes['href'] = $icon->toElementHref($this->name);
+    $attributes[$icon->getUseXLink() ? 'xlink:href' : 'href'] = $icon->toElementHref($this->name);
 
     return Html::tag('use', null, $attributes);
   }
