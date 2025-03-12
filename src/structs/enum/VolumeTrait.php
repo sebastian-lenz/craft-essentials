@@ -9,7 +9,6 @@ use Throwable;
 /**
  * Trait VolumeTrait
  *
- * @property string $value
  * @noinspection PhpUnused
  */
 trait VolumeTrait
@@ -23,6 +22,7 @@ trait VolumeTrait
 
   /**
    * @return Volume
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function getModel(): Volume {
     return Craft::$app->getVolumes()->getVolumeByHandle($this->value);
@@ -32,6 +32,7 @@ trait VolumeTrait
    * @param mixed $value
    * @return bool
    * @phpstan-assert-if-true Volume $value
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function is(mixed $value): bool {
     try {

@@ -9,7 +9,6 @@ use Throwable;
 /**
  * Trait SiteTrait
  *
- * @property string $value
  * @noinspection PhpUnused
  */
 trait SiteTrait
@@ -23,6 +22,7 @@ trait SiteTrait
 
   /**
    * @return Site
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function getModel(): Site {
     return Craft::$app->getSites()->getSiteByHandle($this->value);
@@ -32,6 +32,7 @@ trait SiteTrait
    * @param mixed $value
    * @return bool
    * @phpstan-assert-if-true Site $value
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function is(mixed $value): bool {
     try {

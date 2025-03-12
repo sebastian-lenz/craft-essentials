@@ -10,7 +10,6 @@ use Throwable;
 /**
  * Trait EntryTypeTrait
  *
- * @property string $value
  * @noinspection PhpUnused
  */
 trait EntryTypeTrait
@@ -24,6 +23,7 @@ trait EntryTypeTrait
 
   /**
    * @return EntryType
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function getModel(): EntryType {
     return Craft::$app->getEntries()->getEntryTypeByHandle($this->value);
@@ -33,6 +33,7 @@ trait EntryTypeTrait
    * @param mixed $value
    * @return bool
    * @phpstan-assert-if-true Entry $value
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function is(mixed $value): bool {
     try {

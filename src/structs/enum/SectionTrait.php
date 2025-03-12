@@ -10,7 +10,6 @@ use Throwable;
 /**
  * Trait SectionTrait
  *
- * @property string $value
  * @noinspection PhpUnused
  */
 trait SectionTrait
@@ -24,6 +23,7 @@ trait SectionTrait
 
   /**
    * @return Section
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function getModel(): Section {
     return Craft::$app->getEntries()->getSectionByHandle($this->value);
@@ -33,6 +33,7 @@ trait SectionTrait
    * @param mixed $value
    * @return bool
    * @phpstan-assert-if-true Entry $value
+   * @noinspection PhpUndefinedFieldInspection
    */
   public function is(mixed $value): bool {
     try {
