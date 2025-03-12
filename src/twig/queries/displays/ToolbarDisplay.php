@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\twig\queries\displays;
 
 use Craft;
 use craft\helpers\UrlHelper;
+use Generator;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\craft\essentials\twig\queries\filters\SearchFilter;
 use lenz\contentfield\twig\DisplayInterface;
@@ -46,18 +47,18 @@ class ToolbarDisplay extends BaseObject implements DisplayInterface
    * @inheritDoc
    * @throws Throwable
    */
-  public function display(array $variables = []): void {
+  public function display(array $variables = []): Generator {
     $variables = array_merge([
       'display' => $this,
       'filters' => $this->_query->getFilters(),
       'query'   => $this->_query,
     ], $this->variables, $variables);
 
-    Craft::$app
+    yield Craft::$app
       ->getView()
       ->getTwig()
       ->load($this->template)
-      ->display($variables);
+      ->render($variables);
   }
 
   /**

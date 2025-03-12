@@ -4,6 +4,7 @@ namespace lenz\craft\essentials\twig\queries\displays;
 
 use Craft;
 use craft\web\twig\variables\Paginate;
+use Generator;
 use lenz\craft\essentials\twig\queries\AbstractQuery;
 use lenz\contentfield\twig\DisplayInterface;
 use Throwable;
@@ -55,16 +56,16 @@ class PaginationDisplay extends Paginate implements DisplayInterface
    * @inheritDoc
    * @throws Throwable
    */
-  public function display(array $variables = []): void {
+  public function display(array $variables = []): Generator {
     if (!$this->_query->hasPagination()) {
       return;
     }
 
-    Craft::$app
+    yield from Craft::$app
       ->getView()
       ->getTwig()
       ->load($this->template)
-      ->display($this->getVariables($variables));
+      ->render($this->getVariables($variables));
   }
 
   /**
