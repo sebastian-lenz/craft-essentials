@@ -83,7 +83,11 @@ class Extension extends AbstractExtension
     if (!isset($this->_commitHash)) {
       $this->_commitHash = ElementCache::with(self::CACHE_COMMIT, function() {
         try {
-          return substr(shell_exec('git rev-parse HEAD'), 0, 7);
+          if (!function_exists('shell_exec')) {
+            throw new Exception('Function shell_exec missing');
+          }
+
+          return substr(@shell_exec('git rev-parse HEAD'), 0, 7);
         } catch (Exception) {
           return '0000000';
         }
