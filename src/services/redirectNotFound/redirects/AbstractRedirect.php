@@ -11,6 +11,17 @@ use craft\web\Response;
 abstract class AbstractRedirect
 {
   /**
+   * @var int
+   */
+  const DEFAULT_REDIRECT_CODE = 301;
+
+  /**
+   * @var int[]
+   */
+  const REDIRECT_CODES = [301, 302];
+
+
+  /**
    * @param Request $request
    * @return bool
    */
@@ -22,10 +33,15 @@ abstract class AbstractRedirect
 
   /**
    * @param string $url
+   * @param int $code
    */
-  protected function sendRedirect(string $url): void {
+  protected function sendRedirect(string $url, int $code = self::DEFAULT_REDIRECT_CODE): void {
+    if (!in_array($code, self::REDIRECT_CODES)) {
+      $code = self::DEFAULT_REDIRECT_CODE;
+    }
+
     $response = new Response();
-    $response->redirect($url, 301)->send();
+    $response->redirect($url, $code)->send();
     die();
   }
 }

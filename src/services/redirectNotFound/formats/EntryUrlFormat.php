@@ -4,7 +4,7 @@ namespace lenz\craft\essentials\services\redirectNotFound\formats;
 
 use Craft;
 use craft\elements\Entry;
-use craft\models\Site;
+use lenz\craft\essentials\services\redirectNotFound\utils\ElementRef;
 use lenz\craft\essentials\services\redirectNotFound\utils\SiteUrlHelper;
 use Throwable;
 
@@ -30,18 +30,15 @@ class EntryUrlFormat extends UrlFormat
    * @inerhitDoc
    */
   public function decode(string $url): ?string {
-    $url = substr($url, strlen(self::PREFIX));
-    list($id, $rest) = array_pad(explode('@', $url, 2), 2, null);
-    list($siteId, $hash) = array_pad(explode('#', $rest, 2), 2, null);
-
+    $ref = ElementRef::parse($url);
     $entry = Entry::findOne([
-      'id' => $id,
-      'siteId' => $siteId,
+      'id' => $ref->id,
+      'siteId' => $ref->siteId,
     ]);
 
     $url = $entry?->url;
-    if ($hash) {
-      $url .= '#' . $hash;
+    if ($ref->hash) {
+      $url .= '#' . $ref->hash;
     }
 
     return $url;
@@ -63,9 +60,6 @@ class EntryUrlFormat extends UrlFormat
       return null;
     }
 
-    $hashPosition = strpos($url, '#');
-    $hash = $hashPosition ? substr($url, $hashPosition) : '';
-
-    return '#entry:' . $element->id . '@' . $site->id . $hash;
+    return (string)ElementRef::fromElement($element, $url);
   }
 }

@@ -7,6 +7,7 @@ use craft\base\ElementInterface;
 use craft\web\Request;
 use Generator;
 use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
+use lenz\craft\essentials\services\redirectNotFound\utils\ElementRef;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoute;
 use lenz\craft\utils\models\Url;
 
@@ -43,7 +44,7 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
       fputcsv($handle, ['source', 'target']);
     }
 
-    fputcsv($handle, [$origin, "#entry:{$target->id}@{$target->siteId}"]);
+    fputcsv($handle, [$origin, (string)ElementRef::fromElement($target)]);
     fclose($handle);
   }
 
@@ -78,16 +79,10 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    */
   public function getElementRoutes(ElementInterface $element): array {
     $result = [];
+
     foreach ($this->eachRow() as $index => $data) {
-      if (!str_starts_with($data[1], '#entry:')) {
-        continue;
-      }
-
-      list($id, $siteId) = array_pad(
-        explode('@', substr($data[1], 7), 2)
-      , 2, null);
-
-      if ($element->id != $id || $element->siteId != $siteId) {
+      $ref = ElementRef::parse($data[1]);
+      if (!$ref || !$ref->matches($element)) {
         continue;
       }
 
@@ -95,7 +90,7 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
         'origin' => Craft::t('lenz-craft-essentials', 'Custom redirect'),
         'originId' => $index,
         'redirect' => $this,
-        'uid' => md5( implode(';', [$this->_fileName, $index])),
+        'uid' => md5(implode(';', [$this->_fileName, $index])),
         'url' => $data[0],
       ]);
     }
@@ -109,15 +104,18 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    */
   public function redirect(Request $request): bool {
     $original = new Url($request->url);
-    $target = UrlFormat::decodeUrl(
-      $this->findTarget($original)
-    );
-
-    if (empty($target)) {
+    $target = $this->findTarget($original);
+    if (is_null($target)) {
       return false;
     }
 
-    $this->sendRedirect(Url::compose($target, $original->getQuery()));
+    [$url, $code] = $target;
+    $url = UrlFormat::decodeUrl($url);
+    if (empty($url)) {
+      return false;
+    }
+
+    $this->sendRedirect(Url::compose($url, $original->getQuery()), $code);
     return true;
   }
 
@@ -144,9 +142,9 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
 
   /**
    * @param Url $url
-   * @return string|null
+   * @return array|null
    */
-  protected function findTarget(Url $url): ?string {
+  protected function findTarget(Url $url): array|null {
     $variants = [trim((string)$url, '/')];
 
     if (!empty($url->query)) {
@@ -158,7 +156,11 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
     foreach ($this->eachRow() as $data) {
       $pattern = trim($data[0], '/');
       if (in_array($pattern, $variants)) {
-        return trim($data[1]);
+        $code = isset($data[2]) && is_numeric($data[2])
+          ? intval($data[2])
+          : 301;
+
+        return [trim($data[1]), $code];
       }
     }
 

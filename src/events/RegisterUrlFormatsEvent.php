@@ -2,6 +2,7 @@
 
 namespace lenz\craft\essentials\events;
 
+use lenz\craft\essentials\services\redirectNotFound\formats\AssetUrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\formats\EntryUrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
 use yii\base\Event;
@@ -25,7 +26,8 @@ class RegisterUrlFormatsEvent extends Event
 
     if (!isset($this->formats)) {
       $this->formats = [
-        new EntryUrlFormat()
+        new AssetUrlFormat(),
+        new EntryUrlFormat(),
       ];
     }
   }
