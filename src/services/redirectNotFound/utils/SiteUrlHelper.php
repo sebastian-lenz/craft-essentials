@@ -53,8 +53,11 @@ class SiteUrlHelper
     $sitePath = $sitePath ? self::normalizePath($sitePath) : null;
 
     if (
+      is_string($path) && empty($sitePath)
+    ) {
+      $url = ltrim($path, '/');
+    } elseif (
       !empty($path) &&
-      !empty($sitePath) &&
       str_starts_with($path . '/', $sitePath . '/')
     ) {
       $url = ltrim(substr($path, strlen($sitePath)), '/');
