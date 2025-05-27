@@ -56,6 +56,11 @@ class Settings extends Model
   public array $iconClasses = [];
 
   /**
+   * @var string
+   */
+  public string $malwareCommand = '';
+
+  /**
    * @var services\passwordPolicy\Settings
    */
   public services\passwordPolicy\Settings $passwordPolicy;

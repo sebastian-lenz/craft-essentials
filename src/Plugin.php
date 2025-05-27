@@ -76,6 +76,7 @@ class Plugin extends \craft\base\Plugin
       }
     );
 
+    services\malwareScanner\Provider::register();
     services\passwordPolicy\Provider::register();
 
     Craft::$app->view->registerTwigExtension(new twig\Extension());
