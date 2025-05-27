@@ -56,10 +56,25 @@ class Settings extends Model
   public array $iconClasses = [];
 
   /**
+   * @var services\passwordPolicy\Settings
+   */
+  public services\passwordPolicy\Settings $passwordPolicy;
+
+  /**
    * @var array
    */
   const LISTS = ['dataTables', 'iconClasses'];
+  const MODELS = ['passwordPolicy' => services\passwordPolicy\Settings::class];
 
+
+  /**
+   * @inheritDoc
+   */
+  public function __construct(mixed $config = []) {
+    parent::__construct($config);
+
+    $this->passwordPolicy = new services\passwordPolicy\Settings();
+  }
 
   /**
    * @return array
@@ -98,7 +113,28 @@ class Settings extends Model
       }
     }
 
+    foreach (self::MODELS as $name => $modelClass) {
+      if (array_key_exists($name, $values)) {
+        $values[$name] = new $modelClass($values[$name]);
+      }
+    }
+
     parent::setAttributes($values, $safeOnly);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function toArray(array $fields = [], array $expand = [], $recursive = true): array {
+    $result = parent::toArray($fields, $expand, $recursive);
+
+    foreach ($result as $key => $value) {
+      if (is_array($value)) {
+        $result[$key] = (object)$value;
+      }
+    }
+
+    return $result;
   }
 
 

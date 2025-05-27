@@ -46,7 +46,7 @@ class Plugin extends \craft\base\Plugin
    * @inheritDoc
    * @throws InvalidConfigException
    */
-  public function init() {
+  public function init(): void {
     parent::init();
 
     $this->setComponents([
@@ -76,6 +76,8 @@ class Plugin extends \craft\base\Plugin
       }
     );
 
+    services\passwordPolicy\Provider::register();
+
     Craft::$app->view->registerTwigExtension(new twig\Extension());
   }
 
@@ -96,7 +98,7 @@ class Plugin extends \craft\base\Plugin
    */
   protected function settingsHtml(): ?string {
     return Craft::$app->view->renderTemplate(
-      'lenz-craft-essentials/_settings',
+      'lenz-craft-essentials/_settings/index',
       [
         'settings' => $this->getSettings(),
       ]

@@ -1,0 +1,12 @@
+{% import '_includes/forms' as forms %}
+
+<hr>
+<h2>Data tables</h2>
+
+{{ forms.textareaField({
+  errors: settings.getErrors('dataTables'),
+  instructions: 'Enter one fully qualified data table class per line.',
+  label: 'Data table classes',
+  name: 'dataTables',
+  value: settings.dataTables|join('\n'),
+}) }}

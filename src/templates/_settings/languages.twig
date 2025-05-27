@@ -1,0 +1,26 @@
+{% import '_includes/forms' as forms %}
+
+<h2>Languages</h2>
+
+{{ forms.lightswitchField({
+  errors: settings.getErrors('enableLanguageRedirect'),
+  label: 'Enable Language Redirect',
+  name: 'enableLanguageRedirect',
+  on: settings.enableLanguageRedirect,
+}) }}
+
+{{ forms.lightswitchField({
+  errors: settings.getErrors('ensureSiteSegment'),
+  label: 'Ensure URLs start with the site segment',
+  name: 'ensureSiteSegment',
+  on: settings.ensureSiteSegment,
+}) }}
+
+{{ forms.checkboxGroupField({
+  errors: settings.getErrors('disabledLanguages'),
+  label: 'Disabled languages',
+  name: 'disabledLanguages',
+  instructions: 'Deprecated, use site enabled status instead.',
+  options: settings.allLanguages,
+  values: settings.disabledLanguages,
+}) }}

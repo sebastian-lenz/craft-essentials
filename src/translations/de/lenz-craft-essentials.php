@@ -18,4 +18,16 @@ return [
   'Tables' => 'Tabellen',
   'Target' => 'Ziel',
   'Temporary (302)' => 'Temporär (302)',
+
+  // Generic
+  'and' => 'und',
+
+  // Password policy
+  'a lowercase character, an uppercase character' => 'ein Kleinbuchstabe, ein Großbuchstabe',
+  'a number' => 'eine Zahl',
+  'a special character' => 'ein Sonderzeichen',
+  'Password can maximum contain {max} characters.' => 'Das Passwort darf maximal {max} Zeichen enthalten.',
+  'Password must contain at least {min} characters.' => 'Das Passwort muss mindestens {min} Zeichen enthalten.',
+  'This password has been compromised in a data breach. Please choose another password.' => 'Dieses Passwort wurde durch eine Datenpanne gefährdet. Bitte wählen Sie ein anderes Passwort.',
+  'Your password must contain at least one of each of the following: {rules}.' => 'Ihr Passwort muss mindestens eine der folgenden Angaben enthalten: {rules}.',
 ];

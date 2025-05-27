@@ -1,0 +1,12 @@
+{% import '_includes/forms' as forms %}
+
+<hr>
+<h2>Icon classes</h2>
+
+{{ forms.textareaField({
+  errors: settings.getErrors('iconClasses'),
+  instructions: 'Enter one fully qualified icon class per line.',
+  label: 'Icon classes',
+  name: 'iconClasses',
+  value: settings.iconClasses|join('\n'),
+}) }}
