@@ -76,6 +76,7 @@ class Plugin extends \craft\base\Plugin
       }
     );
 
+    services\loginSecurity\Provider::register();
     services\malwareScanner\Provider::register();
     services\passwordPolicy\Provider::register();
 
