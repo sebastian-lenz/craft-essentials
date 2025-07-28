@@ -2,7 +2,6 @@
 
 namespace lenz\craft\essentials\twig;
 
-use craft\helpers\Template;
 use Exception;
 use lenz\craft\essentials\helpers\ElementHelper;
 use lenz\craft\essentials\helpers\HtmlHelper;
@@ -13,7 +12,6 @@ use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\models\Attributes;
 use lenz\craft\utils\models\Url;
 use Twig\Environment;
-use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\EscaperExtension;
 use Twig\Markup;
@@ -45,6 +43,15 @@ class Extension extends AbstractExtension
       ->getTwig()
       ->getExtension(EscaperExtension::class)
       ->setEscaper('html_entities', self::escapeHtmlEntities(...));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getTokenParsers(): array {
+    return [
+      new tokenParsers\BufferedTokenParser(),
+    ];
   }
 
   /**
