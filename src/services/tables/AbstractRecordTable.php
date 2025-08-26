@@ -20,6 +20,14 @@ abstract class AbstractRecordTable extends AbstractTable
   // -----------------
 
   /**
+   * @return array
+   */
+  protected function findRecords(): array {
+    $recordClass = $this->getRecordClass();
+    return $recordClass::find()->all();
+  }
+
+  /**
    * @param ActiveRecord $record
    * @param Row $row
    * @return bool
@@ -33,12 +41,10 @@ abstract class AbstractRecordTable extends AbstractTable
    * @inheritDoc
    */
   protected function loadRows(): array {
-    $recordClass = $this->getRecordClass();
-    $records = $recordClass::find()->all();
     $columns = $this->getColumns();
     $rows = [];
 
-    foreach ($records as $record) {
+    foreach ($this->findRecords() as $record) {
       $attributes = [];
       foreach ($columns as $name => $column) {
         $attributes[$name] = $column->filter($record[$name]);
@@ -53,7 +59,7 @@ abstract class AbstractRecordTable extends AbstractTable
   /**
    * @inheritDoc
    */
-  protected function saveRows(array $rows) {
+  protected function saveRows(array $rows): void {
     $recordClass = $this->getRecordClass();
     $records = $recordClass::find()->all();
 
