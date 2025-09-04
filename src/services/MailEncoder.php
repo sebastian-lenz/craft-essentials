@@ -5,57 +5,14 @@ namespace lenz\craft\essentials\services;
 use Craft;
 use craft\events\TemplateEvent;
 use craft\web\View;
+use lenz\craft\essentials\services\eventBus\On;
 use yii\base\Component;
-use yii\base\Event;
 
 /**
  * Class MailEncoder
  */
 class MailEncoder extends Component
 {
-  /**
-   * @var MailEncoder
-   */
-  static private MailEncoder $_instance;
-
-
-  /**
-   * Component constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-
-    Event::on(
-      View::class,
-      View::EVENT_AFTER_RENDER_PAGE_TEMPLATE,
-      [$this, 'onAfterRenderPageTemplate']
-    );
-  }
-
-  /**
-   * @param TemplateEvent $event
-   */
-  public function onAfterRenderPageTemplate(TemplateEvent $event) {
-    if (!Craft::$app->getRequest()->getIsCpRequest()) {
-      $event->output = self::encodeAll($event->output);
-    }
-  }
-
-
-  // Static methods
-  // --------------
-
-  /**
-   * @return MailEncoder
-   */
-  public static function getInstance(): MailEncoder {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new MailEncoder();
-    }
-
-    return self::$_instance;
-  }
-
   /**
    * @param string $value
    * @return string
@@ -91,5 +48,15 @@ class MailEncoder extends Component
         return self::encode($matches[0]);
       }
     }, $value);
+  }
+
+  /**
+   * @param TemplateEvent $event
+   */
+  #[On(View::class, View::EVENT_AFTER_RENDER_PAGE_TEMPLATE)]
+  static public function onAfterRenderPageTemplate(TemplateEvent $event): void {
+    if (!Craft::$app->getRequest()->getIsCpRequest()) {
+      $event->output = self::encodeAll($event->output);
+    }
   }
 }

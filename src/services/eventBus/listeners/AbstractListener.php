@@ -1,7 +1,8 @@
 <?php
 
-namespace lenz\craft\essentials\services\events\listeners;
+namespace lenz\craft\essentials\services\eventBus\listeners;
 
+use lenz\craft\essentials\services\eventBus\On;
 use ReflectionAttribute;
 
 /**
@@ -21,12 +22,11 @@ abstract readonly class AbstractListener
 
 
   /**
-   * @param ReflectionAttribute $attribute
+   * @param On $decorator
    */
-  public function __construct(ReflectionAttribute $attribute) {
-    [$class, $name] = $attribute->getArguments();
-    $this->class = $class;
-    $this->name = $name;
+  public function __construct(On $decorator) {
+    $this->class = $decorator->class;
+    $this->name = $decorator->name;
   }
 
   /**

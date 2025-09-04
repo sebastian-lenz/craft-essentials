@@ -38,6 +38,11 @@ class Settings extends Model
   /**
    * @var bool
    */
+  public bool $enabledImagePlaceholders = false;
+
+  /**
+   * @var bool
+   */
   public bool $enableImageSharpening = false;
 
   /**

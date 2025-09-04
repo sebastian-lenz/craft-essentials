@@ -6,74 +6,74 @@ use Craft;
 use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterCpNavItemsEvent;
-use craft\fields\Link;
 use craft\models\FieldLayout;
+use craft\services\Fields;
 use craft\services\Utilities;
 use craft\web\Application;
 use craft\web\twig\variables\Cp;
+use lenz\craft\essentials\fields\seo\SeoField;
 use lenz\craft\essentials\Plugin;
-use lenz\craft\essentials\services\AbstractService;
-use lenz\craft\essentials\services\cp\linktypes\Url;
-use yii\base\Event;
+use lenz\craft\essentials\services\eventBus\On;
 use yii\base\Module;
-use yii\BaseYii;
 
 /**
  * Class CpHelpers
  */
-class CpHelpers extends AbstractService
+class CpHelpers
 {
   /**
-   * RemoveDashboard constructor.
+   * @return void
    */
-  public function __construct() {
-    parent::__construct();
+  #[On(Application::class, Module::EVENT_BEFORE_ACTION)]
+  static public function onBeforeAction(): void {
+    $request = Craft::$app->getRequest();
 
-    BaseYii::$container->set(\craft\fields\linktypes\Url::class, [
-      'class' => Url::class,
-    ]);
+    if ($request->getSegment(1) == 'dashboard') {
+      $entries = (new Cp())->nav();
+      Craft::$app->getResponse()->redirect(reset($entries)['url']);
+    }
+  }
 
-    Event::on(
-      Cp::class,
-      Cp::EVENT_REGISTER_CP_NAV_ITEMS,
-      function(RegisterCpNavItemsEvent $event) {
-        for ($index = 0; $index < count($event->navItems); $index++) {
-          if ($event->navItems[$index]['url'] == 'dashboard') {
-            array_splice($event->navItems, $index, 1);
-            break;
-          }
-        }
+  /**
+   * @param DefineFieldLayoutElementsEvent $event
+   * @return void
+   */
+  #[On(FieldLayout::class, FieldLayout::EVENT_DEFINE_UI_ELEMENTS)]
+  static public function onDefineUiElements(DefineFieldLayoutElementsEvent $event): void {
+    $event->elements[] = elements\Column::class;
+  }
+
+  /**
+   * @param RegisterCpNavItemsEvent $event
+   * @return void
+   */
+  #[On(Cp::class, Cp::EVENT_REGISTER_CP_NAV_ITEMS)]
+  static public function onRegisterCpNavItems(RegisterCpNavItemsEvent $event): void {
+    for ($index = 0; $index < count($event->navItems); $index++) {
+      if ($event->navItems[$index]['url'] == 'dashboard') {
+        array_splice($event->navItems, $index, 1);
+        break;
       }
-    );
+    }
+  }
 
-    Event::on(
-      Application::class,
-      Module::EVENT_BEFORE_ACTION,
-      function() {
-        $request = Craft::$app->getRequest();
-        if ($request->getSegment(1) == 'dashboard') {
-          $entries = (new Cp())->nav();
-          Craft::$app->getResponse()->redirect(reset($entries)['url']);
-        }
-      }
-    );
+  /**
+   * @param RegisterComponentTypesEvent $event
+   * @return void
+   */
+  #[On(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES)]
+  static public function onRegisterFieldTypes(RegisterComponentTypesEvent $event): void {
+    $event->types[] = SeoField::class;
+  }
 
-    Event::on(
-      Utilities::class,
-      Utilities::EVENT_REGISTER_UTILITIES,
-      function(RegisterComponentTypesEvent $event) {
-        if (count(Plugin::getInstance()->getSettings()->iconClasses) > 0) {
-          $event->types[] = IconUtility::class;
-        }
-      }
-    );
-
-    Event::on(
-      FieldLayout::class,
-      FieldLayout::EVENT_DEFINE_UI_ELEMENTS,
-      function(DefineFieldLayoutElementsEvent $event) {
-        $event->elements[] = elements\Column::class;
-      }
-    );
+  /**
+   * @param RegisterComponentTypesEvent $event
+   * @return void
+   */
+  #[On(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES)]
+  static public function onRegisterUtilities(RegisterComponentTypesEvent $event): void {
+    if (count(Plugin::getInstance()->getSettings()->iconClasses) > 0) {
+      $event->types[] = IconUtility::class;
+    }
   }
 }

@@ -5,60 +5,44 @@ namespace lenz\craft\essentials\services\imageCompressor;
 use Craft;
 use craft\base\Element;
 use craft\elements\Asset;
-use craft\events\GenerateTransformEvent;
 use craft\events\ImageTransformerOperationEvent;
 use craft\events\ModelEvent;
 use craft\imagetransforms\ImageTransformer;
 use lenz\craft\essentials\Plugin;
-use lenz\craft\utils\helpers\ImageTransforms;
-use yii\base\Component;
-use yii\base\Event;
+use lenz\craft\essentials\services\eventBus\On;
 
 /**
  * Class ImageCompressor
  */
-class ImageCompressor extends Component
+class ImageCompressor
 {
   /**
-   * @var ImageCompressor
+   * @param ModelEvent $event
+   * @return void
    */
-  static private ImageCompressor $_instance;
-
+  #[On(Asset::class, Element::EVENT_BEFORE_SAVE)]
+  static public function onBeforeSave(ModelEvent $event): void {
+    if (
+      !empty($event->sender->tempFilePath) &&
+      $event->sender->kind == Asset::KIND_IMAGE
+    ) {
+      Craft::$app->getQueue()->push(new jobs\AssetJob([
+        'assetId' => $event->sender->id,
+      ]));
+    }
+  }
 
   /**
-   * @inheritDoc
+   * @param ImageTransformerOperationEvent $event
+   * @return void
    */
-  public function init(): void {
-    if (!Plugin::getInstance()->getSettings()->enableImageCompressor) {
-      return;
+  #[On(ImageTransformer::class, ImageTransformer::EVENT_TRANSFORM_IMAGE)]
+  static public function onTransformImage(ImageTransformerOperationEvent $event): void {
+    if ($event->asset->kind == Asset::KIND_IMAGE) {
+      Craft::$app->getQueue()->push(new jobs\TransformIndexJob([
+        'transformIndexId' => $event->imageTransformIndex->id,
+      ]));
     }
-
-    Event::on(
-      Asset::class,
-      Element::EVENT_BEFORE_SAVE,
-      function(ModelEvent $event) {
-        if (
-          !empty($event->sender->tempFilePath) &&
-          $event->sender->kind == Asset::KIND_IMAGE
-        ) {
-          Craft::$app->getQueue()->push(new jobs\AssetJob([
-            'assetId' => $event->sender->id,
-          ]));
-        }
-      }
-    );
-
-    Event::on(
-      ImageTransformer::class,
-      ImageTransformer::EVENT_TRANSFORM_IMAGE,
-      function(ImageTransformerOperationEvent $event) {
-        if ($event->asset->kind == Asset::KIND_IMAGE) {
-          Craft::$app->getQueue()->push(new jobs\TransformIndexJob([
-            'transformIndexId' => $event->imageTransformIndex->id,
-          ]));
-        }
-      }
-    );
   }
 
 
@@ -66,13 +50,9 @@ class ImageCompressor extends Component
   // --------------
 
   /**
-   * @return ImageCompressor
+   * @return bool
    */
-  public static function getInstance(): ImageCompressor {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new ImageCompressor();
-    }
-
-    return self::$_instance;
+  static public function requiresHandler(): bool {
+    return Plugin::getInstance()->getSettings()->enableImageCompressor;
   }
 }

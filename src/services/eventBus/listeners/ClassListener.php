@@ -1,7 +1,8 @@
 <?php
 
-namespace lenz\craft\essentials\services\events\listeners;
+namespace lenz\craft\essentials\services\eventBus\listeners;
 
+use lenz\craft\essentials\services\eventBus\On;
 use ReflectionAttribute;
 use yii\base\Event;
 
@@ -11,14 +12,14 @@ use yii\base\Event;
 readonly class ClassListener extends AbstractListener
 {
   /**
-   * @param ReflectionAttribute $attribute
+   * @param On $decorator
    * @param string $className
    */
   public function __construct(
-    ReflectionAttribute $attribute,
+    On $decorator,
     public string $className
   ) {
-    parent::__construct($attribute);
+    parent::__construct($decorator);
   }
 
   /**

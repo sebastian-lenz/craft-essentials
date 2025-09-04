@@ -12,6 +12,7 @@ use craft\image\Raster;
 use craft\imagetransforms\ImageTransformer as NativeImageTransformer;
 use craft\models\ImageTransformIndex;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\eventBus\On;
 use lenz\craft\essentials\services\imageCompressor\jobs\TransformIndexJob;
 use lenz\craft\utils\helpers\ImageTransforms;
 use yii\base\Component;
@@ -40,29 +41,9 @@ class Webp extends Component
 
 
   /**
-   * @inheritDoc
-   */
-  public function init() {
-    if (!Plugin::getInstance()->getSettings()->enableWebp) {
-      return;
-    }
-
-    Event::on(
-      NativeImageTransformer::class, NativeImageTransformer::EVENT_DELETE_TRANSFORMED_IMAGE,
-      [$this, 'onAfterDeleteTransforms']
-    );
-
-    Event::on(
-      NativeImageTransformer::class, NativeImageTransformer::EVENT_TRANSFORM_IMAGE,
-      [$this, 'onGenerateTransform']
-    );
-  }
-
-  /**
    * @param Asset $asset
    * @param ImageTransformIndex $index
    * @return string|null
-   * @throws InvalidConfigException
    */
   public function getWebpPath(Asset $asset, ImageTransformIndex $index): ?string {
     $fileName = ImageTransforms::getTransformPath($asset, $index);
@@ -78,7 +59,8 @@ class Webp extends Component
    * @throws InvalidConfigException
    * @throws FsException
    */
-  public function onAfterDeleteTransforms(ImageTransformerOperationEvent $event) {
+  #[On(NativeImageTransformer::class, NativeImageTransformer::EVENT_DELETE_TRANSFORMED_IMAGE, [self::class, 'requiresHandler'])]
+  public function onAfterDeleteTransforms(ImageTransformerOperationEvent $event): void {
     $asset = $event->asset;
     $fileName = $this->getWebpPath($asset, $event->imageTransformIndex);
     $fs = $asset->getVolume()->getTransformFs();
@@ -92,7 +74,8 @@ class Webp extends Component
    * @param ImageTransformerOperationEvent $event
    * @throws InvalidConfigException
    */
-  public function onGenerateTransform(ImageTransformerOperationEvent $event) {
+  #[On(NativeImageTransformer::class, NativeImageTransformer::EVENT_TRANSFORM_IMAGE, [self::class, 'requiresHandler'])]
+  public function onGenerateTransform(ImageTransformerOperationEvent $event): void {
     $image = $event->image;
     if (!$image instanceof Raster) {
       return;
@@ -149,10 +132,13 @@ class Webp extends Component
    * @return Webp
    */
   public static function getInstance(): Webp {
-    if (!isset(self::$_INSTANCE)) {
-      self::$_INSTANCE = new Webp();
-    }
+    return Plugin::getInstance()->webp;
+  }
 
-    return self::$_INSTANCE;
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    return Plugin::getInstance()->getSettings()->enableWebp;
   }
 }

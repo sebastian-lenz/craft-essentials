@@ -16,10 +16,12 @@ use craft\services\Elements;
 use craft\services\Plugins;
 use craft\web\ErrorHandler;
 use lenz\craft\essentials\events\RegisterRedirectsEvent;
+use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\records\UriHistoryRecord;
-use lenz\craft\essentials\services\AbstractService;
+use lenz\craft\essentials\services\eventBus\On;
 use lenz\craft\essentials\services\redirectNotFound\redirects\AbstractRedirect;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoutesUiElement;
+use yii\base\Component;
 use yii\base\Event;
 use yii\base\ModelEvent;
 use yii\web\HttpException;
@@ -27,9 +29,8 @@ use yii\web\HttpException;
 /**
  * Class RedirectNotFound
  */
-class RedirectNotFound extends AbstractService
+class RedirectNotFound extends Component
 {
-
   /**
    * @var AbstractRedirect[]
    */
@@ -40,18 +41,6 @@ class RedirectNotFound extends AbstractService
    */
   const EVENT_REGISTER_REDIRECTS = 'registerRedirects';
 
-
-  /**
-   * RedirectNotFound constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-
-    Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, [$this, 'onAfterLoadPlugins']);
-    Event::on(Element::class, Element::EVENT_BEFORE_SAVE, [$this, 'onBeforeElementSave']);
-    Event::on(Elements::class, Elements::EVENT_BEFORE_UPDATE_SLUG_AND_URI, [$this, 'onBeforeUpdateSlug']);
-    Event::on(FieldLayout::class, FieldLayout::EVENT_DEFINE_UI_ELEMENTS, [$this, 'onDefineUiElements']);
-  }
 
   /**
    * @param Site|null $site
@@ -75,6 +64,7 @@ class RedirectNotFound extends AbstractService
   /**
    * @return void
    */
+  #[On(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS)]
   public function onAfterLoadPlugins(): void {
     $request = Craft::$app->getRequest();
     if (!$request->getIsSiteRequest() || $request->getIsConsoleRequest()) {
@@ -109,6 +99,7 @@ class RedirectNotFound extends AbstractService
   /**
    * @param ModelEvent $event
    */
+  #[On(Element::class, Element::EVENT_BEFORE_SAVE)]
   public function onBeforeElementSave(ModelEvent $event): void {
     $element = $event->sender;
     if (!($element instanceof Element) || empty($event->sender->id)) {
@@ -130,6 +121,7 @@ class RedirectNotFound extends AbstractService
   /**
    * @param ElementEvent $event
    */
+  #[On(Elements::class, Elements::EVENT_BEFORE_UPDATE_SLUG_AND_URI)]
   public function onBeforeUpdateSlug(ElementEvent $event): void {
     $element = $event->element;
     if (empty($element->uri)) {
@@ -146,6 +138,7 @@ class RedirectNotFound extends AbstractService
    * @param DefineFieldLayoutElementsEvent $event
    * @return void
    */
+  #[On(FieldLayout::class, FieldLayout::EVENT_DEFINE_UI_ELEMENTS)]
   public function onDefineUiElements(DefineFieldLayoutElementsEvent $event): void {
     $event->elements[] = ElementRoutesUiElement::class;
   }
@@ -210,5 +203,16 @@ class RedirectNotFound extends AbstractService
         'uri' => $oldUri,
       ]))->save();
     }
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @return RedirectNotFound
+   */
+  static public function getInstance(): RedirectNotFound {
+    return Plugin::getInstance()->redirectNotFound;
   }
 }

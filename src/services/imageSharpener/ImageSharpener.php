@@ -7,56 +7,33 @@ use craft\image\Raster;
 use craft\imagetransforms\ImageTransformer;
 use Imagine\Imagick\Image;
 use lenz\craft\essentials\Plugin;
-use yii\base\Component;
-use yii\base\Event;
+use lenz\craft\essentials\services\eventBus\On;
 
 /**
  * Class ImageSharpener
  */
-class ImageSharpener extends Component
+class ImageSharpener
 {
   /**
-   * @var ImageSharpener
+   * @param ImageTransformerOperationEvent $event
+   * @return void
    */
-  static private ImageSharpener $_instance;
-
-
-  /**
-   * @inheritDoc
-   */
-  public function init() {
-    if (!Plugin::getInstance()->getSettings()->enableImageSharpening) {
-      return;
-    }
-
-    Event::on(
-      ImageTransformer::class,
-      ImageTransformer::EVENT_TRANSFORM_IMAGE,
-      function(ImageTransformerOperationEvent $event) {
-        if ($event->image instanceof Raster) {
-          $image = $event->image->getImagineImage();
-          if ($image instanceof Image) {
-            $image->getImagick()->sharpenImage(1, 0.5);
-          } else {
-            $image->effects()->sharpen();
-          }
-        }
+  #[On(ImageTransformer::class, ImageTransformer::EVENT_TRANSFORM_IMAGE, [self::class, 'requiresHandler'])]
+  static public function onTransformImage(ImageTransformerOperationEvent $event): void {
+    if ($event->image instanceof Raster) {
+      $image = $event->image->getImagineImage();
+      if ($image instanceof Image) {
+        $image->getImagick()->sharpenImage(1, 0.5);
+      } else {
+        $image->effects()->sharpen();
       }
-    );
+    }
   }
 
-
-  // Static methods
-  // --------------
-
   /**
-   * @return ImageSharpener
+   * @return bool
    */
-  public static function getInstance(): ImageSharpener {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new ImageSharpener();
-    }
-
-    return self::$_instance;
+  static public function requiresHandler(): bool {
+    return Plugin::getInstance()->getSettings()->enableImageSharpening;
   }
 }

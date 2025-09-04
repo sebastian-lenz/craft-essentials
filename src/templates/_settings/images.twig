@@ -18,6 +18,13 @@
 }) }}
 
 {{ forms.lightswitchField({
+  errors: settings.getErrors('enabledImagePlaceholders'),
+  label: 'Enabled Image Placeholders',
+  name: 'enabledImagePlaceholders',
+  on: settings.enabledImagePlaceholders,
+}) }}
+
+{{ forms.lightswitchField({
   errors: settings.getErrors('enableWebp'),
   label: 'Enable automatic WebP transforms',
   name: 'enableWebp',

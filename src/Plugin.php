@@ -3,30 +3,26 @@
 namespace lenz\craft\essentials;
 
 use Craft;
-use craft\events\RegisterComponentTypesEvent;
-use craft\services\Fields;
-use lenz\craft\essentials\fields\seo\SeoField;
 use lenz\craft\utils\elementCache\ElementCache;
 use lenz\craft\utils\foreignField\listeners\RegisterCpTemplates;
 use Throwable;
-use yii\base\Event;
-use yii\base\InvalidConfigException;
+use yii\BaseYii;
 
 /**
  * Class Plugin
  *
- * @property services\cp\CpHelpers $cpHelpers
  * @property services\disabledLanguages\DisabledLanguages $disabledLanguages
  * @property ElementCache $elementCache
+ * @property services\eventBus\EventBus $eventBus
  * @property services\frontendCache\FrontendCacheService $frontendCache
  * @property services\gettext\Gettext $gettext
- * @property services\imageSharpener\ImageSharpener $imageSharpener
- * @property services\MailEncoder $mailEncoder
  * @property services\redirectLanguage\RedirectLanguage $redirectLanguage
  * @property services\redirectNotFound\RedirectNotFound $redirectNotFound
+ * @property services\RemoveStopWords $removeStopWords
+ * @property services\siteMap\SiteMapService $siteMap
  * @property services\tables\Tables $tables
  * @property services\translations\Translations $translations
- * @property services\siteMap\SiteMapService $siteMap
+ * @property services\webp\Webp $webp
  * @method Settings getSettings()
  */
 class Plugin extends \craft\base\Plugin
@@ -44,43 +40,47 @@ class Plugin extends \craft\base\Plugin
 
   /**
    * @inheritDoc
-   * @throws InvalidConfigException
    */
   public function init(): void {
     parent::init();
 
     $this->setComponents([
-      'cpHelpers'         => services\cp\CpHelpers::getInstance(),
-      'disabledLanguages' => services\disabledLanguages\DisabledLanguages::getInstance(),
-      'elementCache'      => ElementCache::getInstance(),
-      'frontendCache'     => services\frontendCache\FrontendCacheService::getInstance(),
+      'elementCache' => ElementCache::getInstance(),
+      'eventBus' => services\eventBus\EventBus::getInstance()->addClass(
+        services\cp\CpHelpers::class,
+        services\disabledLanguages\DisabledLanguages::class,
+        services\frontendCache\FrontendCacheService::class,
+        services\imageCompressor\ImageCompressor::class,
+        services\imagePlaceholder\ImagePlaceholder::class,
+        services\imageSharpener\ImageSharpener::class,
+        services\loginSecurity\LoginSecurity::class,
+        services\MailEncoder::class,
+        services\malwareScanner\MalwareScanner::class,
+        services\passwordPolicy\PasswordPolicy::class,
+        services\redirectLanguage\RedirectLanguage::class,
+        services\redirectNotFound\RedirectNotFound::class,
+        services\RemoveStopWords::class,
+        services\tables\Tables::class,
+        services\webp\Webp::class,
+      ),
+      'disabledLanguages' => services\disabledLanguages\DisabledLanguages::class,
+      'frontendCache'     => services\frontendCache\FrontendCacheService::class,
       'gettext'           => services\gettext\Gettext::class,
-      'imageCompressor'   => services\imageCompressor\ImageCompressor::getInstance(),
-      'imageSharpener'    => services\imageSharpener\ImageSharpener::getInstance(),
-      'mailEncoder'       => services\MailEncoder::getInstance(),
-      'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::getInstance(),
-      'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::getInstance(),
-      'removeStopWords'   => services\RemoveStopWords::getInstance(),
-      'tables'            => services\tables\Tables::getInstance(),
+      'redirectLanguage'  => services\redirectLanguage\RedirectLanguage::class,
+      'redirectNotFound'  => services\redirectNotFound\RedirectNotFound::class,
+      'removeStopWords'   => services\RemoveStopWords::class,
+      'siteMap'           => services\siteMap\SiteMapService::class,
+      'tables'            => services\tables\Tables::class,
       'translations'      => services\translations\Translations::class,
-      'siteMap'           => services\siteMap\SiteMapService::getInstance(),
-      'webp'              => services\webp\Webp::getInstance(),
+      'webp'              => services\webp\Webp::class,
     ]);
 
-    RegisterCpTemplates::register();
-    Event::on(
-      Fields::class,
-      Fields::EVENT_REGISTER_FIELD_TYPES,
-      function(RegisterComponentTypesEvent $event) {
-        $event->types[] = SeoField::class;
-      }
-    );
-
-    services\loginSecurity\Provider::register();
-    services\malwareScanner\Provider::register();
-    services\passwordPolicy\Provider::register();
-
     Craft::$app->view->registerTwigExtension(new twig\Extension());
+    RegisterCpTemplates::register();
+
+    BaseYii::$container->set(\craft\fields\linktypes\Url::class, [
+      'class' => services\cp\linktypes\Url::class,
+    ]);
   }
 
   /**

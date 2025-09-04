@@ -1,21 +1,24 @@
 <?php
 
-namespace lenz\craft\essentials\services\passwordPolicy\listeners;
+namespace lenz\craft\essentials\services\passwordPolicy;
 
+use craft\base\Model;
+use craft\elements\User;
 use craft\events\DefineRulesEvent;
 use lenz\craft\essentials\Plugin;
-use lenz\craft\essentials\services\passwordPolicy\helpers\PasswordPolicy;
+use lenz\craft\essentials\services\eventBus\On;
 use lenz\craft\essentials\services\passwordPolicy\validators\PwnedValidator;
 
 /**
  * Class PasswordRules
  */
-class PasswordRules
+class PasswordPolicy
 {
   /**
    * @param DefineRulesEvent $event
    * @return void
    */
+  #[On(User::class, Model::EVENT_DEFINE_RULES, [self::class, 'requiresHandler'])]
   static public function onDefineRules(DefineRulesEvent $event): void {
     $settings = Plugin::getInstance()->getSettings()->passwordPolicy;
 
@@ -26,11 +29,11 @@ class PasswordRules
     array_unshift($event->rules, [
       ['password', 'newPassword'],
       'match',
-      'pattern' => PasswordPolicy::getPattern(),
+      'pattern' => helpers\Rule::getPattern(),
       'message' => \Craft::t(
         'lenz-craft-essentials',
         'Your password must contain at least one of each of the following: {rules}.',
-        ['rules' => PasswordPolicy::getMessage()]
+        ['rules' => helpers\Rule::getMessage()]
       ),
     ]);
 
@@ -57,5 +60,13 @@ class PasswordRules
         ['min' => $settings->minLength]
       ),
     ]);
+  }
+
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    $settings = Plugin::getInstance()->getSettings();
+    return $settings->passwordPolicy->enabled;
   }
 }

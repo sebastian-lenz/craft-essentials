@@ -6,6 +6,8 @@ use Craft;
 use craft\web\Application;
 use lenz\craft\essentials\events\CacheDurationEvent;
 use lenz\craft\essentials\events\CacheKeyEvent;
+use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\eventBus\On;
 use lenz\craft\utils\elementCache\ElementCache;
 use yii\base\ActionEvent;
 use yii\base\Application as YiiApplication;
@@ -29,11 +31,6 @@ class FrontendCacheService extends Component
    * @var bool
    */
   private bool $_isIntercepted = false;
-
-  /**
-   * @var FrontendCacheService
-   */
-  static private FrontendCacheService $_instance;
 
   /**
    * @var array
@@ -67,19 +64,6 @@ class FrontendCacheService extends Component
    */
   const EVENT_DEFAULT_CACHE_DURATION = 'defaultCacheDuration';
 
-
-  /**
-   * FrontendCache constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-
-    Event::on(
-      Application::class,
-      Application::EVENT_INIT,
-      [$this, 'onApplicationInit']
-    );
-  }
 
   /**
    * @return void
@@ -118,23 +102,9 @@ class FrontendCacheService extends Component
   }
 
   /**
-   * @return void
-   */
-  public function onApplicationInit(): void {
-    if (!$this->isEnabled()) {
-      return;
-    }
-
-    Event::on(
-      Application::class,
-      Module::EVENT_BEFORE_ACTION,
-      [$this, 'onBeforeAction']
-    );
-  }
-
-  /**
    * @param ActionEvent $event
    */
+  #[On(Application::class, Module::EVENT_BEFORE_ACTION, [self::class, 'requiresHandler'])]
   public function onBeforeAction(ActionEvent $event): void {
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
@@ -279,10 +249,13 @@ class FrontendCacheService extends Component
    * @return FrontendCacheService
    */
   public static function getInstance(): FrontendCacheService {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new FrontendCacheService();
-    }
+    return Plugin::getInstance()->frontendCache;
+  }
 
-    return self::$_instance;
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    return self::getInstance()->isEnabled();
   }
 }

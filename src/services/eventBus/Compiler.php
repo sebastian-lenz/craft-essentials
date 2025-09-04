@@ -1,6 +1,6 @@
 <?php
 
-namespace lenz\craft\essentials\services\events;
+namespace lenz\craft\essentials\services\eventBus;
 
 /**
  * Class Compiler
@@ -15,12 +15,10 @@ class Compiler
     $lines = [
       '<?php',
       '',
-      'use lenz\craft\essentials\services\events\Events;',
+      'use lenz\craft\essentials\services\eventBus\EventBus;',
       'use yii\base\Event;',
       ''
     ];
-
-
 
     foreach ($listeners as $listener) {
       array_push($lines, ...$listener->toCode());

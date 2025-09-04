@@ -12,11 +12,11 @@ use Exception;
 use lenz\craft\essentials\events\RedirectEvent;
 use lenz\craft\essentials\events\SitesEvent;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\eventBus\On;
 use Throwable;
 use yii\base\Action;
 use yii\base\ActionEvent;
 use yii\base\Component;
-use yii\base\Event;
 use yii\base\InlineAction;
 use yii\base\Module;
 use yii\base\Request as BaseRequest;
@@ -32,11 +32,6 @@ class RedirectLanguage extends Component
    * @var LanguageStack
    */
   private LanguageStack $_languageStack;
-
-  /**
-   * @var RedirectLanguage
-   */
-  static private RedirectLanguage $_instance;
 
   /**
    * @var string
@@ -55,16 +50,9 @@ class RedirectLanguage extends Component
 
 
   /**
-   * Languages constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-    Event::on(Application::class, Application::EVENT_INIT, $this->onApplicationInit(...));
-  }
-
-  /**
    * @return void
    */
+  #[On(Application::class, Application::EVENT_INIT)]
   public function onApplicationInit(): void {
     $request = Craft::$app->getRequest();
     $settings = Plugin::getInstance()->getSettings();
@@ -202,15 +190,12 @@ class RedirectLanguage extends Component
    * @return RedirectLanguage
    */
   public static function getInstance(): RedirectLanguage {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new RedirectLanguage();
-    }
-
-    return self::$_instance;
+    return Plugin::getInstance()->redirectLanguage;
   }
 
   /**
    * @param string|null $uri
+   * @param string|null $query
    * @return string|null
    */
   public static function ensureSiteBaseUrl(?string $uri = null, ?string $query = null): ?string {

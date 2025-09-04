@@ -4,6 +4,8 @@ namespace lenz\craft\essentials\services;
 
 use craft\elements\db\ElementQuery;
 use craft\search\SearchQuery;
+use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\eventBus\On;
 use Throwable;
 use yii\base\Component;
 use yii\base\Event;
@@ -18,24 +20,6 @@ class RemoveStopWords extends Component
    */
   public array $stopWords;
 
-  /**
-   * @var RemoveStopWords
-   */
-  static private RemoveStopWords $_instance;
-
-
-  /**
-   * RemoveStopWords constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-
-    Event::on(
-      ElementQuery::class,
-      ElementQuery::EVENT_BEFORE_PREPARE,
-      [$this, 'onBeforePrepare']
-    );
-  }
 
   /**
    * @return string[]
@@ -66,7 +50,8 @@ class RemoveStopWords extends Component
   /**
    * @param Event $event
    */
-  public function onBeforePrepare(Event $event) {
+  #[On(ElementQuery::class, ElementQuery::EVENT_BEFORE_PREPARE,)]
+  public function onBeforePrepare(Event $event): void {
     $query = $event->sender;
     if (!($query instanceof ElementQuery) || empty($query->search)) {
       return;
@@ -140,10 +125,6 @@ class RemoveStopWords extends Component
    * @return RemoveStopWords
    */
   public static function getInstance(): RemoveStopWords {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new RemoveStopWords();
-    }
-
-    return self::$_instance;
+    return Plugin::getInstance()->removeStopWords;
   }
 }

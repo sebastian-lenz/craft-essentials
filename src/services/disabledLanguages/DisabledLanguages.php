@@ -7,6 +7,7 @@ use craft\base\Element;
 use craft\elements\Entry;
 use craft\events\SetElementRouteEvent;
 use lenz\craft\essentials\Plugin;
+use lenz\craft\essentials\services\eventBus\On;
 use yii\base\Component;
 use yii\base\Event;
 use yii\web\NotFoundHttpException;
@@ -16,12 +17,6 @@ use yii\web\NotFoundHttpException;
  */
 class DisabledLanguages extends Component
 {
-  /**
-   * @var DisabledLanguages
-   */
-  static private DisabledLanguages $_instance;
-
-
   /**
    * Languages constructor.
    */
@@ -65,6 +60,7 @@ class DisabledLanguages extends Component
    * @param SetElementRouteEvent $event
    * @throws NotFoundHttpException
    */
+  #[On(Element::class, Element::EVENT_SET_ROUTE, [self::class, 'requiresHandler'])]
   public function onElementSetRoute(SetElementRouteEvent $event): void {
     /** @var Entry $entry */
     $entry = $event->sender;
@@ -85,10 +81,13 @@ class DisabledLanguages extends Component
    * @return DisabledLanguages
    */
   public static function getInstance(): DisabledLanguages {
-    if (!isset(self::$_instance)) {
-      self::$_instance = new DisabledLanguages();
-    }
+    return Plugin::getInstance()->disabledLanguages;
+  }
 
-    return self::$_instance;
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    return self::getInstance()->hasDisabledLanguages();
   }
 }

@@ -7,9 +7,9 @@ use Illuminate\Support\Collection;
 use lenz\craft\essentials\Plugin;
 
 /**
- * class PasswordPolicy
+ * class Policy
  */
-class PasswordPolicy
+class Rule
 {
   /**
    * Method to generate the validation message.

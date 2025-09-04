@@ -10,7 +10,7 @@ use craft\web\UrlManager;
 use InvalidArgumentException;
 use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\AbstractService;
-use yii\base\Event;
+use lenz\craft\essentials\services\eventBus\On;
 
 /**
  * Class Tables
@@ -22,39 +22,6 @@ class Tables extends AbstractService
    */
   private array $_tables = [];
 
-
-  /**
-   * @inheritDoc
-   */
-  public function init() {
-    if (
-      !Craft::$app->request->isCpRequest ||
-      !count(Plugin::getInstance()->getSettings()->dataTables)
-    ) {
-      return;
-    }
-
-    Event::on(
-      UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES,
-      function (RegisterUrlRulesEvent $event) {
-        $event->rules += [
-          'tables' => 'lenz-craft-essentials/tables/index',
-          'tables/view' => 'lenz-craft-essentials/tables/view',
-        ];
-      }
-    );
-
-    Event::on(
-      Cp::class, Cp::EVENT_REGISTER_CP_NAV_ITEMS,
-      function(RegisterCpNavItemsEvent $event) {
-        array_splice($event->navItems, 2, 0, [[
-          'url'      => 'tables',
-          'label'    => Craft::t('lenz-craft-essentials', 'Tables'),
-          'fontIcon' => 'list'
-        ]]);
-      }
-    );
-  }
 
   /**
    * @param string $name
@@ -82,5 +49,41 @@ class Tables extends AbstractService
     }
 
     return $this->_tables;
+  }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @param RegisterUrlRulesEvent $event
+   * @return void
+   */
+  #[On(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, [self::class, 'requiresHandler'])]
+  static public function onRegisterUrlRules(RegisterUrlRulesEvent $event): void {
+    $event->rules += [
+      'tables' => 'lenz-craft-essentials/tables/index',
+      'tables/view' => 'lenz-craft-essentials/tables/view',
+    ];
+  }
+
+  /**
+   * @param RegisterCpNavItemsEvent $event
+   * @return void
+   */
+  #[On(Cp::class, Cp::EVENT_REGISTER_CP_NAV_ITEMS, [self::class, 'requiresHandler'])]
+  static public function onRegisterCpNavItems(RegisterCpNavItemsEvent $event): void {
+    array_splice($event->navItems, 2, 0, [[
+      'url'      => 'tables',
+      'label'    => Craft::t('lenz-craft-essentials', 'Tables'),
+      'fontIcon' => 'list'
+    ]]);
+  }
+
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    return count(Plugin::getInstance()->getSettings()->dataTables);
   }
 }

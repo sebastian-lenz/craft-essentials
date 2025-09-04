@@ -3,17 +3,17 @@
 namespace lenz\craft\essentials\services\loginSecurity;
 
 use craft\controllers\UsersController;
+use lenz\craft\essentials\services\eventBus\On;
 use yii\base\ActionEvent;
-use yii\base\Event;
 use yii\base\InlineAction;
 use yii\base\Module;
 use yii\web\Application;
 use yii\web\Response;
 
 /**
- * Class Provider
+ * Class LoginSecurity
  */
-class Provider
+class LoginSecurity
 {
   /**
    * @var int
@@ -22,17 +22,10 @@ class Provider
 
 
   /**
-   * @return void
-   */
-  static public function register(): void {
-    Event::on(Application::class, Module::EVENT_AFTER_ACTION, [self::class, 'onAfterAction']);
-    Event::on(Application::class, Module::EVENT_BEFORE_ACTION, [self::class, 'onBeforeAction']);
-  }
-
-  /**
    * @param ActionEvent $event
    * @return void
    */
+  #[On(Application::class, Module::EVENT_AFTER_ACTION)]
   static public function onAfterAction(ActionEvent $event): void {
     if (
       $event->action instanceof InlineAction &&
@@ -47,6 +40,7 @@ class Provider
    * @param ActionEvent $event
    * @return void
    */
+  #[On(Application::class, Module::EVENT_BEFORE_ACTION)]
   static public function onBeforeAction(ActionEvent $event): void {
     if ($event->action instanceof InlineAction &&
       $event->action->controller instanceof UsersController &&
