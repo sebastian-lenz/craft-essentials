@@ -2,11 +2,12 @@
 
 namespace lenz\craft\essentials\services\eventBus;
 
-use craft\web\Application;
+use craft\web\Application as WebApplication;
 use lenz\craft\essentials\services\eventBus\listeners\AbstractListener;
 use lenz\craft\essentials\services\eventBus\scopes\AbstractScope;
 use lenz\craft\essentials\services\eventBus\scopes\ClassScope;
 use lenz\craft\essentials\services\eventBus\scopes\NamespaceScope;
+use yii\base\Application;
 use yii\base\Component;
 use yii\base\Event;
 
@@ -28,7 +29,8 @@ class EventBus extends Component
    */
   public function init(): void {
     parent::init();
-    Event::on(Application::class, Application::EVENT_INIT, $this->onApplicationInit(...));
+
+    Event::on(Application::class, WebApplication::EVENT_INIT, $this->onApplicationInit(...));
   }
 
   /**
