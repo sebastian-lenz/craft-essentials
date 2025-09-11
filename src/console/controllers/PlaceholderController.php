@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\console\controllers;
 
 use craft\elements\Asset;
+use lenz\craft\essentials\Plugin;
 use lenz\craft\essentials\services\imagePlaceholder\GeneratePlaceholderJob;
 use lenz\craft\essentials\services\imagePlaceholder\ImagePlaceholder;
 use yii\console\Controller;
@@ -16,10 +17,13 @@ class PlaceholderController extends Controller
    * Compile all gettext files.
    */
   public function actionIndex(): void {
-    $assetIds = Asset::find()
-      ->volume(ImagePlaceholder::$VOLUMES)
-      ->select(['id'])
-      ->column();
+    $volumes = Plugin::getInstance()->getSettings()->imagePlaceholderVolumes;
+    $query = Asset::find();
+    if (!empty($volumes)) {
+      $query->volume($volumes);
+    }
+
+    $assetIds = $query->select(['id'])->column();
 
     foreach ($assetIds as $assetId) {
       \Craft::$app->getQueue()->push(

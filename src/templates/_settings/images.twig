@@ -24,6 +24,14 @@
   on: settings.enabledImagePlaceholders,
 }) }}
 
+{{ forms.textareaField({
+  errors: settings.getErrors('imagePlaceholderVolumes'),
+  instructions: 'Enter the handle of a volume per line, leave empty to enable on all.',
+  label: 'Image Placeholder Volumes',
+  name: 'imagePlaceholderVolumes',
+  value: settings.imagePlaceholderVolumes|join('\n'),
+}) }}
+
 {{ forms.lightswitchField({
   errors: settings.getErrors('enableWebp'),
   label: 'Enable automatic WebP transforms',

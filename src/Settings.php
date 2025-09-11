@@ -61,6 +61,11 @@ class Settings extends Model
   public array $iconClasses = [];
 
   /**
+   * @var array
+   */
+  public array $imagePlaceholderVolumes = [];
+
+  /**
    * @var string
    */
   public string $malwareCommand = '';
@@ -73,7 +78,7 @@ class Settings extends Model
   /**
    * @var array
    */
-  const LISTS = ['dataTables', 'iconClasses'];
+  const LISTS = ['dataTables', 'iconClasses', 'imagePlaceholderVolumes'];
   const MODELS = ['passwordPolicy' => services\passwordPolicy\Settings::class];
 
 

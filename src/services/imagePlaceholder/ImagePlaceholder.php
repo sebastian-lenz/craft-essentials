@@ -78,7 +78,8 @@ class ImagePlaceholder
 
     try {
       $volume = $element->getVolume()->handle;
-      if (is_array(self::$VOLUMES) && !in_array($volume, self::$VOLUMES)) {
+      $enabledVolumes = Plugin::getInstance()->getSettings()->imagePlaceholderVolumes;
+      if (!empty($enabledVolumes) && !in_array($volume, $enabledVolumes)) {
         return false;
       }
     } catch (Throwable) {
