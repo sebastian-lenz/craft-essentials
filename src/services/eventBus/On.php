@@ -14,11 +14,15 @@ readonly class On
    * @param string $class
    * @param string $name
    * @param mixed|null $when
+   * @param mixed|null $data
+   * @param bool $append
    */
   public function __construct(
     public string $class,
     public string $name,
-    public mixed $when = null
+    public mixed $when = null,
+    public mixed $data = null,
+    public bool $append = true,
   ) { }
 
   /**

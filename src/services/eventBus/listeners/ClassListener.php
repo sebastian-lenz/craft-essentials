@@ -3,7 +3,6 @@
 namespace lenz\craft\essentials\services\eventBus\listeners;
 
 use lenz\craft\essentials\services\eventBus\On;
-use ReflectionAttribute;
 use yii\base\Event;
 
 /**
@@ -26,19 +25,17 @@ readonly class ClassListener extends AbstractListener
    * @inheritDoc
    */
   public function register(): void {
-    Event::on($this->class, $this->name, $this->className);
+    Event::on($this->class, $this->name, $this->className, $this->data, $this->append);
   }
 
   /**
    * @inheritDoc
    */
   public function toCode(): array {
-    $class = var_export($this->class, true);
-    $name = var_export($this->name, true);
     $className = $this->className;
 
     return [
-      "Event::on($class, $name, $className::class);"
+      $this->writeOnCall("$className::class"),
     ];
   }
 }

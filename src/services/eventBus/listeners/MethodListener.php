@@ -44,33 +44,30 @@ readonly class MethodListener extends AbstractListener
    */
   public function register(): void {
     $methodName = $this->methodName;
+    $handler = $this->isStatic
+      ? [$this->className, $this->methodName]
+      : fn($event) => EventBus::getHandler($this->className)->$methodName($event);
 
-    if ($this->isStatic) {
-      Event::on($this->class, $this->name, [$this->className, $this->methodName]);
-    } else {
-      Event::on($this->class, $this->name, fn($event) =>
-        EventBus::getHandler($this->className)->$methodName($event)
-      );
-    }
+    Event::on($this->class, $this->name, $handler, $this->data, $this->append);
   }
 
   /**
    * @inheritDoc
    */
   public function toCode(): array {
-    $class = var_export($this->class, true);
-    $name = var_export($this->name, true);
     $className = $this->className;
     $methodName = $this->methodName;
 
     if ($this->isStatic) {
-      return ["Event::on($class, $name, $className::$methodName(...));"];
+      $handler = "$className::$methodName(...)";
+    } else {
+      $handler = is_callable([$className, 'getInstance'])
+        ? "fn(\$event) => $className::getInstance()->$methodName(\$event)"
+        : "fn(\$event) => EventBus::getHandler('$className')->$methodName(\$event)";
     }
 
     return [
-      is_callable([$className, 'getInstance'])
-        ? "Event::on($class, $name, fn(\$event) => $className::getInstance()->$methodName(\$event));"
-        : "Event::on($class, $name, fn(\$event) => EventBus::getHandler('$className')->$methodName(\$event));"
+      $this->writeOnCall($handler),
     ];
   }
 }
