@@ -61,7 +61,7 @@ abstract class AbstractRecordTable extends AbstractTable
    */
   protected function saveRows(array $rows): void {
     $recordClass = $this->getRecordClass();
-    $records = $recordClass::find()->all();
+    $records = $this->findRecords();
 
     foreach ($rows as $row) {
       $data = $this->getSaveRowData($row, $row->attributes);
