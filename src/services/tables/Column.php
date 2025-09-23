@@ -63,6 +63,27 @@ class Column extends BaseObject
   }
 
   /**
+   * @param callable $callback
+   * @param FilterType $type
+   * @return $this
+   */
+  public function addFilter(callable $callback, FilterType $type = FilterType::Any): self {
+    $this->filters[] = new Filter($callback, $type);
+    return $this;
+  }
+
+  /**
+   * @param callable $fromFilter
+   * @param callable $toFilter
+   * @return $this
+   */
+  public function addStorageFilter(callable $fromFilter, callable $toFilter): self {
+    $this->filters[] = new Filter($fromFilter, FilterType::FromStorage);
+    $this->filters[] = new Filter($toFilter, FilterType::ToStorage);
+    return $this;
+  }
+
+  /**
    * Supported values: left, center, right, justify, top, middle, bottom
    * @return $this
    */
@@ -76,16 +97,25 @@ class Column extends BaseObject
 
   /**
    * @param mixed $value
+   * @param FilterType $type
    * @return mixed
    */
-  public function filter(mixed $value): mixed {
+  public function filter(mixed $value, FilterType $type): mixed {
     if ($this->type == 'checkbox') {
       return !!$value;
     }
 
     if (!empty($this->filters)) {
       foreach ($this->filters as $filter) {
-        $value = $filter($value);
+        if (!($filter instanceof Filter)) {
+          $value = $filter($value);
+        } elseif (
+          $filter->type == $type ||
+          $filter->type == FilterType::Any ||
+          $type == FilterType::Any
+        ) {
+          $value = $filter($value);
+        }
       }
     }
 

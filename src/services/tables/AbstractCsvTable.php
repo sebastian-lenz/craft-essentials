@@ -54,7 +54,7 @@ abstract class AbstractCsvTable extends AbstractTable
     }
 
     $handle = fopen($fileName, 'r');
-    $columns = $this->getColumns();
+    $columns = $this->getCachedColumns();
     $header = $this->hasHeaderRow ? null : array_keys($columns);
     $rows = [];
 
@@ -67,7 +67,7 @@ abstract class AbstractCsvTable extends AbstractTable
       $attributes = [];
       foreach ($header as $index => $name) {
         $value = array_key_exists($index, $data) ? $data[$index] : '';
-        $attributes[$name] = $columns[$name]->filter($value);
+        $attributes[$name] = $columns[$name]->filter($value, FilterType::FromStorage);
       }
 
       $rows[] = $this->createRow($attributes);
@@ -83,7 +83,7 @@ abstract class AbstractCsvTable extends AbstractTable
   protected function saveRows(array $rows): void {
     $fileName = App::parseEnv($this->getFileName());
     $handle = fopen($fileName, 'w');
-    $header = array_keys($this->getColumns());
+    $header = array_keys($this->getCachedColumns());
 
     if ($this->hasHeaderRow) {
       fputcsv($handle, $header, $this->delimiter, $this->enclosure, $this->escape);

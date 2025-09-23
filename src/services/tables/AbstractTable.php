@@ -110,7 +110,7 @@ abstract class AbstractTable implements ArrayAccess, Countable, IteratorAggregat
    * @param array $rows
    */
   public function setRows(array $rows): void {
-    $columns = $this->getColumns();
+    $columns = $this->getCachedColumns();
     $result = [];
 
     foreach ($rows as $row) {
@@ -205,6 +205,12 @@ abstract class AbstractTable implements ArrayAccess, Countable, IteratorAggregat
    * @return array
    */
   protected function getSaveRowData(Row $row, array $attributes): array {
+    foreach ($this->getCachedColumns() as $name => $column) {
+      if (array_key_exists($name, $attributes)) {
+        $attributes[$name] = $column->filter($attributes[$name], FilterType::ToStorage);
+      }
+    }
+
     return $attributes;
   }
 
@@ -244,7 +250,7 @@ abstract class AbstractTable implements ArrayAccess, Countable, IteratorAggregat
         continue;
       }
 
-      $attributes[$name] = $column->filter($value);
+      $attributes[$name] = $column->filter($value, FilterType::FromInput);
     }
 
     return $this->createRow($attributes);

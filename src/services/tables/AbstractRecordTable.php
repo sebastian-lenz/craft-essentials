@@ -41,13 +41,13 @@ abstract class AbstractRecordTable extends AbstractTable
    * @inheritDoc
    */
   protected function loadRows(): array {
-    $columns = $this->getColumns();
+    $columns = $this->getCachedColumns();
     $rows = [];
 
     foreach ($this->findRecords() as $record) {
       $attributes = [];
       foreach ($columns as $name => $column) {
-        $attributes[$name] = $column->filter($record[$name]);
+        $attributes[$name] = $column->filter($record[$name], FilterType::FromStorage);
       }
 
       $rows[] = $this->createRow($attributes);

@@ -8,6 +8,23 @@ namespace lenz\craft\essentials\services\tables;
 trait HandsontableTrait
 {
   /**
+   * @var Column[]
+   */
+  protected array $_columns;
+
+
+  /**
+   * @return array
+   */
+  public function getCachedColumns(): array {
+    if (!isset($this->_columns)) {
+      $this->_columns = $this->getColumns();
+    }
+
+    return $this->_columns;
+  }
+
+  /**
    * @return Column[]
    */
   abstract function getColumns(): array;
@@ -46,7 +63,7 @@ trait HandsontableTrait
     $colHeaders = [];
     $colWidths = [];
 
-    foreach ($this->getColumns() as $name => $column) {
+    foreach ($this->getCachedColumns() as $name => $column) {
       $columns[] = $column->getJsConfig($name);
       $colHeaders[] = $column->getJsHeader($name);
       $colWidths[] = $column->getJsWidth();
