@@ -30,7 +30,17 @@ class EventBus extends Component
   public function init(): void {
     parent::init();
 
-    Event::on(Application::class, WebApplication::EVENT_INIT, $this->onApplicationInit(...));
+    $basePath = \Craft::$app->getPath()->getCompiledClassesPath();
+    $fileName = $basePath . '/compiled_event_listeners.php';
+
+    if (!file_exists($fileName)) {
+      Event::on(Application::class, WebApplication::EVENT_INIT, function () use ($fileName) {
+        file_put_contents($fileName, Compiler::compile($this->findListeners()));
+        include_once $fileName;
+      });
+    } else {
+      include_once $fileName;
+    }
   }
 
   /**
@@ -77,20 +87,6 @@ class EventBus extends Component
       ],
       []
     );
-  }
-
-  /**
-   * @return void
-   */
-  private function onApplicationInit(): void {
-    $basePath = \Craft::$app->getPath()->getCompiledClassesPath();
-    $fileName = $basePath . '/compiled_event_listeners.php';
-
-    if (!file_exists($fileName)) {
-      file_put_contents($fileName, Compiler::compile($this->findListeners()));
-    }
-
-    include_once $fileName;
   }
 
 
