@@ -75,6 +75,30 @@ class FrontendCacheService extends Component
   /**
    * @return void
    */
+  #[On(Application::class, Application::EVENT_INIT)]
+  public function onApplicationInit(): void {
+    $request = Craft::$app->getRequest();
+    if (
+      $request->isCpRequest ||
+      $request->isConsoleRequest ||
+      Craft::$app->getConfig()->getGeneral()->devMode ||
+      !Craft::$app->getUser()->getIsGuest() ||
+      !$request->isGet
+    ) {
+      return;
+    }
+
+    $key = CacheKeyEvent::getUrlCacheKey();
+    $response = $this->getCachedResponse($key);
+    if (!is_null($response)) {
+      $response->send();
+      exit();
+    }
+  }
+
+  /**
+   * @return void
+   */
   public function onAfterRequest(): void {
     if (is_null($this->_cacheKey) || $this->_isIntercepted) {
       return;
@@ -182,31 +206,6 @@ class FrontendCacheService extends Component
   }
 
   /**
-   * @return bool
-   */
-  protected function isEnabled(): bool {
-    $request = Craft::$app->getRequest();
-    if (
-      $request->isCpRequest ||
-      $request->isConsoleRequest ||
-      Craft::$app->getConfig()->getGeneral()->devMode ||
-      !Craft::$app->getUser()->getIsGuest() ||
-      !$request->isGet
-    ) {
-      return false;
-    }
-
-    $key = CacheKeyEvent::getUrlCacheKey();
-    $response = $this->getCachedResponse($key);
-    if (!is_null($response)) {
-      $response->send();
-      exit();
-    }
-
-    return true;
-  }
-
-  /**
    * @param string $key
    * @param WebResponse $response
    * @param int $duration
@@ -239,23 +238,5 @@ class FrontendCacheService extends Component
     ];
 
     ElementCache::getCache()->set($cacheKey, $cacheData, $duration);
-  }
-
-
-  // Static methods
-  // --------------
-
-  /**
-   * @return FrontendCacheService
-   */
-  public static function getInstance(): FrontendCacheService {
-    return Plugin::getInstance()->frontendCache;
-  }
-
-  /**
-   * @return bool
-   */
-  static public function requiresHandler(): bool {
-    return self::getInstance()->isEnabled();
   }
 }
