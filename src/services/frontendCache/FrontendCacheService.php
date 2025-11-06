@@ -239,4 +239,15 @@ class FrontendCacheService extends Component
 
     ElementCache::getCache()->set($cacheKey, $cacheData, $duration);
   }
+
+
+  // Static methods
+  // --------------
+
+  /**
+   * @return FrontendCacheService
+   */
+  public static function getInstance(): FrontendCacheService {
+    return Plugin::getInstance()->frontendCache;
+  }
 }
