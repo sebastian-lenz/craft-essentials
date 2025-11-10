@@ -75,15 +75,14 @@ class FrontendCacheService extends Component
   /**
    * @return void
    */
-  #[On(Application::class, Application::EVENT_INIT)]
+  #[On(Application::class, Application::EVENT_INIT, [self::class, 'requiresHandler'])]
   public function onApplicationInit(): void {
     $request = Craft::$app->getRequest();
     if (
       $request->isCpRequest ||
       $request->isConsoleRequest ||
-      Craft::$app->getConfig()->getGeneral()->devMode ||
-      !Craft::$app->getUser()->getIsGuest() ||
-      !$request->isGet
+      !$request->isGet ||
+      !Craft::$app->getUser()->getIsGuest()
     ) {
       return;
     }
@@ -249,5 +248,12 @@ class FrontendCacheService extends Component
    */
   public static function getInstance(): FrontendCacheService {
     return Plugin::getInstance()->frontendCache;
+  }
+
+  /**
+   * @return bool
+   */
+  static public function requiresHandler(): bool {
+    return !Craft::$app->getConfig()->getGeneral()->devMode;
   }
 }
