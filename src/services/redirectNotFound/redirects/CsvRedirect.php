@@ -6,10 +6,12 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\web\Request;
 use Generator;
+use lenz\craft\essentials\events\RedirectUrlEvent;
 use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRef;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoute;
 use lenz\craft\utils\models\Url;
+use yii\base\Event;
 
 /**
  * Class CsvRedirect
@@ -20,6 +22,11 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    * @var string
    */
   private string $_fileName;
+
+  /**
+   * @var string
+   */
+  const EVENT_COLLECT_REDIRECT_URLS = 'collectRedirectUrls';
 
 
   /**
@@ -103,20 +110,29 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
    * @return bool
    */
   public function redirect(Request $request): bool {
-    $original = new Url($request->url);
-    $target = $this->findTarget($original);
-    if (is_null($target)) {
-      return false;
+    Event::trigger(__CLASS__, self::EVENT_COLLECT_REDIRECT_URLS, $event = new RedirectUrlEvent([
+      'requestUrl' => $request->url,
+      'urls' => [$request->url],
+    ]));
+
+    foreach ($event->urls as $original) {
+      $original = $original instanceof Url ? $original : new Url($original);
+      $target = $this->findTarget($original);
+      if (is_null($target)) {
+        continue;
+      }
+
+      [$url, $code] = $target;
+      $url = UrlFormat::decodeUrl($url);
+      if (empty($url)) {
+        continue;
+      }
+
+      $this->sendRedirect(Url::compose($url, $original->getQuery()), $code);
+      return true;
     }
 
-    [$url, $code] = $target;
-    $url = UrlFormat::decodeUrl($url);
-    if (empty($url)) {
-      return false;
-    }
-
-    $this->sendRedirect(Url::compose($url, $original->getQuery()), $code);
-    return true;
+    return false;
   }
 
 

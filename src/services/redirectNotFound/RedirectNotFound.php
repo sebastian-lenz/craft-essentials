@@ -47,7 +47,7 @@ class RedirectNotFound extends Component
    * @return AbstractRedirect[]
    */
   public function getRedirects(?Site $site = null): array {
-    if (!isset($this->_redirects)) {
+    if (!isset($this->_redirects) || $site) {
       $event = RegisterRedirectsEvent::create($site);
       $this->trigger(self::EVENT_REGISTER_REDIRECTS, $event);
 
