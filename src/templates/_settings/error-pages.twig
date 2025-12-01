@@ -1,0 +1,18 @@
+{% import '_includes/forms' as forms %}
+
+<h2>Error Pages</h2>
+
+{{ forms.textField({
+  errors: settings.getErrors('errorFileName'),
+  label: 'Error export file name',
+  name: 'errorFileName',
+  value: settings.errorFileName,
+}) }}
+
+{{ forms.textareaField({
+  errors: settings.getErrors('errorSlugs'),
+  instructions: 'Enter one monitored page slug per line.',
+  label: 'Error page slugs',
+  name: 'errorSlugs',
+  value: settings.errorSlugs|join('\n'),
+}) }}

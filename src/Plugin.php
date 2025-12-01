@@ -49,6 +49,7 @@ class Plugin extends \craft\base\Plugin
       'eventBus' => services\eventBus\EventBus::getInstance()->addClass(
         services\cp\CpHelpers::class,
         services\disabledLanguages\DisabledLanguages::class,
+        services\errorPages\ErrorPages::class,
         services\frontendCache\FrontendCacheService::class,
         services\imageCompressor\ImageCompressor::class,
         services\imagePlaceholder\ImagePlaceholder::class,

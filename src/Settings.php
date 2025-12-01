@@ -56,6 +56,16 @@ class Settings extends Model
   public bool $ensureSiteSegment = true;
 
   /**
+   * @var string
+   */
+  public string $errorFileName = '@templates/{slug}.twig';
+
+  /**
+   * @var string[]
+   */
+  public array $errorSlugs = [];
+
+  /**
    * @var string[]
    */
   public array $iconClasses = [];
@@ -78,8 +88,10 @@ class Settings extends Model
   /**
    * @var array
    */
-  const LISTS = ['dataTables', 'iconClasses', 'imagePlaceholderVolumes'];
-  const MODELS = ['passwordPolicy' => services\passwordPolicy\Settings::class];
+  const LISTS = ['dataTables', 'errorSlugs', 'iconClasses', 'imagePlaceholderVolumes'];
+  const MODELS = [
+    'passwordPolicy' => services\passwordPolicy\Settings::class,
+  ];
 
 
   /**
