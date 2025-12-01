@@ -55,6 +55,7 @@ class ErrorPages
     $element = $event->element;
     if (
       $element->propagating ||
+      $element->getIsDraft() ||
       !$element->getIsCanonical() ||
       !($element instanceof Entry)
     ) {
@@ -69,6 +70,7 @@ class ErrorPages
       self::TYPE_DEPENDENCY => \Craft::$app->getQueue()->push(new ExportErrorPageJob([
         'siteId' => $element->siteId,
       ])),
+      default => null,
     };
   }
 
