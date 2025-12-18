@@ -92,6 +92,8 @@ class FrontendCacheService extends Component
     if (!is_null($response)) {
       $response->send();
       exit();
+    } else {
+      Event::on(Application::class, Module::EVENT_BEFORE_ACTION, [$this, 'onBeforeAction']);
     }
   }
 
@@ -127,7 +129,6 @@ class FrontendCacheService extends Component
   /**
    * @param ActionEvent $event
    */
-  #[On(Application::class, Module::EVENT_BEFORE_ACTION, [self::class, 'requiresHandler'])]
   public function onBeforeAction(ActionEvent $event): void {
     $cacheKeyEvent = new CacheKeyEvent();
     $this->trigger(self::EVENT_CACHE_KEY, $cacheKeyEvent);
