@@ -3,6 +3,7 @@
 namespace lenz\craft\essentials\services\gettext\sources;
 
 use Exception;
+use lenz\contentfield\models\enumerations\VolumeFolderEnumeration;
 use lenz\contentfield\models\fields\AbstractField;
 use lenz\contentfield\models\fields\SelectField;
 use lenz\contentfield\models\schemas\AbstractSchema;
@@ -69,7 +70,7 @@ class ContentFieldSource extends AbstractSource
    */
   private function extractSelectField(Translations $translations, AbstractSchema $schema, SelectField $field): void {
     $enumeration = $field->getEnumeration();
-    if ($enumeration instanceof UntranslatedModel) {
+    if ($enumeration instanceof UntranslatedModel || $enumeration instanceof VolumeFolderEnumeration) {
       return;
     }
 
