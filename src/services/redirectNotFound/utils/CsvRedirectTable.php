@@ -17,10 +17,11 @@ use lenz\craft\essentials\services\tables\Row;
  */
 class CsvRedirectTable extends AbstractCsvTable
 {
-  /**
-   * @var bool
-   */
+  /** @var bool */
   public bool $hasStatusCode = false;
+
+  /** @var bool */
+  public bool $hasPriority = false;
 
 
   /**
@@ -44,6 +45,15 @@ class CsvRedirectTable extends AbstractCsvTable
         'width' => 40,
       ]);
     }
+
+    if ($this->hasPriority) {
+      $columns['priority'] = new Column([
+        'title' => Craft::t('lenz-craft-essentials', 'Priority'),
+        'type' => 'numeric',
+        'width' => 40,
+      ]);
+    }
+
 
     return $columns;
   }
@@ -76,9 +86,14 @@ class CsvRedirectTable extends AbstractCsvTable
         $options = $this->getCodeOptions();
         $attributes[$key] = array_key_exists($value, $options) ? $options[$value] : $value;
       } else {
-        $value = trim(trim($value), '/');
-        if (!UrlFormat::isUrlFormat($value) && !UrlHelper::isFullUrl($value)) {
-          $value = '/' . $value;
+        $value = trim($value);
+
+        if (!preg_match('/^(regexp:|match:)/', $value)) {
+          $value = trim($value, '/');
+
+          if (!UrlFormat::isUrlFormat($value) && !UrlHelper::isFullUrl($value)) {
+            $value = '/' . $value;
+          }
         }
 
         $attributes[$key] = $value;
@@ -110,6 +125,11 @@ class CsvRedirectTable extends AbstractCsvTable
    */
   protected function filterRows(array $rows): array {
     usort($rows, function(Row $lft, Row $rgt) {
+      if ($this->hasPriority) {
+        $result = self::toPriority($lft['priority']) - self::toPriority($rgt['priority']);
+        if ($result !== 0) return $result;
+      }
+
       return strcmp($lft['source'], $rgt['source']);
     });
 
@@ -161,5 +181,13 @@ class CsvRedirectTable extends AbstractCsvTable
     return in_array($code, AbstractRedirect::REDIRECT_CODES)
       ? $code
       : AbstractRedirect::DEFAULT_REDIRECT_CODE;
+  }
+
+  /**
+   * @param mixed $value
+   * @return int
+   */
+  static function toPriority(mixed $value): int {
+    return is_numeric($value) ? intval($value) : 0;
   }
 }

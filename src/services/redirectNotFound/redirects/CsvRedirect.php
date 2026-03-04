@@ -7,6 +7,7 @@ use craft\base\ElementInterface;
 use craft\web\Request;
 use Generator;
 use lenz\craft\essentials\events\RedirectUrlEvent;
+use lenz\craft\essentials\helpers\Arr;
 use lenz\craft\essentials\services\redirectNotFound\formats\UrlFormat;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRef;
 use lenz\craft\essentials\services\redirectNotFound\utils\ElementRoute;
@@ -170,8 +171,24 @@ class CsvRedirect extends AbstractRedirect implements AppendableRedirect, Elemen
     }
 
     foreach ($this->eachRow() as $data) {
-      $pattern = trim($data[0], '/');
-      if (in_array($pattern, $variants)) {
+      $pattern = $data[0];
+
+      if (str_starts_with($pattern, 'regexp:')) {
+        $pattern = substr($pattern, 7);
+        $matches = array_reduce($variants,
+          fn($matches, $variant) => $matches || preg_match($pattern, $variant),
+          false);
+      } elseif (str_starts_with($pattern, 'match:')) {
+        $pattern = substr($pattern, 6);
+        $matches = array_reduce($variants,
+          fn($matches, $variant) => $matches || fnmatch($pattern, $variant),
+          false);
+      } else {
+        $pattern = trim($pattern, '/');
+        $matches = in_array($pattern, $variants);
+      }
+
+      if ($matches) {
         $code = isset($data[2]) && is_numeric($data[2])
           ? intval($data[2])
           : 301;
