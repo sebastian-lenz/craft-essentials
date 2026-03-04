@@ -82,7 +82,9 @@ class CsvRedirectTable extends AbstractCsvTable
   protected function createRow(array $attributes): ?Row {
     $isEmpty = true;
     foreach ($attributes as $key => $value) {
-      if ($key == 'code') {
+      if ($key == 'priority') {
+        // Noop
+      } else if ($key == 'code') {
         $options = $this->getCodeOptions();
         $attributes[$key] = array_key_exists($value, $options) ? $options[$value] : $value;
       } else {
@@ -126,7 +128,7 @@ class CsvRedirectTable extends AbstractCsvTable
   protected function filterRows(array $rows): array {
     usort($rows, function(Row $lft, Row $rgt) {
       if ($this->hasPriority) {
-        $result = self::toPriority($lft['priority']) - self::toPriority($rgt['priority']);
+        $result = self::toPriority($rgt['priority']) - self::toPriority($lft['priority']);
         if ($result !== 0) return $result;
       }
 
@@ -149,6 +151,16 @@ class CsvRedirectTable extends AbstractCsvTable
     }
 
     return $options;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getJsOptions(): array {
+    return [
+      ...parent::getJsOptions(),
+      'columnSorting' => false,
+    ];
   }
 
   /**
