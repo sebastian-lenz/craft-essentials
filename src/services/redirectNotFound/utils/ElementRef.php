@@ -22,6 +22,11 @@ class ElementRef extends BaseObject
   public string|null $hash = null;
 
   /**
+   * @var string|null
+   */
+  public string|null $query = null;
+
+  /**
    * @var int|null
    */
   public int|null $siteId = null;
@@ -29,7 +34,7 @@ class ElementRef extends BaseObject
   /**
    * @var string
    */
-  const PATTERN = '/^#(?<type>asset|entry):(?<id>\d+)(?:@(?<siteId>\d+))?(?:#(?<hash>.*))?$/';
+  const PATTERN = '/^#(?<type>asset|entry):(?<id>\d+)(?:@(?<siteId>\d+))?(?:\?<query>[^#]+)?(?:#(?<hash>.*))?$/';
 
   /**
    * @var string[]
@@ -59,6 +64,10 @@ class ElementRef extends BaseObject
 
     if (!is_null($this->siteId)) {
       $result .= "@$this->siteId";
+    }
+
+    if (!is_null($this->query)) {
+      $result .= '?' . str_replace('#', '_', $this->query);
     }
 
     if (!is_null($this->hash)) {
@@ -143,7 +152,7 @@ class ElementRef extends BaseObject
    */
   static public function parse(string $value): ElementRef|null {
     if (preg_match(self::PATTERN, $value, $match)) {
-      $config = Arr::only($match, ['hash', 'siteId']);
+      $config = Arr::only($match, ['hash', 'query', 'siteId']);
       return new ElementRef($match['type'], intval($match['id']), $config);
     } else {
       return null;

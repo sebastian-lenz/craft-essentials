@@ -37,9 +37,8 @@ class EntryUrlFormat extends UrlFormat
     ]);
 
     $url = $entry?->url;
-    if ($ref->hash) {
-      $url .= '#' . $ref->hash;
-    }
+    if ($ref->query) $url .= '?' . $ref->query;
+    if ($ref->hash) $url .= '#' . $ref->hash;
 
     return $url;
   }
