@@ -34,7 +34,7 @@ class ElementRef extends BaseObject
   /**
    * @var string
    */
-  const PATTERN = '/^#(?<type>asset|entry):(?<id>\d+)(?:@(?<siteId>\d+))?(?:\?<query>[^#]+)?(?:#(?<hash>.*))?$/';
+  const PATTERN = '/^#(?<type>asset|entry):(?<id>\d+)(?:@(?<siteId>\d+))?(?:\?(?<query>[^#]+))?(?:#(?<hash>.*))?$/';
 
   /**
    * @var string[]
