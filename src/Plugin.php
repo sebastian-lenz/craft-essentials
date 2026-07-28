@@ -76,8 +76,10 @@ class Plugin extends \craft\base\Plugin
       'webp'              => services\webp\Webp::class,
     ]);
 
-    Craft::$app->view->registerTwigExtension(new twig\Extension());
     RegisterCpTemplates::register();
+    Craft::$app->onInit(fn() =>
+      Craft::$app->view->registerTwigExtension(new twig\Extension())
+    );
 
     BaseYii::$container->set(\craft\fields\linktypes\Url::class, [
       'class' => services\cp\linktypes\Url::class,
