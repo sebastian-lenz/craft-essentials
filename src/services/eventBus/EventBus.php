@@ -19,40 +19,14 @@ use yii\base\Event;
 class EventBus extends Component
 {
   /**
-   * @var array
-   */
-  private array $_scopes = [];
-
-
-  /**
-   * @inheritDoc
-   */
-  public function init(): void {
-    parent::init();
-
-    $basePath = \Craft::$app->getPath()->getCompiledClassesPath();
-    $fileName = $basePath . '/compiled_event_listeners.php';
-
-    if (!file_exists($fileName)) {
-      Event::on(Application::class, WebApplication::EVENT_INIT, function () use ($fileName) {
-        file_put_contents($fileName, Compiler::compile($this->findListeners()));
-        include_once $fileName;
-      });
-    } else {
-      include_once $fileName;
-    }
-  }
-
-  /**
    * @param string ...$classNames
    * @return EventBus
    */
   public function addClass(...$classNames): EventBus {
-    foreach ($classNames as $className) {
-      $this->_scopes[] = new ClassScope($className);
-    }
-
-    return $this;
+    return $this->addScopes(array_map(
+      fn(string $className) => new ClassScope($className),
+      $classNames
+    ));
   }
 
   /**
@@ -63,12 +37,12 @@ class EventBus extends Component
    */
   public function addNamespace(string $namespace, string $path, string|array $segments = 'listeners'): EventBus {
     $segments = is_array($segments) ? $segments : explode('/', $segments);
-    $this->_scopes[] = new NamespaceScope(
-      namespace: implode('\\', array_filter([$namespace, ...$segments])),
-      path: implode(DIRECTORY_SEPARATOR, array_filter([$path, ...$segments])),
-    );
-
-    return $this;
+    return $this->addScopes([
+      new NamespaceScope(
+        namespace: implode('\\', array_filter([$namespace, ...$segments])),
+        path: implode(DIRECTORY_SEPARATOR, array_filter([$path, ...$segments])),
+      ),
+    ]);
   }
 
 
@@ -76,13 +50,40 @@ class EventBus extends Component
   // ---------------
 
   /**
+   * Every call gets a compiled file of its own, so the listeners of a scope are
+   * only registered by the module that added it. A shared file would register the
+   * listeners of a plugin through any other module using the bus, even when the
+   * plugin itself is not loaded. Naming the file after its scopes also replaces
+   * it as soon as the scopes change.
+   *
+   * @param AbstractScope[] $scopes
+   * @return EventBus
+   */
+  private function addScopes(array $scopes): EventBus {
+    $basePath = \Craft::$app->getPath()->getCompiledClassesPath();
+    $fileName = $basePath . '/compiled_event_listeners_' . md5(serialize($scopes)) . '.php';
+
+    if (file_exists($fileName)) {
+      include_once $fileName;
+    } else {
+      Event::on(Application::class, WebApplication::EVENT_INIT, function() use ($fileName, $scopes) {
+        file_put_contents($fileName, Compiler::compile($this->findListeners($scopes)));
+        include_once $fileName;
+      });
+    }
+
+    return $this;
+  }
+
+  /**
+   * @param AbstractScope[] $scopes
    * @return AbstractListener[]
    */
-  private function findListeners(): array {
+  private function findListeners(array $scopes): array {
     return array_reduce(
-      $this->_scopes,
-      fn(array $listener, AbstractScope $scope) => [
-        ...$listener,
+      $scopes,
+      fn(array $listeners, AbstractScope $scope) => [
+        ...$listeners,
         ...$scope->findListeners()
       ],
       []
